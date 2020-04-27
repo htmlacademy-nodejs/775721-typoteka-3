@@ -1,7 +1,7 @@
 # Личный проект «Типотека» [![Build status][travis-image]][travis-url]
 
 * Студент: [Никита Прытков](https://up.htmlacademy.ru/nodejs/3/user/775721).
-* Наставник: `Неизвестно`.
+* Наставник: [Николай Мендяев](https://htmlacademy.ru/profile/id1339341).
 
 ---
 
