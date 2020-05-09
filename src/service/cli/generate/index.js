@@ -1,6 +1,8 @@
 `use strict`;
 
-const fs = require(`fs`);
+const fs = require(`fs`).promises;
+
+const chalk = require(`chalk`);
 
 const { MODULE_NAME, FILE_NAME, QuantityLimit, TITLES, SENTENCES, AnnounceSizeLimit, CATEGORIES, DAY_IN_MILLISECONDS, DATE_LIMIT_IN_DAYS } = require(`./constants`);
 const { ExitCode } = require(`../../constants`);
@@ -24,26 +26,26 @@ const generatePublications = (quantity) => Array.from({ length: quantity }, () =
 
 module.exports = {
   name: MODULE_NAME,
-  run(parameters) {
+  async run(parameters) {
     const [rawQuantity] = parameters;
     const quantity = Number.parseInt(rawQuantity, 10) || QuantityLimit.MIN;
 
     if (quantity > QuantityLimit.MAX) {
-      console.error(`Не больше ${ QuantityLimit.MAX } публикаций`);
+      console.error(chalk.red(`Не больше ${ QuantityLimit.MAX } публикаций`));
 
       process.exit(ExitCode.ERROR);
     }
 
     const content = JSON.stringify(generatePublications(quantity));
 
-    fs.writeFile(FILE_NAME, content, (error) => {
-      if (error) {
-        console.error(`Не получилось записать данные в файл...`);
+    try {
+      await fs.writeFile(FILE_NAME, content);
+    } catch (error) {
+      console.error(chalk.red(`Не получилось записать данные в файл...`));
 
-        return process.exit(ExitCode.ERROR);
-      }
+      process.exit(ExitCode.ERROR);
+    }
 
-      return console.info(`Файл с данными успешно создан.`);
-    });
+    console.info(chalk.green(`Файл с данными успешно создан.`));
   }
 }
