@@ -2,6 +2,8 @@
 
 const fs = require(`fs`);
 
+const chalk = require(`chalk`);
+
 const { MODULE_NAME, FILE_NAME, QuantityLimit, TITLES, SENTENCES, AnnounceSizeLimit, CATEGORIES, DAY_IN_MILLISECONDS, DATE_LIMIT_IN_DAYS } = require(`./constants`);
 const { ExitCode } = require(`../../constants`);
 const { getRandomInteger, shuffle } = require(`../../utils`);
@@ -29,7 +31,7 @@ module.exports = {
     const quantity = Number.parseInt(rawQuantity, 10) || QuantityLimit.MIN;
 
     if (quantity > QuantityLimit.MAX) {
-      console.error(`Не больше ${ QuantityLimit.MAX } публикаций`);
+      console.error(chalk.red(`Не больше ${ QuantityLimit.MAX } публикаций`));
 
       process.exit(ExitCode.ERROR);
     }
@@ -38,12 +40,12 @@ module.exports = {
 
     fs.writeFile(FILE_NAME, content, (error) => {
       if (error) {
-        console.error(`Не получилось записать данные в файл...`);
+        console.error(chalk.red(`Не получилось записать данные в файл...`));
 
         return process.exit(ExitCode.ERROR);
       }
 
-      return console.info(`Файл с данными успешно создан.`);
+      return console.info(chalk.green(`Файл с данными успешно создан.`));
     });
   }
 }
