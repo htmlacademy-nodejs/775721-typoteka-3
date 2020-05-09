@@ -1,6 +1,6 @@
 `use strict`;
 
-const fs = require(`fs`);
+const fs = require(`fs`).promises;
 
 const chalk = require(`chalk`);
 
@@ -26,7 +26,7 @@ const generatePublications = (quantity) => Array.from({ length: quantity }, () =
 
 module.exports = {
   name: MODULE_NAME,
-  run(parameters) {
+  async run(parameters) {
     const [rawQuantity] = parameters;
     const quantity = Number.parseInt(rawQuantity, 10) || QuantityLimit.MIN;
 
@@ -38,14 +38,14 @@ module.exports = {
 
     const content = JSON.stringify(generatePublications(quantity));
 
-    fs.writeFile(FILE_NAME, content, (error) => {
-      if (error) {
-        console.error(chalk.red(`Не получилось записать данные в файл...`));
+    try {
+      await fs.writeFile(FILE_NAME, content);
+    } catch (error) {
+      console.error(chalk.red(`Не получилось записать данные в файл...`));
 
-        return process.exit(ExitCode.ERROR);
-      }
+      process.exit(ExitCode.ERROR);
+    }
 
-      return console.info(chalk.green(`Файл с данными успешно создан.`));
-    });
+    console.info(chalk.green(`Файл с данными успешно создан.`));
   }
 }
