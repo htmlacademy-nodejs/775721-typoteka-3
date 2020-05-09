@@ -4,7 +4,16 @@ const fs = require(`fs`).promises;
 
 const chalk = require(`chalk`);
 
-const { MODULE_NAME, FILE_NAME, QuantityLimit, TITLES, SENTENCES, AnnounceSizeLimit, CATEGORIES, DAY_IN_MILLISECONDS, DATE_LIMIT_IN_DAYS } = require(`./constants`);
+const {
+  MODULE_NAME,
+  FILE_NAME, QuantityLimit,
+  AnnounceSizeLimit,
+  DAY_IN_MILLISECONDS,
+  DATE_LIMIT_IN_DAYS,
+  FILE_TITLES_PATH,
+  FILE_CATEGORIES_PATH,
+  FILE_SENTENCES_PATH,
+} = require(`./constants`);
 const { ExitCode } = require(`../../constants`);
 const { getRandomInteger, shuffle } = require(`../../utils`);
 
@@ -14,15 +23,35 @@ const createRandomDate = () => {
   return date.toLocaleString();
 };
 
-const createPublication = () => ({
-  title: TITLES[getRandomInteger(0, TITLES.length - 1)],
+const createPublication = ({ titles, categories, sentences }) => ({
+  title: titles[getRandomInteger(0, titles.length - 1)],
   createdDate: createRandomDate(),
-  announce: shuffle(SENTENCES).slice(0, getRandomInteger(AnnounceSizeLimit.MIN, AnnounceSizeLimit.MAX)).join(` `),
-  fullText: shuffle(SENTENCES).slice(0, getRandomInteger(0, SENTENCES.length)).join(` `),
-  category: shuffle(CATEGORIES).slice(0, getRandomInteger(0, SENTENCES.length)),
+  announce: shuffle(sentences).slice(0, getRandomInteger(AnnounceSizeLimit.MIN, AnnounceSizeLimit.MAX)).join(` `),
+  fullText: shuffle(sentences).slice(0, getRandomInteger(0, sentences.length)).join(` `),
+  category: shuffle(categories).slice(0, getRandomInteger(0, categories.length)),
 });
 
-const generatePublications = (quantity) => Array.from({ length: quantity }, () => createPublication());
+const generatePublications = async (quantity) => {
+  const titles = await readContent(FILE_TITLES_PATH);
+  const categories = await readContent(FILE_CATEGORIES_PATH);
+  const sentences = await readContent(FILE_SENTENCES_PATH);
+
+  return Array.from({ length: quantity }, () => createPublication({ titles, categories, sentences }));
+};
+
+const readContent = async (filePath) => {
+  let result = [];
+
+  try {
+    const content = await fs.readFile(filePath, `utf-8`);
+
+    result = content.split(`\n`).filter(Boolean);
+  } catch (error) {
+    console.error(chalk.red(error));
+  }
+
+  return result;
+};
 
 module.exports = {
   name: MODULE_NAME,
@@ -36,7 +65,8 @@ module.exports = {
       process.exit(ExitCode.ERROR);
     }
 
-    const content = JSON.stringify(generatePublications(quantity));
+    const publications = await generatePublications(quantity);
+    const content = JSON.stringify(publications);
 
     try {
       await fs.writeFile(FILE_NAME, content);
