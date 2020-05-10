@@ -65,10 +65,10 @@ module.exports = {
       process.exit(ExitCode.ERROR);
     }
 
-    const publications = await generatePublications(quantity);
-    const content = JSON.stringify(publications);
-
     try {
+      const publications = await generatePublications(quantity);
+      const content = JSON.stringify(publications);
+
       await fs.writeFile(FILE_NAME, content);
     } catch (error) {
       console.error(chalk.red(`Не получилось записать данные в файл...`));
