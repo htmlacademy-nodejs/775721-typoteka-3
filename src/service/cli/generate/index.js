@@ -6,7 +6,7 @@ const chalk = require(`chalk`);
 
 const {
   MODULE_NAME,
-  FILE_NAME, QuantityLimit,
+  QuantityLimit,
   AnnounceSizeLimit,
   DAY_IN_MILLISECONDS,
   DATE_LIMIT_IN_DAYS,
@@ -14,7 +14,7 @@ const {
   FILE_CATEGORIES_PATH,
   FILE_SENTENCES_PATH,
 } = require(`./constants`);
-const { ExitCode } = require(`../../constants`);
+const { ExitCode, FILE_MOCKS_PATH } = require(`../../constants`);
 const { getRandomInteger, shuffle } = require(`../../utils`);
 
 const createRandomDate = () => {
@@ -69,7 +69,7 @@ module.exports = {
       const publications = await generatePublications(quantity);
       const content = JSON.stringify(publications);
 
-      await fs.writeFile(FILE_NAME, content);
+      await fs.writeFile(FILE_MOCKS_PATH, content);
     } catch (error) {
       console.error(chalk.red(`Не получилось записать данные в файл...`));
 
