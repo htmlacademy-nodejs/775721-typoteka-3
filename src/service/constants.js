@@ -7,8 +7,4 @@ module.exports = {
   ExitCode: {
     ERROR: 1,
   },
-  HttpStatusCode: {
-    OK: 200,
-    NOT_FOUND: 404,
-  }
 };
