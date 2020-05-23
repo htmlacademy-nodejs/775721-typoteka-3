@@ -5,7 +5,7 @@ const path = require(`path`);
 const express = require(`express`);
 const chalk = require(`chalk`);
 
-const { DEFAULT_PORT, PUBLIC_DIR_NAME } = require(`./constants`);
+const { DEFAULT_PORT, DirName } = require(`./constants`);
 const mainRouter = require(`./routes/main`);
 const authenticationRouter = require(`./routes/authentication`);
 const userRouter = require(`./routes/user`);
@@ -14,7 +14,10 @@ const categoriesRouter = require(`./routes/categories`);
 
 const app = express();
 
-app.use(express.static(path.resolve(__dirname, PUBLIC_DIR_NAME)));
+app.set(`view engine`, `pug`);
+app.set(`views`, path.resolve(__dirname, DirName.TEMPLATES));
+
+app.use(express.static(path.resolve(__dirname, DirName.PUBLIC)));
 
 app.use(mainRouter);
 app.use(authenticationRouter);
