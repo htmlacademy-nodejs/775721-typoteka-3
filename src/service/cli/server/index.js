@@ -6,7 +6,8 @@ const fs = require(`fs`).promises;
 const chalk = require(`chalk`);
 
 const { MODULE_NAME, DEFAULT_PORT, Message } = require(`./constants`);
-const { HttpStatusCode, ExitCode, FILE_MOCKS_PATH } = require(`../../constants`);
+const { ExitCode, FILE_MOCKS_PATH } = require(`../../constants`);
+const { HttpStatusCode } = require(`../../../constants`);
 
 const sendHtml = (response, statusCode, body) => {
   const html = `

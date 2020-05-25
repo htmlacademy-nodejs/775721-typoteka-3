@@ -1,0 +1,39 @@
+extends ../layout
+
+block content
+  main.articles-category
+    h1 Бизнес
+    section.articles-category__theme-list
+      h2.visually-hidden Список тем
+      ul.themes
+        li.themes__item
+          a.themes__item-link(href='#')
+            | Автомобили
+            sup 88
+        li.themes__item
+          a.themes__item-link(href='#')
+            | Удаленная работа
+            sup 13
+        li.themes__item
+          a.themes__item-link.themes__item-link--active
+            | Бизнес
+            sup 13
+        li.themes__item
+          a.themes__item-link(href='#')
+            | Путешествия
+            sup 13
+        li.themes__item
+          a.themes__item-link.themes__item-link--padding(href='#')
+            | Дизайн и обустройство
+            sup 13
+        li.themes__item
+          a.themes__item-link(href='#')
+            | Производство игрушек
+            sup 22
+        li.themes__item
+          a.themes__item-link(href='#')
+            | UX & UI
+            sup 22
+
+    include ../partials/preview-articles
+
