@@ -7,7 +7,7 @@ const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {Route, EXPECTED_PROPERTIES} = require(`./constants`);
 const {HttpStatusCode} = require(`../../../constants`);
 
-const createArticleRouter = (articlesService) => {
+const createArticleRouter = (articlesService, commentRouter) => {
   const router = new Router();
 
   router.get(Route.INDEX, (req, res) => {
@@ -48,6 +48,8 @@ const createArticleRouter = (articlesService) => {
 
     res.status(HttpStatusCode.OK).json(deletedArticle);
   });
+
+  router.use(Route.COMMENTS, isArticleExists(articlesService), commentRouter);
 
   return router;
 };
