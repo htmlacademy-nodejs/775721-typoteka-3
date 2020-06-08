@@ -80,6 +80,12 @@ module.exports = {
       process.exit(ExitCode.ERROR);
     }
 
+    if (quantity < 0) {
+      console.error(chalk.red(`Не могу создать ${ QuantityLimit.MAX } публикаций`));
+
+      process.exit(ExitCode.ERROR);
+    }
+
     try {
       const publications = await generatePublications(quantity);
       const content = JSON.stringify(publications);
