@@ -2,13 +2,21 @@
 
 const fs = require(`fs`).promises;
 
-const { FILE_MOCKS_PATH } = require(`../constants`);
+const {FILE_MOCKS_PATH} = require(`../constants`);
+
+let data;
 
 const getMockData = async () => {
+  if (data) {
+    return data;
+  }
+
   try {
     const content = await fs.readFile(FILE_MOCKS_PATH);
 
-    return [null, JSON.parse(content)];
+    data = JSON.parse(content);
+
+    return [null, data];
   } catch (error) {
     return [error, []];
   }
