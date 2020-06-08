@@ -7,13 +7,13 @@ const { nanoid } = require(`nanoid`);
 
 const {
   MODULE_NAME,
-  QuantityLimit,
-  AnnounceSizeLimit,
   DAY_IN_MILLISECONDS,
   DATE_LIMIT_IN_DAYS,
-  FILE_TITLES_PATH,
-  FILE_CATEGORIES_PATH,
-  FILE_SENTENCES_PATH,
+  FilePath,
+  QuantityLimit,
+  AnnounceSizeLimit,
+  CommentTextSentencesLimit,
+  CommentsQuantityLimit,
 } = require(`./constants`);
 const { ExitCode, FILE_MOCKS_PATH, MAX_ID_LENGTH } = require(`../../constants`);
 const { getRandomInteger, shuffle } = require(`../../utils`);
@@ -24,22 +24,22 @@ const createRandomDate = () => {
   return date.toLocaleString();
 };
 
-const createPublication = ({ titles, categories, sentences }) => ({
+const createComment = (comments) => ({
+  id: nanoid(MAX_ID_LENGTH),
+  text: shuffle(comments).slice(0, getRandomInteger(CommentTextSentencesLimit.MIN, CommentTextSentencesLimit.MAX)).join(` `),
+});
+
+const createComments = (quantity, comments) => Array.from({ length: quantity }, () => createComment(comments));
+
+const createPublication = ({ titles, categories, sentences, comments }) => ({
   id: nanoid(MAX_ID_LENGTH),
   title: titles[getRandomInteger(0, titles.length - 1)],
   createdDate: createRandomDate(),
   announce: shuffle(sentences).slice(0, getRandomInteger(AnnounceSizeLimit.MIN, AnnounceSizeLimit.MAX)).join(` `),
   fullText: shuffle(sentences).slice(0, getRandomInteger(0, sentences.length)).join(` `),
   category: shuffle(categories).slice(0, getRandomInteger(0, categories.length)),
+  comments: createComments(getRandomInteger(CommentsQuantityLimit.MIN, CommentsQuantityLimit.MAX), comments),
 });
-
-const generatePublications = async (quantity) => {
-  const titles = await readContent(FILE_TITLES_PATH);
-  const categories = await readContent(FILE_CATEGORIES_PATH);
-  const sentences = await readContent(FILE_SENTENCES_PATH);
-
-  return Array.from({ length: quantity }, () => createPublication({ titles, categories, sentences }));
-};
 
 const readContent = async (filePath) => {
   let result = [];
@@ -53,6 +53,19 @@ const readContent = async (filePath) => {
   }
 
   return result;
+};
+
+const getMockContent = async (filePaths) => {
+  const promises = filePaths.map((filePath) => readContent(filePath));
+
+  return await Promise.all(promises);
+};
+
+const generatePublications = async (quantity) => {
+  const filePaths = Object.values(FilePath);
+  const [titles, categories, sentences, comments] = await getMockContent(filePaths);
+
+  return Array.from({ length: quantity }, () => createPublication({ titles, categories, sentences, comments }));
 };
 
 module.exports = {
