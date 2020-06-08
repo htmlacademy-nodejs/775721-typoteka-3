@@ -1,12 +1,10 @@
 `use strict`;
 
-const fs = require(`fs`).promises;
-
 const express = require(`express`);
 const chalk = require(`chalk`);
 
+const { getMockData } = require(`../../lib/get-mock-data`);
 const { MODULE_NAME, DEFAULT_PORT, Message } = require(`./constants`);
-const { FILE_MOCKS_PATH } = require(`../../constants`);
 const { HttpStatusCode } = require(`../../../constants`);
 
 const app = express();
@@ -15,8 +13,11 @@ const router = new express.Router();
 
 router.get(`/posts`, async (req, res) => {
   try {
-    const content = await fs.readFile(FILE_MOCKS_PATH);
-    const mocks = JSON.parse(content);
+    const [error, mocks] = await getMockData();
+
+    if (error) {
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json(mocks);
+    }
 
     res.json(mocks);
   } catch (error) {
