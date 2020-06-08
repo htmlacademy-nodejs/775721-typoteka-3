@@ -29,7 +29,9 @@ app.use(express.json());
 
 app.use(router);
 
-app.use((req, res) => res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send(Message.NOT_FOUND));
+app.use((req, res) => res.status(HttpStatusCode.NOT_FOUND).send(Message.NOT_FOUND));
+
+app.use((error, req, res, next) => res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send(Message.INTERNAL_SERVER_ERROR));
 
 module.exports = {
   name: MODULE_NAME,
