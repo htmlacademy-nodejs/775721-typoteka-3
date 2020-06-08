@@ -3,4 +3,5 @@
 exports.Route = {
   ARTICLES: `/articles`,
   CATEGORIES: `/categories`,
+  SEARCH: `/search`,
 };

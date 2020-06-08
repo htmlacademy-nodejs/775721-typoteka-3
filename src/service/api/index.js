@@ -10,6 +10,7 @@ const {CategoryService} = require(`../data-service/category`);
 const {createCommentRouter} = require(`./comment`);
 const {createArticleRouter} = require(`./article`);
 const {createCategoryRouter} = require(`./category`);
+const {createSearchRouter} = require(`./search`);
 const {Route} = require(`./constants`);
 
 const apiRouter = new Router();
@@ -23,11 +24,13 @@ const apiRouter = new Router();
     const categoryService = new CategoryService();
 
     const commentRouter = createCommentRouter(articleService, commentService);
-    const articleRoute = createArticleRouter(articleService, commentRouter);
-    const categoryRoute = createCategoryRouter(articleService, categoryService);
+    const articleRouter = createArticleRouter(articleService, commentRouter);
+    const categoryRouter = createCategoryRouter(articleService, categoryService);
+    const searchRouter = createSearchRouter(articleService);
 
-    apiRouter.use(Route.ARTICLES, articleRoute);
-    apiRouter.use(Route.CATEGORIES, categoryRoute);
+    apiRouter.use(Route.ARTICLES, articleRouter);
+    apiRouter.use(Route.CATEGORIES, categoryRouter);
+    apiRouter.use(Route.SEARCH, searchRouter);
   } catch (error) {
     console.error(chalk.red(error));
   }

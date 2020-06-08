@@ -1,3 +1,5 @@
+`use strict`;
+
 exports.Route = {
   INDEX: `/`,
   ARTICLE: `/:articleId`,

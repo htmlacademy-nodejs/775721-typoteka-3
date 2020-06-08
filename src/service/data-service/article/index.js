@@ -15,6 +15,10 @@ class ArticleService {
     return this.#articles;
   };
 
+  findAllByTitle(title) {
+    return this.#articles.filter((offer) => offer.title.includes(title));
+  };
+
   findById(id) {
     return this.#articles.find((article) => article.id === id);
   };
