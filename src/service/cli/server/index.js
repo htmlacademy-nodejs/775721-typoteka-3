@@ -1,34 +1,21 @@
 `use strict`;
 
-const fs = require(`fs`).promises;
-
 const express = require(`express`);
 const chalk = require(`chalk`);
 
-const { MODULE_NAME, DEFAULT_PORT, Message } = require(`./constants`);
-const { FILE_MOCKS_PATH } = require(`../../constants`);
-const { HttpStatusCode } = require(`../../../constants`);
+const {apiRouter} = require(`../../api`);
+const {MODULE_NAME, DEFAULT_PORT, API_ROUTE, Message} = require(`./constants`);
+const {HttpStatusCode} = require(`../../../constants`);
 
 const app = express();
 
-const router = new express.Router();
-
-router.get(`/posts`, async (req, res) => {
-  try {
-    const content = await fs.readFile(FILE_MOCKS_PATH);
-    const mocks = JSON.parse(content);
-
-    res.json(mocks);
-  } catch (error) {
-    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json([]);
-  }
-});
-
 app.use(express.json());
 
-app.use(router);
+app.use(API_ROUTE, apiRouter);
 
-app.use((req, res) => res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send(Message.NOT_FOUND));
+app.use((req, res) => res.status(HttpStatusCode.NOT_FOUND).send(Message.NOT_FOUND));
+
+app.use((error, req, res, next) => res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send(Message.INTERNAL_SERVER_ERROR));
 
 module.exports = {
   name: MODULE_NAME,
@@ -37,5 +24,5 @@ module.exports = {
     const port = Number.parseInt(customPort, 10) || DEFAULT_PORT;
 
     app.listen(port, () => console.info(chalk.green(`Принимаю подключения на ${ port }`)));
-  }
-}
+  },
+};

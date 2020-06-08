@@ -1,9 +1,12 @@
 `use strict`;
 
-module.exports = {
-  MODULE_NAME: `--server`,
-  DEFAULT_PORT: 3000,
-  Message: {
-    NOT_FOUND: `Данные не найдены`
-  },
-}
+exports.MODULE_NAME = `--server`;
+
+exports.DEFAULT_PORT = 3000;
+
+exports.API_ROUTE = `/api`;
+
+exports.Message = {
+  NOT_FOUND: `Данные не найдены`,
+  INTERNAL_SERVER_ERROR: `Произошла непредвиденная ошибка на сервере`,
+};

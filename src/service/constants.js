@@ -1,10 +1,13 @@
 `use strict`;
 
-module.exports = {
-  USER_ARGUMENTS_START_INDEX: 2,
-  DEFAULT_COMMAND: `--help`,
-  FILE_MOCKS_PATH: `mocks.json`,
-  ExitCode: {
-    ERROR: 1,
-  },
+exports.USER_ARGUMENTS_START_INDEX = 2;
+
+exports.DEFAULT_COMMAND = `--help`;
+
+exports.FILE_MOCKS_PATH = `mocks.json`;
+
+exports.MAX_ID_LENGTH = 6;
+
+exports.ExitCode = {
+  ERROR: 1,
 };
