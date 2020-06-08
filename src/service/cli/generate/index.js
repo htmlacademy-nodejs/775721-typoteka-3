@@ -3,6 +3,7 @@
 const fs = require(`fs`).promises;
 
 const chalk = require(`chalk`);
+const { nanoid } = require(`nanoid`);
 
 const {
   MODULE_NAME,
@@ -14,7 +15,7 @@ const {
   FILE_CATEGORIES_PATH,
   FILE_SENTENCES_PATH,
 } = require(`./constants`);
-const { ExitCode, FILE_MOCKS_PATH } = require(`../../constants`);
+const { ExitCode, FILE_MOCKS_PATH, MAX_ID_LENGTH } = require(`../../constants`);
 const { getRandomInteger, shuffle } = require(`../../utils`);
 
 const createRandomDate = () => {
@@ -24,6 +25,7 @@ const createRandomDate = () => {
 };
 
 const createPublication = ({ titles, categories, sentences }) => ({
+  id: nanoid(MAX_ID_LENGTH),
   title: titles[getRandomInteger(0, titles.length - 1)],
   createdDate: createRandomDate(),
   announce: shuffle(sentences).slice(0, getRandomInteger(AnnounceSizeLimit.MIN, AnnounceSizeLimit.MAX)).join(` `),
