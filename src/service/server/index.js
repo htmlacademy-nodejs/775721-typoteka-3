@@ -27,7 +27,9 @@ const createServer = async ({articles, logger = pinoLogger} = {}) => {
   const commentService = new CommentService();
   const categoryService = new CategoryService();
 
-  const apiRouter = createRouter({articleService, commentService, categoryService});
+  const apiRouter = createRouter({articleService, commentService, categoryService, logger});
+
+  server.use(express.json());
 
   server.use((req, res, next) => {
     logger.debug(`Старт запроса к url: ${ req.url }`);
@@ -44,8 +46,6 @@ const createServer = async ({articles, logger = pinoLogger} = {}) => {
 
     return undefined;
   });
-
-  server.use(express.json());
 
   server.use(Route.API, apiRouter);
 

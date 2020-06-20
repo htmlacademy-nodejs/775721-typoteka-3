@@ -9,11 +9,11 @@ const {createSearchRouter} = require(`./search`);
 const {Route} = require(`./constants`);
 
 
-const createRouter = ({articleService, commentService, categoryService}) => {
+const createRouter = ({articleService, commentService, categoryService, logger}) => {
   const router = new Router();
 
-  const commentRouter = createCommentRouter(articleService, commentService);
-  const articleRouter = createArticleRouter(articleService, commentRouter);
+  const commentRouter = createCommentRouter({articleService, commentService, logger});
+  const articleRouter = createArticleRouter({articleService, commentRouter, logger});
   const categoryRouter = createCategoryRouter(articleService, categoryService);
   const searchRouter = createSearchRouter(articleService);
 
