@@ -1,4 +1,4 @@
-`use strict`;
+'use strict';
 
 module.exports = {
   MODULE_NAME: `--generate`,
@@ -26,4 +26,4 @@ module.exports = {
     MIN: 0,
     MAX: 5,
   }
-}
+};

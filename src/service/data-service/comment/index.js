@@ -1,4 +1,4 @@
-`use strict`;
+'use strict';
 
 const {nanoid} = require(`nanoid`);
 
@@ -7,7 +7,7 @@ const {MAX_ID_LENGTH} = require(`../../constants`);
 class CommentService {
   findAll(articles) {
     return articles.comments;
-  };
+  }
 
   create(article, text) {
     const newComment = {
@@ -30,7 +30,7 @@ class CommentService {
     article.comments = article.comments.filter(({id}) => id !== commentId);
 
     return deletedComment;
-  };
+  }
 }
 
 exports.CommentService = CommentService;

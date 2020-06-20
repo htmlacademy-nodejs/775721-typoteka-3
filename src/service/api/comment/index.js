@@ -1,4 +1,4 @@
-`use strict`;
+'use strict';
 
 const {Router} = require(`express`);
 
@@ -35,7 +35,7 @@ const createCommentRouter = (articleService, commentService) => {
       return res.status(HttpStatusCode.NOT_FOUND).send(`Комментарий с id: ${ commentId } не найден`);
     }
 
-    res.status(HttpStatusCode.OK).json(deletedComment);
+    return res.status(HttpStatusCode.OK).json(deletedComment);
   });
 
   return router;

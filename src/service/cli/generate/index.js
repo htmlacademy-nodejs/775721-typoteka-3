@@ -1,9 +1,9 @@
-`use strict`;
+'use strict';
 
 const fs = require(`fs`).promises;
 
 const chalk = require(`chalk`);
-const { nanoid } = require(`nanoid`);
+const {nanoid} = require(`nanoid`);
 
 const {
   MODULE_NAME,
@@ -15,8 +15,8 @@ const {
   CommentTextSentencesLimit,
   CommentsQuantityLimit,
 } = require(`./constants`);
-const { ExitCode, FILE_MOCKS_PATH, MAX_ID_LENGTH } = require(`../../constants`);
-const { getRandomInteger, shuffle } = require(`../../utils`);
+const {ExitCode, FILE_MOCKS_PATH, MAX_ID_LENGTH} = require(`../../constants`);
+const {getRandomInteger, shuffle} = require(`../../utils`);
 
 const createRandomDate = () => {
   const date = new Date(Date.now() - getRandomInteger(0, DAY_IN_MILLISECONDS * DATE_LIMIT_IN_DAYS));
@@ -29,9 +29,9 @@ const createComment = (comments) => ({
   text: shuffle(comments).slice(0, getRandomInteger(CommentTextSentencesLimit.MIN, CommentTextSentencesLimit.MAX)).join(` `),
 });
 
-const createComments = (quantity, comments) => Array.from({ length: quantity }, () => createComment(comments));
+const createComments = (quantity, comments) => Array.from({length: quantity}, () => createComment(comments));
 
-const createPublication = ({ titles, categories, sentences, comments }) => ({
+const createPublication = ({titles, categories, sentences, comments}) => ({
   id: nanoid(MAX_ID_LENGTH),
   title: titles[getRandomInteger(0, titles.length - 1)],
   createdDate: createRandomDate(),
@@ -65,7 +65,7 @@ const generatePublications = async (quantity) => {
   const filePaths = Object.values(FilePath);
   const [titles, categories, sentences, comments] = await getMockContent(filePaths);
 
-  return Array.from({ length: quantity }, () => createPublication({ titles, categories, sentences, comments }));
+  return Array.from({length: quantity}, () => createPublication({titles, categories, sentences, comments}));
 };
 
 module.exports = {
@@ -99,4 +99,4 @@ module.exports = {
 
     console.info(chalk.green(`Файл с данными успешно создан.`));
   }
-}
+};

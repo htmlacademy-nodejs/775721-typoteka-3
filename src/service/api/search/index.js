@@ -1,4 +1,4 @@
-`use strict`;
+'use strict';
 
 const {Router} = require(`express`);
 
@@ -21,7 +21,7 @@ const createSearchRouter = (articlesService) => {
       return res.status(HttpStatusCode.NOT_FOUND).send(`Не найдено публикаций содержащих: ${ query }`);
     }
 
-    res.status(HttpStatusCode.OK).json(foundedArticles);
+    return res.status(HttpStatusCode.OK).json(foundedArticles);
   });
 
   return router;

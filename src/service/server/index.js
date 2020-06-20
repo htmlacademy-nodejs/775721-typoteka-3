@@ -35,6 +35,7 @@ const createServer = async ({articles} = {}) => {
 
   app.use((req, res) => res.status(HttpStatusCode.NOT_FOUND).send(Message.NOT_FOUND));
 
+  // eslint-disable-next-line
   app.use((error, req, res, next) => res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send(Message.INTERNAL_SERVER_ERROR));
 
   return app;

@@ -1,31 +1,29 @@
-`use strict`;
+'use strict';
 
 const {nanoid} = require(`nanoid`);
 
 const {MAX_ID_LENGTH} = require(`../../constants`);
 
 class ArticleService {
-  #articles;
-
   constructor(articles) {
-    this.#articles = articles;
+    this._articles = articles;
   }
 
   findAll() {
-    return this.#articles;
-  };
+    return this._articles;
+  }
 
   findAllByTitle(title) {
-    return this.#articles.filter((offer) => offer.title.includes(title));
-  };
+    return this._articles.filter((offer) => offer.title.includes(title));
+  }
 
   findById(id) {
-    return this.#articles.find((article) => article.id === id);
-  };
+    return this._articles.find((article) => article.id === id);
+  }
 
   isExists(id) {
-    return this.#articles.some((article) => article.id === id);
-  };
+    return this._articles.some((article) => article.id === id);
+  }
 
   create({title, announce, fullText, category}) {
     const newArticle = {
@@ -37,22 +35,22 @@ class ArticleService {
       comments: [],
     };
 
-    this.#articles.push(newArticle);
+    this._articles.push(newArticle);
 
     return newArticle;
   }
 
   update({id, title, announce, fullText, category}) {
-    const index = this.#articles.findIndex((offer) => offer.id === id);
+    const index = this._articles.findIndex((offer) => offer.id === id);
 
     if (index === -1) {
       return null;
     }
 
-    const article = this.#articles[index];
+    const article = this._articles[index];
     const updatedArticle = Object.assign(article, {title, announce, fullText, category});
 
-    this.#articles[index] = updatedArticle;
+    this._articles[index] = updatedArticle;
 
     return updatedArticle;
   }
@@ -64,7 +62,7 @@ class ArticleService {
       return null;
     }
 
-    this.#articles = this.#articles.filter((offer) => offer.id !== id);
+    this._articles = this._articles.filter((offer) => offer.id !== id);
 
     return deletedArticle;
   }
