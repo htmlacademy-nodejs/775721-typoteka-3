@@ -1,8 +1,7 @@
 'use strict';
 
-const chalk = require(`chalk`);
-
 const {createServer} = require(`../../server`);
+const {pinoLogger} = require(`../../logger`);
 const {MODULE_NAME, DEFAULT_PORT} = require(`./constants`);
 
 module.exports = {
@@ -14,9 +13,10 @@ module.exports = {
     try {
       const server = await createServer();
 
-      server.listen(port, () => console.info(chalk.green(`Принимаю подключения на ${ port }`)));
+      server.listen(port, () => pinoLogger.info(`Принимаю подключения на ${ port }`))
+      .on(`error`, (error) => pinoLogger.error(`Не могу запустить сервер. Ошибка: ${ error }`));
     } catch (error) {
-      console.error(chalk.red(`Не могу создать сервер. Ошибка: ${ error }`));
+      pinoLogger.error(`Не могу создать сервер. Ошибка: ${ error }`);
     }
   },
 };
