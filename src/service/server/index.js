@@ -1,8 +1,8 @@
 'use strict';
 
 const express = require(`express`);
-const chalk = require(`chalk`);
 
+const {pinoLogger} = require(`../logger`);
 const {ArticleService} = require(`../data-service/article`);
 const {CommentService} = require(`../data-service/comment`);
 const {CategoryService} = require(`../data-service/category`);
@@ -11,15 +11,15 @@ const {createRouter} = require(`../api`);
 const {HttpStatusCode} = require(`../../constants`);
 const {Route, Message} = require(`./constants`);
 
-const createServer = async ({articles} = {}) => {
-  const app = express();
+const createServer = async ({articles, logger = pinoLogger} = {}) => {
+  const server = express();
   let currentArticles = articles;
 
   if (!articles) {
     try {
       currentArticles = await getMockData();
     } catch (error) {
-      console.error(chalk.red(`Ошибка при получении моковых данных. Ошибка: ${ error }`));
+      logger.error(`Ошибка при получении моковых данных. Ошибка: ${ error }`);
     }
   }
 
@@ -29,16 +29,40 @@ const createServer = async ({articles} = {}) => {
 
   const apiRouter = createRouter({articleService, commentService, categoryService});
 
-  app.use(express.json());
+  server.use((req, res, next) => {
+    logger.debug(`Старт запроса к url: ${ req.url }`);
 
-  app.use(Route.API, apiRouter);
+    return next();
+  });
 
-  app.use((req, res) => res.status(HttpStatusCode.NOT_FOUND).send(Message.NOT_FOUND));
+  server.use((req, res, next) => {
+    next();
+
+    if (res.headersSent) {
+      return logger.info(`Конец запроса со статусом ${ res.statusCode }`);
+    }
+
+    return undefined;
+  });
+
+  server.use(express.json());
+
+  server.use(Route.API, apiRouter);
+
+  server.use((req, res) => {
+    res.status(HttpStatusCode.NOT_FOUND).send(Message.NOT_FOUND);
+
+    return logger.error(`Не могу найти маршрут к url: ${ req.url }.`);
+  });
 
   // eslint-disable-next-line
-  app.use((error, req, res, next) => res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send(Message.INTERNAL_SERVER_ERROR));
+  server.use((error, req, res, next) => {
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send(Message.INTERNAL_SERVER_ERROR);
 
-  return app;
+    return logger.error(`Ошибка сервера: ${ error }.`);
+  });
+
+  return server;
 };
 
 exports.createServer = createServer;
