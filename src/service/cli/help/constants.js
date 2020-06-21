@@ -1,4 +1,4 @@
-`use strict`;
+'use strict';
 
 module.exports = {
   MODULE_NAME: `--help`,
@@ -14,4 +14,4 @@ module.exports = {
         --generate <count>:   формирует файл mocks.json
         --server <port>:      запускает http-сервер
   `,
-}
+};

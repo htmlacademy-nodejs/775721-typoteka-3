@@ -1,4 +1,4 @@
-`use strict`;
+'use strict';
 
 const {Router} = require(`express`);
 
@@ -6,8 +6,10 @@ const {HttpStatusCode} = require(`../../../constants`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {Route, EXPECTED_PROPERTIES} = require(`./constants`);
 
-const createCommentRouter = (articleService, commentService) => {
+const createCommentRouter = ({articleService, commentService, logger}) => {
   const router = new Router({mergeParams: true});
+
+  const isRequestDataValidMiddleware = isRequestDataValid({expectedProperties: EXPECTED_PROPERTIES, logger});
 
   router.get(Route.INDEX, (req, res) => {
     const {articleId} = req.params;
@@ -17,7 +19,7 @@ const createCommentRouter = (articleService, commentService) => {
     res.status(HttpStatusCode.OK).json(comments);
   });
 
-  router.post(Route.INDEX, isRequestDataValid(EXPECTED_PROPERTIES), (req, res) => {
+  router.post(Route.INDEX, isRequestDataValidMiddleware, (req, res) => {
     const {articleId} = req.params;
     const {text} = req.body;
     const article = articleService.findById(articleId);
@@ -35,7 +37,7 @@ const createCommentRouter = (articleService, commentService) => {
       return res.status(HttpStatusCode.NOT_FOUND).send(`Комментарий с id: ${ commentId } не найден`);
     }
 
-    res.status(HttpStatusCode.OK).json(deletedComment);
+    return res.status(HttpStatusCode.OK).json(deletedComment);
   });
 
   return router;

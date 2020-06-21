@@ -1,4 +1,4 @@
-`use strict`;
+'use strict';
 
 exports.getRandomInteger = (min, max) => {
   const intMin = Math.ceil(min);

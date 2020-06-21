@@ -1,4 +1,4 @@
-`use strict`;
+'use strict';
 
 exports.USER_ARGUMENTS_START_INDEX = 2;
 

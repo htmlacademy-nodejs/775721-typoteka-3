@@ -1,4 +1,4 @@
-`use strict`;
+'use strict';
 
 const {Router} = require(`express`);
 
@@ -7,49 +7,52 @@ const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {Route, EXPECTED_PROPERTIES} = require(`./constants`);
 const {HttpStatusCode} = require(`../../../constants`);
 
-const createArticleRouter = (articlesService, commentRouter) => {
+const createArticleRouter = ({articleService, commentRouter, logger}) => {
   const router = new Router();
 
+  const isRequestDataValidMiddleware = isRequestDataValid({expectedProperties: EXPECTED_PROPERTIES, logger});
+  const isArticleExistsMiddleware = isArticleExists({service: articleService, logger});
+
   router.get(Route.INDEX, (req, res) => {
-    const articles = articlesService.findAll();
+    const articles = articleService.findAll();
 
     res.status(HttpStatusCode.OK).json(articles);
   });
 
-  router.post(Route.INDEX, isRequestDataValid(EXPECTED_PROPERTIES), (req, res) => {
+  router.post(Route.INDEX, isRequestDataValidMiddleware, (req, res) => {
     const {title, announce, fullText, category} = req.body;
 
-    const newArticle = articlesService.create({title, announce, fullText, category});
+    const newArticle = articleService.create({title, announce, fullText, category});
 
     res.status(HttpStatusCode.CREATED).json(newArticle);
   });
 
-  router.get(Route.ARTICLE, isArticleExists(articlesService), (req, res) => {
+  router.get(Route.ARTICLE, isArticleExistsMiddleware, (req, res) => {
     const {articleId} = req.params;
 
-    const article = articlesService.findById(articleId);
+    const article = articleService.findById(articleId);
 
     res.status(HttpStatusCode.OK).json(article);
   });
 
-  router.put(Route.ARTICLE, [isArticleExists(articlesService), isRequestDataValid(EXPECTED_PROPERTIES)], (req, res) => {
+  router.put(Route.ARTICLE, [isArticleExistsMiddleware, isRequestDataValidMiddleware], (req, res) => {
     const {articleId} = req.params;
     const {title, announce, fullText, category} = req.body;
 
-    const updatedArticle = articlesService.update({id: articleId, title, announce, fullText, category});
+    const updatedArticle = articleService.update({id: articleId, title, announce, fullText, category});
 
     res.status(HttpStatusCode.OK).json(updatedArticle);
   });
 
-  router.delete(Route.ARTICLE, isArticleExists(articlesService), (req, res) => {
+  router.delete(Route.ARTICLE, isArticleExistsMiddleware, (req, res) => {
     const {articleId} = req.params;
 
-    const deletedArticle = articlesService.delete(articleId);
+    const deletedArticle = articleService.delete(articleId);
 
     res.status(HttpStatusCode.OK).json(deletedArticle);
   });
 
-  router.use(Route.COMMENTS, isArticleExists(articlesService), commentRouter);
+  router.use(Route.COMMENTS, isArticleExistsMiddleware, commentRouter);
 
   return router;
 };
