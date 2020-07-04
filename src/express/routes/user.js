@@ -2,9 +2,11 @@
 
 const {Router} = require(`express`);
 
+const { getUserMain } = require(`../controllers/user`);
+
 const router = new Router();
 
-router.get(`/`, (req, res) => res.render(`user/my`));
+router.get(`/`, getUserMain);
 router.get(`/comments`, (req, res) => res.render(`user/comments`));
 
 module.exports = router;
