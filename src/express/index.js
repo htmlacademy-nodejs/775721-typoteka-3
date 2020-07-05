@@ -20,6 +20,8 @@ app.set(`views`, path.resolve(__dirname, DirName.TEMPLATES));
 
 app.use(express.static(path.resolve(__dirname, DirName.PUBLIC)));
 
+app.use(express.urlencoded({extended: false}));
+
 app.use(mainRouter);
 app.use(authenticationRouter);
 app.use(`/my`, userRouter);

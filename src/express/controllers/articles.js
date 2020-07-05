@@ -6,6 +6,42 @@ const {HttpStatusCode} = require(`../../constants`);
 const {readContent} = require(`../../utils/readContent`);
 const {FilePath} = require(`../../constants`);
 
+exports.getAddArticle = async (req, res, next) => {
+  try {
+    const categories = await readContent(FilePath.CATEGORIES);
+
+    return res.render(`articles/new-post`, {categories});
+  } catch (error) {
+    return next();
+  }
+};
+
+exports.postAddArticle = async (req, res, next) => {
+  try {
+    const {createdDate, title, category, announce, fullText} = req.body;
+
+    const article = {
+      title,
+      createdDate,
+      category,
+      announce,
+      fullText,
+    };
+
+    const {statusCode} = await request.post({url: `${ API_URL }/articles`, json: true, body: article});
+
+    if (statusCode === HttpStatusCode.CREATED) {
+      return res.redirect(`/my`);
+    }
+
+    const categories = await readContent(FilePath.CATEGORIES);
+
+    return res.render(`articles/new-post`, {article, categories});
+  } catch (error) {
+    return next();
+  }
+};
+
 exports.getEditArticle = async (req, res, next) => {
   try {
     const {id} = req.params;
