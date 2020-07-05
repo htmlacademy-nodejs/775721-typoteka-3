@@ -32,7 +32,7 @@ const createServer = async ({articles, logger = pinoLogger} = {}) => {
   server.use(express.json());
 
   server.use((req, res, next) => {
-    logger.debug(`Старт запроса к url: ${ req.url }`);
+    logger.debug(`Старт ${ req.method } запроса к url: ${ req.url }`);
 
     return next();
   });
@@ -41,7 +41,7 @@ const createServer = async ({articles, logger = pinoLogger} = {}) => {
     next();
 
     if (res.headersSent) {
-      return logger.info(`Конец запроса со статусом ${ res.statusCode }`);
+      return logger.info(`Конец ${ req.method } запроса со статусом ${ res.statusCode }`);
     }
 
     return undefined;

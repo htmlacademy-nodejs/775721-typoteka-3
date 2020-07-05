@@ -22,3 +22,11 @@ exports.hasAllExpectedProperties = (object, expectedProperties) => {
 
   return expectedProperties.every((expectedProperty) => objectProperties.includes(expectedProperty));
 };
+
+exports.getMissingProperties = (object, expectedProperties) => expectedProperties.reduce((missingProperties, property) => {
+  if (property in object) {
+    return missingProperties;
+  }
+
+  return [property, ...missingProperties];
+}, []);
