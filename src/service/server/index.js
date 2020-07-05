@@ -32,7 +32,9 @@ const createServer = async ({articles, logger = pinoLogger} = {}) => {
   server.use(express.json());
 
   server.use((req, res, next) => {
-    logger.debug(`Старт ${ req.method } запроса к url: ${ req.url }`);
+    const decodedUrl = decodeURI(req.url);
+
+    logger.debug(`Старт ${ req.method } запроса к url: ${ decodedUrl }`);
 
     return next();
   });
