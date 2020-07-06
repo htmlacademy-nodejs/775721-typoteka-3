@@ -7,3 +7,10 @@ exports.HttpStatusCode = {
   NOT_FOUND: 404,
   INTERNAL_SERVER_ERROR: 500,
 };
+
+exports.FilePath = {
+  TITLES: `./data/titles.txt`,
+  CATEGORIES: `./data/categories.txt`,
+  SENTENCES: `./data/sentences.txt`,
+  COMMENTS: `./data/comments.txt`,
+};

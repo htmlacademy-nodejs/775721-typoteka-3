@@ -5,11 +5,13 @@ const fs = require(`fs`).promises;
 const chalk = require(`chalk`);
 const {nanoid} = require(`nanoid`);
 
+const {readContent} = require(`../../../utils/readContent`);
+const {FilePath} = require(`../../../constants`);
+
 const {
   MODULE_NAME,
   DAY_IN_MILLISECONDS,
   DATE_LIMIT_IN_DAYS,
-  FilePath,
   QuantityLimit,
   AnnounceSizeLimit,
   CommentTextSentencesLimit,
@@ -40,20 +42,6 @@ const createPublication = ({titles, categories, sentences, comments}) => ({
   category: shuffle(categories).slice(0, getRandomInteger(0, categories.length)),
   comments: createComments(getRandomInteger(CommentsQuantityLimit.MIN, CommentsQuantityLimit.MAX), comments),
 });
-
-const readContent = async (filePath) => {
-  let result = [];
-
-  try {
-    const content = await fs.readFile(filePath, `utf-8`);
-
-    result = content.split(`\n`).filter(Boolean);
-  } catch (error) {
-    console.error(chalk.red(error));
-  }
-
-  return result;
-};
 
 const getMockContent = async (filePaths) => {
   const promises = filePaths.map((filePath) => readContent(filePath));
@@ -98,5 +86,5 @@ module.exports = {
     }
 
     console.info(chalk.green(`Файл с данными успешно создан.`));
-  }
+  },
 };
