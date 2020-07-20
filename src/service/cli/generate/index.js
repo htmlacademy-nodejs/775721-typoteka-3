@@ -69,7 +69,7 @@ module.exports = {
     }
 
     if (quantity < 0) {
-      console.error(chalk.red(`Не могу создать ${ QuantityLimit.MAX } публикаций`));
+      console.error(chalk.red(`Не могу создать ${ quantity } публикаций`));
 
       process.exit(ExitCode.ERROR);
     }
