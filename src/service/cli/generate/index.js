@@ -5,30 +5,23 @@ const fs = require(`fs`).promises;
 const chalk = require(`chalk`);
 const {nanoid} = require(`nanoid`);
 
-const {readContent} = require(`../../../utils/readContent`);
+const {getMockContent} = require(`../utils/get-mock-content`);
+const {createRandomDate} = require(`../utils/create-random-date`);
+const {createRandomCategories} = require(`../utils/create-random-categories`);
+const {createRandomText} = require(`../utils/create-random-text`);
 const {FilePath} = require(`../../../constants`);
+const {QuantityLimit, AnnounceSizeLimit, CommentTextSentencesLimit} = require(`../constants`);
 
 const {
   MODULE_NAME,
-  DAY_IN_MILLISECONDS,
-  DATE_LIMIT_IN_DAYS,
-  QuantityLimit,
-  AnnounceSizeLimit,
-  CommentTextSentencesLimit,
   CommentsQuantityLimit,
 } = require(`./constants`);
 const {ExitCode, FILE_MOCKS_PATH, MAX_ID_LENGTH} = require(`../../constants`);
-const {getRandomInteger, shuffle} = require(`../../utils`);
-
-const createRandomDate = () => {
-  const date = new Date(Date.now() - getRandomInteger(0, DAY_IN_MILLISECONDS * DATE_LIMIT_IN_DAYS));
-
-  return date.toLocaleString();
-};
+const {getRandomInteger} = require(`../../utils`);
 
 const createComment = (comments) => ({
   id: nanoid(MAX_ID_LENGTH),
-  text: shuffle(comments).slice(0, getRandomInteger(CommentTextSentencesLimit.MIN, CommentTextSentencesLimit.MAX)).join(` `),
+  text: createRandomText(comments, {min: CommentTextSentencesLimit.MIN, max: CommentTextSentencesLimit.MAX}),
 });
 
 const createComments = (quantity, comments) => Array.from({length: quantity}, () => createComment(comments));
@@ -37,17 +30,11 @@ const createPublication = ({titles, categories, sentences, comments}) => ({
   id: nanoid(MAX_ID_LENGTH),
   title: titles[getRandomInteger(0, titles.length - 1)],
   createdDate: createRandomDate(),
-  announce: shuffle(sentences).slice(0, getRandomInteger(AnnounceSizeLimit.MIN, AnnounceSizeLimit.MAX)).join(` `),
-  fullText: shuffle(sentences).slice(0, getRandomInteger(0, sentences.length)).join(` `),
-  category: shuffle(categories).slice(0, getRandomInteger(0, categories.length)),
+  announce: createRandomText(sentences, {min: AnnounceSizeLimit.MIN, max: AnnounceSizeLimit.MAX}),
+  fullText: createRandomText(sentences),
+  category: createRandomCategories(categories),
   comments: createComments(getRandomInteger(CommentsQuantityLimit.MIN, CommentsQuantityLimit.MAX), comments),
 });
-
-const getMockContent = async (filePaths) => {
-  const promises = filePaths.map((filePath) => readContent(filePath));
-
-  return await Promise.all(promises);
-};
 
 const generatePublications = async (quantity) => {
   const filePaths = Object.values(FilePath);
@@ -69,7 +56,7 @@ module.exports = {
     }
 
     if (quantity < 0) {
-      console.error(chalk.red(`Не могу создать ${ QuantityLimit.MAX } публикаций`));
+      console.error(chalk.red(`Не могу создать ${ quantity } публикаций`));
 
       process.exit(ExitCode.ERROR);
     }
