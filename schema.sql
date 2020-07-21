@@ -32,7 +32,7 @@ CREATE TABLE users
 	first_name VARCHAR(50) NOT NULL,
 	last_name VARCHAR(50) NOT NULL,
 	email VARCHAR(320) UNIQUE NOT NULL,
-	password VARCHAR(100) NOT NULL CHECK (char_length(password) > 6),
+	password VARCHAR(100) NOT NULL CHECK (char_length(password) >= 6),
 	avatar TEXT
 );
 
@@ -41,7 +41,7 @@ CREATE UNIQUE INDEX email_idx ON users ((lower(email)));
 CREATE TABLE categories
 (
   id BIGSERIAL PRIMARY KEY,
-  title VARCHAR(30) NOT NULL CHECK (char_length(title) > 5)
+  title VARCHAR(30) NOT NULL CHECK (char_length(title) >= 5)
 );
 
 CREATE TABLE articles
@@ -50,8 +50,8 @@ CREATE TABLE articles
   user_id BIGINT NOT NULL,
   image TEXT,
   created_date TIMESTAMP NOT NULL,
-  title VARCHAR(250) NOT NULL CHECK (char_length(title) > 30),
-  announce VARCHAR(250) NOT NULL CHECK (char_length(announce) > 30),
+  title VARCHAR(250) NOT NULL CHECK (char_length(title) >= 30),
+  announce VARCHAR(250) NOT NULL CHECK (char_length(announce) >= 30),
   text VARCHAR(1000),
   FOREIGN KEY(user_id) REFERENCES users
     ON UPDATE CASCADE
@@ -80,7 +80,7 @@ CREATE TABLE comments
   user_id BIGINT NOT NULL,
   article_id BIGINT NOT NULL,
   created_date TIMESTAMP NOT NULL,
-  message VARCHAR(300) NOT NULL CHECK (char_length(message) > 20),
+  message VARCHAR(300) NOT NULL CHECK (char_length(message) >= 20),
   FOREIGN KEY(user_id) REFERENCES users
     ON UPDATE CASCADE
     ON DELETE CASCADE,
