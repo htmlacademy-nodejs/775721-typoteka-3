@@ -1,14 +1,14 @@
 'use strict';
 
 const {request} = require(`../request`);
-const {API_URL} = require(`../constants`);
 const {HttpStatusCode} = require(`../../constants`);
+const {API_SERVER_URL} = require(`../../config`);
 
 const REQUIRED_NUMBER_OF_COMMENTS = 3;
 
 exports.getUserMain = async (req, res, next) => {
   try {
-    const {statusCode, body} = await request.get({url: `${ API_URL }/articles`, json: true});
+    const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/articles`, json: true});
     const articles = statusCode === HttpStatusCode.OK ? body : [];
 
     res.render(`user/my`, {articles});
@@ -19,13 +19,13 @@ exports.getUserMain = async (req, res, next) => {
 
 exports.getUserComments = async (req, res, next) => {
   try {
-    const {statusCode, body} = await request.get({url: `${ API_URL }/articles`, json: true});
+    const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/articles`, json: true});
     const articles = statusCode === HttpStatusCode.OK ? body : [];
     const requiredArticles = articles.slice(0, REQUIRED_NUMBER_OF_COMMENTS);
     const requiredArticlesIds = requiredArticles.map(({id}) => id);
 
     const commentsRequests = requiredArticlesIds.map((id) => request.get({
-      url: `${ API_URL }/articles/${ id }/comments`,
+      url: `${ API_SERVER_URL }/articles/${ id }/comments`,
       json: true,
     }));
     const commentsResponses = await Promise.all(commentsRequests);

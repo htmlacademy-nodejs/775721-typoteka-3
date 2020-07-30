@@ -2,13 +2,14 @@
 
 const {createServer} = require(`../../server`);
 const {pinoLogger} = require(`../../logger`);
-const {MODULE_NAME, DEFAULT_PORT} = require(`./constants`);
+const {MODULE_NAME} = require(`./constants`);
+const {API_SERVER_DEFAULT_PORT} = require(`../../../config`);
 
 module.exports = {
   name: MODULE_NAME,
   async run(parameters) {
     const [customPort] = parameters;
-    const port = Number.parseInt(customPort, 10) || DEFAULT_PORT;
+    const port = Number.parseInt(customPort, 10) || API_SERVER_DEFAULT_PORT;
 
     try {
       const server = await createServer();
