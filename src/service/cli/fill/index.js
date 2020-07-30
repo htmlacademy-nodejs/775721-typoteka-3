@@ -11,8 +11,7 @@ const {createArticles} = require(`./utils/create-articles`);
 const {createArticlesCategories} = require(`./utils/create-articles-categories`);
 const {createComments} = require(`./utils/create-comments`);
 const {createCommandsForCreatingDBPrimaryData} = require(`./utils/create-commands-for-creating-db-primary-data`);
-const {FilePath} = require(`../../../constants`);
-const {ExitCode} = require(`../../constants`);
+const {FilePath, ExitCode} = require(`../../../constants`);
 const {QuantityLimit} = require(`../constants`);
 const {MODULE_NAME, FILE_NAME, USERS_QUANTITY, EntityKeyToEntityPropertiesOrder} = require(`./constants`);
 

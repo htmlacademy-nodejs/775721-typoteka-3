@@ -9,14 +9,13 @@ const {getMockContent} = require(`../utils/get-mock-content`);
 const {createRandomDate} = require(`../utils/create-random-date`);
 const {createRandomCategories} = require(`../utils/create-random-categories`);
 const {createRandomText} = require(`../utils/create-random-text`);
-const {FilePath} = require(`../../../constants`);
+const {FilePath, ExitCode} = require(`../../../constants`);
 const {QuantityLimit, AnnounceSizeLimit, CommentTextSentencesLimit} = require(`../constants`);
-
 const {
   MODULE_NAME,
   CommentsQuantityLimit,
 } = require(`./constants`);
-const {ExitCode, FILE_MOCKS_PATH, MAX_ID_LENGTH} = require(`../../constants`);
+const {FILE_MOCKS_PATH, MAX_ID_LENGTH} = require(`../../constants`);
 const {getRandomInteger} = require(`../../utils`);
 
 const createComment = (comments) => ({

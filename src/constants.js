@@ -14,3 +14,7 @@ exports.FilePath = {
   SENTENCES: `./data/sentences.txt`,
   COMMENTS: `./data/comments.txt`,
 };
+
+exports.ExitCode = {
+  ERROR: 1,
+};

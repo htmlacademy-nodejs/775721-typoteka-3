@@ -7,7 +7,3 @@ exports.DEFAULT_COMMAND = `--help`;
 exports.FILE_MOCKS_PATH = `mocks.json`;
 
 exports.MAX_ID_LENGTH = 6;
-
-exports.ExitCode = {
-  ERROR: 1,
-};
