@@ -47,3 +47,15 @@ exports.createUserModel = (sequelize, DataTypes) => {
 
   return User;
 };
+
+exports.createUserAssociations = ({User, Article, Comment}) => {
+  User.hasMany(Article, {
+    as: `articles`,
+    foreignKey: `user_id`,
+  });
+
+  User.hasMany(Comment, {
+    as: `comments`,
+    foreignKey: `user_id`,
+  });
+};
