@@ -24,14 +24,14 @@ block content
                   label
                     input(type='text', name='title' placeholder='Заголовок', value=(article ? article.title : ''), required)
                 .new-publication__checkbox.new-publication__checkbox--auto
-                  each category, index in categories
+                  each category in categories
                     input(
-                      id='category-checkbox-' + index type='checkbox',
+                      id='category-checkbox-' + category.id type='checkbox',
                       name='category',
-                      value=category,
-                      checked=(article && article.category ? article.category.includes(category) : false)
+                      value=category.id,
+                      checked=(article && article.category ? article.category.includes(category.title) : false)
                     )
-                    label(for='category-checkbox-' + index) #{category}
+                    label(for='category-checkbox-' + category.id) #{category.title}
                 a.new-publication__form-link.button.button--transparent(href='#') Добавить категорию
               .form__wrapper.form__wrapper--text
                 .form__field.form__field--publication-text

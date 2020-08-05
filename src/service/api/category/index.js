@@ -8,11 +8,14 @@ const {Route} = require(`./constants`);
 const createCategoryRouter = (articleService, categoryService) => {
   const router = new Router();
 
-  router.get(Route.INDEX, (req, res) => {
-    const articles = articleService.findAll();
-    const categories = categoryService.findAll(articles);
+  router.get(Route.INDEX, async (req, res, next) => {
+    try {
+      const categories = await categoryService.findAll();
 
-    res.status(HttpStatusCode.OK).json(categories);
+      res.status(HttpStatusCode.OK).json(categories);
+    } catch (error) {
+      next(error);
+    }
   });
 
   return router;

@@ -15,7 +15,7 @@ const createServer = ({dataBase, logger = pinoLogger} = {}) => {
 
   const articleService = new ArticleService(dataBase, logger);
   const commentService = new CommentService();
-  const categoryService = new CategoryService();
+  const categoryService = new CategoryService(dataBase, logger);
 
   const apiRouter = createRouter({articleService, commentService, categoryService, logger});
 
