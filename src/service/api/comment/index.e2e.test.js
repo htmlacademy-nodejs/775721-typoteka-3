@@ -1,31 +1,69 @@
 'use strict';
 
-const {describe, it, expect, beforeEach} = require(`@jest/globals`);
-
+const {describe, it, expect, beforeEach, afterAll} = require(`@jest/globals`);
 const request = require(`supertest`);
 
 const {createServer} = require(`../../server`);
+const testDataBase = require(`../../database/test-data-base`);
 
 describe(`Comment API end-points`, () => {
+  const server = createServer({dataBase: testDataBase});
+
+  const users = [
+    {
+      id: 1,
+      firstName: `Иван`,
+      lastName: `Абрамов`,
+      email: `ivan_abramov@mail.local`,
+      password: 123456,
+      avatar: `avatar01.jpg`,
+    },
+  ];
+  const categories = [
+    {
+      id: 1,
+      title: `Программирование`,
+    },
+  ];
+  const articles = [
+    {
+      id: 1,
+      image: `item01.jpg`,
+      title: `Как начать программировать за 21 день.`,
+      announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+      text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+      user_id: 1, /* eslint-disable-line */
+    },
+  ];
+  const articlesCategories = [
+    {
+      articleId: 1,
+      categoriesIds: [1],
+    },
+  ];
+
+  afterAll(() => {
+    testDataBase.sequelize.close();
+  });
+
   describe(`GET api/articles/:articleId/comments`, () => {
-    const mockComment = {
-      id: `ORF5b1`,
-      text: `Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Плюсую, но слишком много буквы!`,
-    };
-    const mockArticle = {
-      id: `7hd_rn`,
-      title: `Лучше рок-музыканты 20-века`,
-      createdDate: `24.04.2020, 11:19:41`,
-      announce: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-      fullText: `Достичь успеха помогут ежедневные повторения.`,
-      category: [],
-      comments: [mockComment],
-    };
-    const mockArticles = [mockArticle];
-    let server;
+    const comments = [
+      {
+        id: 1,
+        message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
+        user_id: 1, /* eslint-disable-line */
+        article_id: 1, /* eslint-disable-line */
+      },
+      {
+        id: 2,
+        message: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
+        user_id: 1, /* eslint-disable-line */
+        article_id: 1, /* eslint-disable-line */
+      },
+    ];
 
     beforeEach(async () => {
-      server = await createServer({articles: mockArticles});
+      await testDataBase.resetDataBase({users, categories, articles, articlesCategories, comments});
     });
 
     it(`should return status 404 if article doesn't exist`, async () => {
@@ -35,38 +73,40 @@ describe(`Comment API end-points`, () => {
     });
 
     it(`should return status 200 if article exist`, async () => {
-      const res = await request(server).get(`/api/articles/${ mockArticle.id }/comments`);
+      const res = await request(server).get(`/api/articles/1/comments`);
 
       expect(res.statusCode).toBe(200);
     });
 
     it(`should return comments`, async () => {
-      const res = await request(server).get(`/api/articles/${ mockArticle.id }/comments`);
+      const expectedFirstComment = {
+        id: 1,
+        message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
+      };
+      const expectedSecondComment = {
+        id: 2,
+        message: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
+      };
 
-      expect(res.body).toEqual(mockArticle.comments);
+      const res = await request(server).get(`/api/articles/1/comments`);
+      const [firstComment, secondComment] = res.body;
+
+      expect(firstComment).toMatchObject(expectedFirstComment);
+      expect(secondComment).toMatchObject(expectedSecondComment);
     });
   });
 
   describe(`POST api/articles/:articleId/comments`, () => {
-    const mockArticle = {
-      id: `7hd_rn`,
-      title: `Лучше рок-музыканты 20-века`,
-      createdDate: `24.04.2020, 11:19:41`,
-      announce: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-      fullText: `Достичь успеха помогут ежедневные повторения.`,
-      category: [],
-      comments: [
-        {
-          id: `ORF5b1`,
-          text: `Давно не пользуюсь стационарными компьютерами. Ноутбуки победили. Плюсую, но слишком много буквы!`,
-        },
-      ],
-    };
-    const mockArticles = [mockArticle];
-    let server;
+    const comments = [
+      {
+        message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
+        user_id: 1, /* eslint-disable-line */
+        article_id: 1, /* eslint-disable-line */
+      },
+    ];
 
     beforeEach(async () => {
-      server = await createServer({articles: mockArticles});
+      await testDataBase.resetDataBase({users, categories, articles, articlesCategories, comments});
     });
 
     it(`should return status 404 if article doesn't exist`, async () => {
@@ -82,7 +122,7 @@ describe(`Comment API end-points`, () => {
       const data = {
         message: `New comment`,
       };
-      const res = await request(server).post(`/api/articles/${ mockArticle.id }/comments`).send(data);
+      const res = await request(server).post(`/api/articles/1/comments`).send(data);
 
       expect(res.statusCode).toBe(400);
     });
@@ -91,7 +131,7 @@ describe(`Comment API end-points`, () => {
       const data = {
         text: `New comment`,
       };
-      const res = await request(server).post(`/api/articles/${ mockArticle.id }/comments`).send(data);
+      const res = await request(server).post(`/api/articles/1/comments`).send(data);
 
       expect(res.statusCode).toBe(201);
     });
@@ -100,82 +140,81 @@ describe(`Comment API end-points`, () => {
       const data = {
         text: `New comment`,
       };
-      const res = await request(server).post(`/api/articles/${ mockArticle.id }/comments`).send(data);
+      const expectedComment = {
+        message: `New comment`,
+      };
+
+      const res = await request(server).post(`/api/articles/1/comments`).send(data);
 
       expect(res.body).toHaveProperty(`id`);
-      expect(res.body.text).toBe(data.text);
+      expect(res.body).toMatchObject(expectedComment);
     });
 
     it(`should return comments with new comment if new comment was created`, async () => {
       const data = {
         text: `New comment`,
       };
-      const {body} = await request(server).post(`/api/articles/${ mockArticle.id }/comments`).send(data);
-      const res = await request(server).get(`/api/articles/${ mockArticle.id }/comments`);
+      const {body: newComment} = await request(server).post(`/api/articles/1/comments`).send(data);
+      const res = await request(server).get(`/api/articles/1/comments`);
 
-      expect(res.body).toContainEqual(body);
+      expect(res.body).toContainEqual(newComment);
     });
   });
 
   describe(`DELETE api/articles/:articleId/comments/:commentId`, () => {
-    const mockComment1 = {
-      id: `WNP24E`,
-      text: `Согласен с автором!`,
-    };
-    const mockComment2 = {
-      id: `I4KyE3`,
-      text: `Мне кажется или я уже читал это где-то? Хочу такую же футболку :-)`,
-    };
-    const mockArticle = {
-      id: `Fwt8UQ`,
-      title: `Борьба с прокрастинацией`,
-      createdDate: `22.03.2020, 08:35:48`,
-      announce: `Он написал больше 30 хитов.`,
-      fullText: `Альбом стал настоящим открытием года. Мощные гитарные рифы и скоростные соло-партии не дадут заскучать. Как начать действовать?`,
-      category: [
-        `Разное`,
-        `Программирование`,
-        `IT`,
-      ],
-      comments: [mockComment1, mockComment2],
-    };
-    const mockArticles = [mockArticle];
-    let server;
+    const comments = [
+      {
+        id: 1,
+        message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
+        user_id: 1, /* eslint-disable-line */
+        article_id: 1, /* eslint-disable-line */
+      },
+      {
+        id: 2,
+        message: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
+        user_id: 1, /* eslint-disable-line */
+        article_id: 1, /* eslint-disable-line */
+      },
+    ];
 
     beforeEach(async () => {
-      server = await createServer({articles: mockArticles});
+      await testDataBase.resetDataBase({users, categories, articles, articlesCategories, comments});
     });
 
     it(`should return status 404 if article doesn't exist`, async () => {
-      const res = await request(server).delete(`/api/articles/1234/comments/${ mockComment1.id }`);
+      const res = await request(server).delete(`/api/articles/1234/comments/1`);
 
       expect(res.statusCode).toBe(404);
     });
 
-    it(`should return status 404 if article doesn't exist`, async () => {
-      const res = await request(server).delete(`/api/articles/${ mockArticle.id }/comments/1234`);
+    it(`should return status 404 if comment doesn't exist`, async () => {
+      const res = await request(server).delete(`/api/articles/1/comments/1234`);
 
       expect(res.statusCode).toBe(404);
     });
 
     it(`should return status 200 if comment was deleted`, async () => {
-      const res = await request(server).delete(`/api/articles/${ mockArticle.id }/comments/${ mockComment2.id }`);
+      const res = await request(server).delete(`/api/articles/1/comments/2`);
 
       expect(res.statusCode).toBe(200);
     });
 
     it(`should return deleted comment if comment was deleted`, async () => {
-      const res = await request(server).delete(`/api/articles/${ mockArticle.id }/comments/${ mockComment1.id }`);
+      const expectedComment = {
+        id: 2,
+        message: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
+      };
 
-      expect(res.body).toEqual(mockComment1);
+      const res = await request(server).delete(`/api/articles/1/comments/2`);
+
+      expect(res.body).toMatchObject(expectedComment);
     });
 
-    it(`should return comment without deleted comment if comment was deleted`, async () => {
-      await request(server).delete(`/api/articles/${ mockArticle.id }/comments/${ mockComment2.id }`);
-      const res = await request(server).get(`/api/articles/${ mockArticle.id }/comments`);
+    it(`should return comments without deleted comment if comment was deleted`, async () => {
+      const {body: deletedComment} = await request(server).delete(`/api/articles/1/comments/2`);
+      const res = await request(server).get(`/api/articles/1/comments`);
 
-      expect(res.body).not.toContainEqual(mockComment2);
+      expect(res.body).not.toContainEqual(deletedComment);
     });
   });
-})
-;
+});
