@@ -1,6 +1,6 @@
 'use strict';
 
-const {sequelize} = require(`../../database`);
+const dataBase = require(`../../database`);
 const {createServer} = require(`../../server`);
 const {pinoLogger} = require(`../../logger`);
 const {MODULE_NAME} = require(`./constants`);
@@ -16,7 +16,7 @@ module.exports = {
     try {
       pinoLogger.info(`Подключаюсь к базе данных`);
 
-      const result = await sequelize.sync();
+      const result = await dataBase.sequelize.sync();
 
       pinoLogger.info(`Успешное подключение к базе данных ${ result.config.database }`);
     } catch (error) {
@@ -25,13 +25,9 @@ module.exports = {
       process.exit(ExitCode.ERROR);
     }
 
-    try {
-      const server = await createServer();
+    const server = createServer({dataBase});
 
-      server.listen(port, () => pinoLogger.info(`Принимаю подключения на ${ port }`))
-      .on(`error`, (error) => pinoLogger.error(`Не могу запустить сервер. Ошибка: ${ error }`));
-    } catch (error) {
-      pinoLogger.error(`Не могу создать сервер. Ошибка: ${ error }`);
-    }
+    server.listen(port, () => pinoLogger.info(`Принимаю подключения на ${ port }`))
+    .on(`error`, (error) => pinoLogger.error(`Не могу запустить сервер. Ошибка: ${ error }`));
   },
 };

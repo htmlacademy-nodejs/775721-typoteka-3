@@ -1,70 +1,204 @@
 'use strict';
 
-const {nanoid} = require(`nanoid`);
-
-const {MAX_ID_LENGTH} = require(`../../constants`);
-
 class ArticleService {
-  constructor(articles) {
-    this._articles = articles;
-  }
+  constructor(dataBase, logger) {
+    const {sequelize, models} = dataBase;
+    const {Category, Comment} = models;
 
-  findAll() {
-    return this._articles;
-  }
-
-  findAllByTitle(title) {
-    return this._articles.filter((offer) => offer.title.includes(title));
-  }
-
-  findById(id) {
-    return this._articles.find((article) => article.id === id);
-  }
-
-  isExists(id) {
-    return this._articles.some((article) => article.id === id);
-  }
-
-  create({title, announce, fullText, category}) {
-    const newArticle = {
-      id: nanoid(MAX_ID_LENGTH),
-      title,
-      announce,
-      fullText,
-      category,
-      comments: [],
+    this._dataBase = dataBase;
+    this._models = models;
+    this._logger = logger;
+    this._selectOptions = {
+      raw: false,
+      include: [
+        {
+          model: Category,
+          attributes: [],
+          through: {
+            attributes: [],
+          },
+        },
+        {
+          model: Comment,
+          as: `comments`,
+          attributes: [
+            `id`,
+            `message`,
+            [`created_date`, `createdDate`],
+          ],
+        },
+      ],
+      attributes: [
+        `id`,
+        `image`,
+        `title`,
+        `announce`,
+        [`text`, `fullText`],
+        [`created_date`, `createdDate`],
+        [sequelize.fn(`ARRAY_AGG`, sequelize.col(`categories.title`)), `category`],
+      ],
+      group: [`article.id`, `article.image`, `article.title`, `article.announce`, `article.text`, `article.created_date`, `comments.id`],
+      order: [
+        [`created_date`, `DESC`],
+      ],
     };
-
-    this._articles.push(newArticle);
-
-    return newArticle;
   }
 
-  update({id, title, announce, fullText, category}) {
-    const index = this._articles.findIndex((offer) => offer.id === id);
+  async findAll() {
+    const {Article} = this._models;
 
-    if (index === -1) {
-      return null;
+    try {
+      return await Article.findAll(this._selectOptions);
+    } catch (error) {
+      this._logger.error(`Не могу найти публикации. Ошибка: ${ error }`);
+
+      return [];
     }
-
-    const article = this._articles[index];
-    const updatedArticle = Object.assign(article, {title, announce, fullText, category});
-
-    this._articles[index] = updatedArticle;
-
-    return updatedArticle;
   }
 
-  delete(id) {
-    const deletedArticle = this.findById(id);
+  async findAllByTitle(title) {
+    const {sequelize} = this._dataBase;
+    const {Article} = this._models;
 
-    if (!deletedArticle) {
+    try {
+      return await Article.findAll({
+        ...this._selectOptions,
+        where: {
+          title: {
+            [sequelize.Sequelize.Op.iLike]: `%${ title }%`,
+
+          },
+        },
+      });
+    } catch (error) {
+      this._logger.error(`Не могу найти публикацию с заголовком: ${ title }. Ошибка: ${ error }`);
+
       return null;
     }
+  }
 
-    this._articles = this._articles.filter((offer) => offer.id !== id);
+  async findById(id) {
+    const {Article} = this._models;
+    const articleId = Number.parseInt(id, 10);
 
-    return deletedArticle;
+    try {
+      return await Article.findByPk(articleId, this._selectOptions);
+    } catch (error) {
+      this._logger.error(`Не могу найти публикацию с id: ${ articleId }. Ошибка: ${ error }`);
+
+      return null;
+    }
+  }
+
+  async isExists(id) {
+    const {Article} = this._models;
+    const articleId = Number.parseInt(id, 10);
+
+    try {
+      const article = await Article.findByPk(articleId);
+
+      return !!article;
+    } catch (error) {
+      this._logger.error(`Не могу проверить наличие публикации с id: ${ articleId }. Ошибка: ${ error }`);
+
+      return false;
+    }
+  }
+
+  async create({image, title, announce, fullText, categories: categoriesIds}) {
+    const {sequelize} = this._dataBase;
+    const {Article, Category, User} = this._models;
+
+    try {
+      const user = await User.findByPk(1);
+
+      const newArticle = await user.createArticle({
+        image,
+        title,
+        announce,
+        text: fullText,
+      });
+
+      const categories = await Category.findAll({
+        where: {
+          id: {
+            [sequelize.Sequelize.Op.or]: categoriesIds,
+          },
+        },
+      });
+
+      await newArticle.addCategories(categories);
+
+      return await Article.findByPk(newArticle.id, this._selectOptions);
+    } catch (error) {
+      this._logger.error(`Не могу создать публикацию. Ошибка: ${ error }`);
+
+      return null;
+    }
+  }
+
+  async update({id, image, title, announce, fullText, categories: categoriesIds}) {
+    const {sequelize} = this._dataBase;
+    const {Article, Category} = this._models;
+
+    try {
+      const [updatedRows] = await Article.update({
+        image,
+        title,
+        announce,
+        text: fullText,
+      }, {
+        where: {
+          id,
+        },
+      });
+
+      if (!updatedRows) {
+        return null;
+      }
+
+      const updatedArticle = await Article.findByPk(id);
+
+      const categories = await Category.findAll({
+        where: {
+          id: {
+            [sequelize.Sequelize.Op.or]: categoriesIds,
+          },
+        },
+      });
+
+      await updatedArticle.setCategories(categories);
+
+      return await Article.findByPk(updatedArticle.id, this._selectOptions);
+    } catch (error) {
+      this._logger.error(`Не могу обновить публикацию. Ошибка: ${ error }`);
+
+      return null;
+    }
+  }
+
+  async delete(id) {
+    const {Article} = this._models;
+
+    try {
+      const deletedArticle = await Article.findByPk(id, this._selectOptions);
+      const deletedRows = await Article.destroy({
+        where: {
+          id,
+        },
+        ...this._selectOptions,
+      });
+
+      if (!deletedRows) {
+        return null;
+      }
+
+      return deletedArticle;
+    } catch (error) {
+      this._logger.error(`Не могу удалить публикацию. Ошибка: ${ error }`);
+
+      return null;
+    }
   }
 }
 

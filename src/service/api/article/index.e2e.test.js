@@ -1,60 +1,88 @@
 'use strict';
 
-const {describe, it, expect, beforeEach} = require(`@jest/globals`);
-
+const {describe, it, expect, beforeEach, afterAll} = require(`@jest/globals`);
 const request = require(`supertest`);
 
 const {createServer} = require(`../../server`);
+const testDataBase = require(`../../database/test-data-base`);
 
 describe(`Article API end-points`, () => {
+  const server = createServer({dataBase: testDataBase});
+
+  afterAll(() => {
+    testDataBase.sequelize.close();
+  });
+
   describe(`GET api/articles`, () => {
-    const mockArticles = [
+    const users = [
       {
-        id: `BNe8ED`,
-        title: `Как начать программировать`,
-        createdDate: `20.05.2020, 04:51:59`,
-        announce: `Первая большая ёлка была установлена только в 1938 году.`,
-        fullText: `Он написал больше 30 хитов. Собрать камни бесконечности легко, если вы прирожденный герой.`,
-        category: [
-          `Без рамки`,
-          `Музыка`,
-          `За жизнь`,
-          `Железо`,
-        ],
-        comments: [
-          {
-            'id': `bA0DIb`,
-            'text': `Плюсую, но слишком много буквы!`,
-          },
-          {
-            'id': `hpnG7J`,
-            'text': `Это где ж такие красоты? Планируете записать видосик на эту тему?`,
-          },
-        ],
-      },
-      {
-        id: `8MqcDu`,
-        title: `Ёлки. История деревьев`,
-        createdDate: `21.05.2020, 08:55:16`,
-        announce: `Собрать камни бесконечности легко, если вы прирожденный герой. Программировать не настолько сложно, как об этом говорят. Из под его пера вышло 8 платиновых альбомов. Это один из лучших рок-музыкантов.`,
-        fullText: `Это один из лучших рок-музыкантов. Он написал больше 30 хитов. Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Этот смартфон — настоящая находка. Большой и яркий экран, мощнейший процессор — всё это в небольшом гаджете. Из под его пера вышло 8 платиновых альбомов. Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле? Первая большая ёлка была установлена только в 1938 году. Помните, небольшое количество ежедневных упражнений лучше, чем один раз, но много. Ёлки — это не просто красивое дерево. Это прочная древесина. Как начать действовать? Для начала просто соберитесь. Простые ежедневные упражнения помогут достичь успеха. Альбом стал настоящим открытием года. Мощные гитарные рифы и скоростные соло-партии не дадут заскучать.`,
-        category: [
-          `За жизнь`,
-          `Программирование`,
-          `IT`,
-        ],
-        comments: [
-          {
-            'id': `ENMOl2`,
-            'text': `Совсем немного... Это где ж такие красоты? Согласен с автором!`,
-          },
-        ],
+        id: 1,
+        firstName: `Иван`,
+        lastName: `Абрамов`,
+        email: `ivan_abramov@mail.local`,
+        password: 123456,
+        avatar: `avatar01.jpg`,
       },
     ];
-    let server;
+    const categories = [
+      {
+        id: 1,
+        title: `Программирование`,
+      },
+      {
+        id: 2,
+        title: `Кино и сериалы`,
+      },
+      {
+        id: 3,
+        title: `Железо`,
+      },
+    ];
+    const articles = [
+      {
+        id: 1,
+        image: `item01.jpg`,
+        title: `Как начать программировать за 21 день.`,
+        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+        text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+        user_id: 1, /* eslint-disable-line */
+      },
+      {
+        id: 2,
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        text: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        user_id: 1, /* eslint-disable-line */
+      },
+    ];
+    const comments = [
+      {
+        id: 1,
+        message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
+        user_id: 1, /* eslint-disable-line */
+        article_id: 1, /* eslint-disable-line */
+      },
+      {
+        id: 2,
+        message: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
+        user_id: 1, /* eslint-disable-line */
+        article_id: 2, /* eslint-disable-line */
+      },
+    ];
+    const articlesCategories = [
+      {
+        articleId: 1,
+        categoriesIds: [1, 2],
+      },
+      {
+        articleId: 2,
+        categoriesIds: [3],
+      },
+    ];
 
     beforeEach(async () => {
-      server = await createServer({articles: mockArticles});
+      await testDataBase.resetDataBase({users, categories, articles, comments, articlesCategories});
     });
 
     it(`should return status 200 if request was successful`, async () => {
@@ -64,24 +92,68 @@ describe(`Article API end-points`, () => {
     });
 
     it(`should return correct articles if request was successful`, async () => {
+      const expectedFirstArticle = {
+        id: 1,
+        image: `item01.jpg`,
+        title: `Как начать программировать за 21 день.`,
+        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+        fullText: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+        category: [`Программирование`, `Кино и сериалы`],
+        comments: [{
+          id: 1,
+          message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
+        }],
+      };
+      const expectedSecondArticle = {
+        id: 2,
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [`Железо`],
+        comments: [{
+          id: 2,
+          message: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
+        }],
+      };
+
       const res = await request(server).get(`/api/articles`);
 
-      expect(res.body).toEqual(mockArticles);
+      const [firstArticle, secondArticle] = res.body;
+
+      expect(firstArticle).toMatchObject(expectedFirstArticle);
+      expect(secondArticle).toMatchObject(expectedSecondArticle);
     });
   });
 
   describe(`POST api/articles`, () => {
-    let server;
+    const users = [
+      {
+        id: 1,
+        firstName: `Иван`,
+        lastName: `Абрамов`,
+        email: `ivan_abramov@mail.local`,
+        password: 123456,
+        avatar: `avatar01.jpg`,
+      },
+    ];
+    const categories = [
+      {
+        id: 1,
+        title: `Программирование`,
+      },
+    ];
 
     beforeEach(async () => {
-      server = await createServer({articles: []});
+      await testDataBase.resetDataBase({users, categories});
     });
 
     it(`should return status 400 if didn't send category`, async () => {
       const data = {
-        title: `Заголовок`,
-        announce: `Announce`,
-        fullText: `FullText`,
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
       };
 
       const res = await request(server).post(`/api/articles`).send(data);
@@ -91,10 +163,11 @@ describe(`Article API end-points`, () => {
 
     it(`should return status 201 if sent valid data`, async () => {
       const data = {
-        title: `Заголовок`,
-        announce: `Announce`,
-        fullText: `FullText`,
-        category: [`Категория`],
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [1],
       };
 
       const res = await request(server).post(`/api/articles`).send(data);
@@ -104,24 +177,34 @@ describe(`Article API end-points`, () => {
 
     it(`should return article with id and sent title if sent valid data`, async () => {
       const data = {
-        title: `Заголовок`,
-        announce: `Announce`,
-        fullText: `FullText`,
-        category: [`Категория`],
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [1],
+      };
+      const expectedArticle = {
+        id: 1,
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [`Программирование`],
       };
 
       const res = await request(server).post(`/api/articles`).send(data);
 
       expect(res.body).toHaveProperty(`id`);
-      expect(res.body.title).toBe(data.title);
+      expect(res.body).toMatchObject(expectedArticle);
     });
 
     it(`should return article without extra properties if sent data with extra property`, async () => {
       const data = {
-        title: `Заголовок`,
-        announce: `Announce`,
-        fullText: `FullText`,
-        category: [`Категория`],
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [1],
         token: `token`,
       };
 
@@ -132,11 +215,11 @@ describe(`Article API end-points`, () => {
 
     it(`should return articles with new article`, async () => {
       const data = {
-        title: `Заголовок`,
-        announce: `Announce`,
-        fullText: `FullText`,
-        category: [`Категория`],
-        token: `token`,
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [1],
       };
 
       const {body: newArticle} = await request(server).post(`/api/articles`).send(data);
@@ -147,34 +230,65 @@ describe(`Article API end-points`, () => {
   });
 
   describe(`GET api/articles/:articleId`, () => {
-    const mockArticle = {
-      id: `BNe8ED`,
-      title: `Как начать программировать`,
-      createdDate: `20.05.2020, 04:51:59`,
-      announce: `Первая большая ёлка была установлена только в 1938 году.`,
-      fullText: `Он написал больше 30 хитов. Собрать камни бесконечности легко, если вы прирожденный герой.`,
-      category: [
-        `Без рамки`,
-        `Музыка`,
-        `За жизнь`,
-        `Железо`,
-      ],
-      comments: [
-        {
-          id: `bA0DIb`,
-          text: `Плюсую, но слишком много буквы!`,
-        },
-        {
-          id: `hpnG7J`,
-          text: `Это где ж такие красоты? Планируете записать видосик на эту тему?`,
-        },
-      ],
-    };
-    const mockArticles = [mockArticle];
-    let server;
+    const users = [
+      {
+        id: 1,
+        firstName: `Иван`,
+        lastName: `Абрамов`,
+        email: `ivan_abramov@mail.local`,
+        password: 123456,
+        avatar: `avatar01.jpg`,
+      },
+    ];
+    const categories = [
+      {
+        id: 1,
+        title: `Программирование`,
+      },
+      {
+        id: 2,
+        title: `Кино и сериалы`,
+      },
+    ];
+    const articles = [
+      {
+        id: 1,
+        image: `item01.jpg`,
+        title: `Как начать программировать за 21 день.`,
+        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+        text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+        user_id: 1, /* eslint-disable-line */
+      },
+      {
+        id: 2,
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        text: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        user_id: 1, /* eslint-disable-line */
+      },
+    ];
+    const comments = [
+      {
+        id: 1,
+        message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
+        user_id: 1, /* eslint-disable-line */
+        article_id: 2, /* eslint-disable-line */
+      },
+    ];
+    const articlesCategories = [
+      {
+        articleId: 1,
+        categoriesIds: [1],
+      },
+      {
+        articleId: 2,
+        categoriesIds: [2],
+      },
+    ];
 
     beforeEach(async () => {
-      server = await createServer({articles: mockArticles});
+      await testDataBase.resetDataBase({users, categories, articles, comments, articlesCategories});
     });
 
     it(`should return status 404 if article doesn't exist`, async () => {
@@ -184,55 +298,79 @@ describe(`Article API end-points`, () => {
     });
 
     it(`should return status 200 if article exists`, async () => {
-      const res = await request(server).get(`/api/articles/${ mockArticle.id }`);
+      const res = await request(server).get(`/api/articles/2`);
 
       expect(res.statusCode).toBe(200);
     });
 
     it(`should return article if article exists`, async () => {
-      const res = await request(server).get(`/api/articles/${ mockArticle.id }`);
+      const res = await request(server).get(`/api/articles/2`);
+      const expectedArticle = {
+        id: 2,
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [`Кино и сериалы`],
+        comments: [{
+          id: 1,
+          message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
+        }],
+      };
 
-      expect(res.body).toEqual(mockArticle);
+      expect(res.body).toMatchObject(expectedArticle);
     });
   });
 
   describe(`PUT api/articles/:articleId`, () => {
-    const mockArticle = {
-      id: `BNe8ED`,
-      title: `Как начать программировать`,
-      createdDate: `20.05.2020, 04:51:59`,
-      announce: `Первая большая ёлка была установлена только в 1938 году.`,
-      fullText: `Он написал больше 30 хитов. Собрать камни бесконечности легко, если вы прирожденный герой.`,
-      category: [
-        `Без рамки`,
-        `Музыка`,
-        `За жизнь`,
-        `Железо`,
-      ],
-      comments: [
-        {
-          id: `bA0DIb`,
-          text: `Плюсую, но слишком много буквы!`,
-        },
-        {
-          id: `hpnG7J`,
-          text: `Это где ж такие красоты? Планируете записать видосик на эту тему?`,
-        },
-      ],
-    };
-    const mockArticles = [mockArticle];
-    let server;
+    const users = [
+      {
+        id: 1,
+        firstName: `Иван`,
+        lastName: `Абрамов`,
+        email: `ivan_abramov@mail.local`,
+        password: 123456,
+        avatar: `avatar01.jpg`,
+      },
+    ];
+    const categories = [
+      {
+        id: 1,
+        title: `Программирование`,
+      },
+      {
+        id: 2,
+        title: `Кино и сериалы`,
+      },
+    ];
+    const articles = [
+      {
+        id: 1,
+        image: `item01.jpg`,
+        title: `Как начать программировать за 21 день.`,
+        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+        text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+        user_id: 1, /* eslint-disable-line */
+      },
+    ];
+    const articlesCategories = [
+      {
+        articleId: 1,
+        categoriesIds: [1],
+      },
+    ];
 
     beforeEach(async () => {
-      server = await createServer({articles: mockArticles});
+      await testDataBase.resetDataBase({users, categories, articles, articlesCategories});
     });
 
     it(`should return status 404 if article doesn't exist`, async () => {
       const data = {
-        title: `Заголовок`,
-        announce: `Announce`,
-        fullText: `FullText`,
-        category: [`Категория`],
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [2],
       };
       const res = await request(server).put(`/api/articles/1234`).send(data);
 
@@ -241,87 +379,100 @@ describe(`Article API end-points`, () => {
 
     it(`should return status 400 if didn't send title`, async () => {
       const data = {
-        announce: `Announce`,
-        fullText: `FullText`,
-        category: [`Категория`],
+        image: `item02.jpg`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [2],
       };
-      const res = await request(server).put(`/api/articles/${ mockArticle.id }`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data);
 
       expect(res.statusCode).toBe(400);
     });
 
     it(`should return status 200 if article was updated`, async () => {
       const data = {
-        title: `Заголовок`,
-        announce: `Announce`,
-        fullText: `FullText`,
-        category: [`Категория`],
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [2],
       };
-      const res = await request(server).put(`/api/articles/${ mockArticle.id }`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data);
 
       expect(res.statusCode).toBe(200);
     });
 
     it(`should return article with updated title if article was updated`, async () => {
       const data = {
-        title: `Заголовок`,
-        announce: `Announce`,
-        fullText: `FullText`,
-        category: [`Категория`],
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [2],
       };
-      const res = await request(server).put(`/api/articles/${ mockArticle.id }`).send(data);
+      const expectedArticle = {
+        id: 1,
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [`Кино и сериалы`],
+      };
 
-      expect(res.body.title).toBe(data.title);
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.body).toMatchObject(expectedArticle);
     });
   });
 
   describe(`DELETE api/articles/:articleId`, () => {
-    const mockArticle1 = {
-      id: `BNe8ED`,
-      title: `Как начать программировать`,
-      createdDate: `20.05.2020, 04:51:59`,
-      announce: `Первая большая ёлка была установлена только в 1938 году.`,
-      fullText: `Он написал больше 30 хитов. Собрать камни бесконечности легко, если вы прирожденный герой.`,
-      category: [
-        `Без рамки`,
-        `Музыка`,
-        `За жизнь`,
-        `Железо`,
-      ],
-      comments: [
-        {
-          id: `bA0DIb`,
-          text: `Плюсую, но слишком много буквы!`,
-        },
-        {
-          id: `hpnG7J`,
-          text: `Это где ж такие красоты? Планируете записать видосик на эту тему?`,
-        },
-      ],
-    };
-    const mockArticle2 = {
-      id: `8MqcDu`,
-      title: `Ёлки. История деревьев`,
-      createdDate: `21.05.2020, 08:55:16`,
-      announce: `Собрать камни бесконечности легко, если вы прирожденный герой. Программировать не настолько сложно, как об этом говорят. Из под его пера вышло 8 платиновых альбомов. Это один из лучших рок-музыкантов.`,
-      fullText: `Это один из лучших рок-музыкантов. Он написал больше 30 хитов. Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Этот смартфон — настоящая находка. Большой и яркий экран, мощнейший процессор — всё это в небольшом гаджете. Из под его пера вышло 8 платиновых альбомов. Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле? Первая большая ёлка была установлена только в 1938 году. Помните, небольшое количество ежедневных упражнений лучше, чем один раз, но много. Ёлки — это не просто красивое дерево. Это прочная древесина. Как начать действовать? Для начала просто соберитесь. Простые ежедневные упражнения помогут достичь успеха. Альбом стал настоящим открытием года. Мощные гитарные рифы и скоростные соло-партии не дадут заскучать.`,
-      category: [
-        `За жизнь`,
-        `Программирование`,
-        `IT`,
-      ],
-      comments: [
-        {
-          'id': `ENMOl2`,
-          'text': `Совсем немного... Это где ж такие красоты? Согласен с автором!`,
-        },
-      ],
-    };
-    const mockArticles = [mockArticle1, mockArticle2];
-    let server;
+    const users = [
+      {
+        id: 1,
+        firstName: `Иван`,
+        lastName: `Абрамов`,
+        email: `ivan_abramov@mail.local`,
+        password: 123456,
+        avatar: `avatar01.jpg`,
+      },
+    ];
+    const categories = [
+      {
+        id: 1,
+        title: `Программирование`,
+      },
+    ];
+    const articles = [
+      {
+        id: 1,
+        image: `item01.jpg`,
+        title: `Как начать программировать за 21 день.`,
+        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+        text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+        user_id: 1, /* eslint-disable-line */
+      },
+      {
+        id: 2,
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        text: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        user_id: 1, /* eslint-disable-line */
+      },
+    ];
+    const articlesCategories = [
+      {
+        articleId: 1,
+        categoriesIds: [1],
+      },
+      {
+        articleId: 2,
+        categoriesIds: [1],
+      },
+    ];
 
     beforeEach(async () => {
-      server = await createServer({articles: mockArticles});
+      await testDataBase.resetDataBase({users, categories, articles, articlesCategories});
     });
 
     it(`should return status 404 if articles doesn't exist`, async () => {
@@ -331,28 +482,40 @@ describe(`Article API end-points`, () => {
     });
 
     it(`should return status 200 if articles was deleted`, async () => {
-      const res = await request(server).delete(`/api/articles/${ mockArticle2.id }`);
+      const res = await request(server).delete(`/api/articles/2`);
 
       expect(res.statusCode).toBe(200);
     });
 
     it(`should return deleted article if article was deleted`, async () => {
-      const res = await request(server).delete(`/api/articles/${ mockArticle2.id }`);
+      const expectedArticle = {
+        id: 2,
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [`Программирование`],
+      };
 
-      expect(res.body).toEqual(mockArticle2);
-    });
+      const res = await request(server).delete(`/api/articles/2`);
 
-    it(`should return article if articles was deleted`, async () => {
-      const res = await request(server).delete(`/api/articles/${ mockArticle2.id }`);
-
-      expect(res.body).toEqual(mockArticle2);
+      expect(res.body).toMatchObject(expectedArticle);
     });
 
     it(`should return articles without deleted article`, async () => {
-      await request(server).delete(`/api/articles/${ mockArticle2.id }`);
+      const expectedArticle = {
+        id: 2,
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        category: [`Программирование`],
+      };
+
+      await request(server).delete(`/api/articles/2`);
       const res = await request(server).get(`/api/articles`);
 
-      expect(res.body).not.toContainEqual(mockArticle2);
+      expect(res.body).not.toContainEqual(expectedArticle);
     });
   });
 });

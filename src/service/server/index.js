@@ -6,24 +6,14 @@ const {pinoLogger} = require(`../logger`);
 const {ArticleService} = require(`../data-service/article`);
 const {CommentService} = require(`../data-service/comment`);
 const {CategoryService} = require(`../data-service/category`);
-const {getMockData} = require(`../lib/get-mock-data`);
 const {createRouter} = require(`../api`);
 const {HttpStatusCode} = require(`../../constants`);
 const {Route, Message} = require(`./constants`);
 
-const createServer = async ({articles, logger = pinoLogger} = {}) => {
+const createServer = ({dataBase, logger = pinoLogger} = {}) => {
   const server = express();
-  let currentArticles = articles;
 
-  if (!articles) {
-    try {
-      currentArticles = await getMockData();
-    } catch (error) {
-      logger.error(`Ошибка при получении моковых данных. Ошибка: ${ error }`);
-    }
-  }
-
-  const articleService = new ArticleService(currentArticles);
+  const articleService = new ArticleService(dataBase, logger);
   const commentService = new CommentService();
   const categoryService = new CategoryService();
 

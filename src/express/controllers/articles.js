@@ -8,6 +8,7 @@ const {API_SERVER_URL} = require(`../../config`);
 
 exports.getAddArticle = async (req, res, next) => {
   try {
+    // TODO: Заменить на получение данных с базы данных
     const categories = await readContent(FilePath.CATEGORIES);
 
     return res.render(`articles/new-post`, {categories});
@@ -34,6 +35,7 @@ exports.postAddArticle = async (req, res, next) => {
       return res.redirect(`/my`);
     }
 
+    // TODO: Заменить на получение данных с базы данных
     const categories = await readContent(FilePath.CATEGORIES);
 
     return res.render(`articles/new-post`, {article, categories});
@@ -51,6 +53,7 @@ exports.getEditArticle = async (req, res, next) => {
       return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
     }
 
+    // TODO: Заменить на получение данных с базы данных
     const categories = await readContent(FilePath.CATEGORIES);
 
     return res.render(`articles/new-post`, {article, categories});
