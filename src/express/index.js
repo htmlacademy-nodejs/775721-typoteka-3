@@ -32,6 +32,10 @@ app.use(`/categories`, categoriesRouter);
 app.use((req, res) => res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`));
 
 // eslint-disable-next-line
-app.use((error, req, res, next) => res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render(`errors/500`));
+app.use((error, req, res, next) => {
+  console.error(chalk.red(`Произошла ошибка на сервере: ${ error }`));
+
+  res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render(`errors/500`);
+});
 
 app.listen(FRONT_SERVER_DEFAULT_PORT, () => console.info(chalk.green(`Принимаю подключения на ${ FRONT_SERVER_DEFAULT_PORT }`)));

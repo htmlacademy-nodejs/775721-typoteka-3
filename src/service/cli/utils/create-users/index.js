@@ -1,6 +1,6 @@
 'use strict';
 
-const {getRandomInteger} = require(`../../../../utils`);
+const {getRandomInteger} = require(`../../../utils`);
 const {USER_FIRST_NAMES, USER_LAST_NAMES, PasswordRestrict} = require(`./constants`);
 
 exports.createUsers = (count) => Array.from({length: count}, (_, index) => {
@@ -9,7 +9,7 @@ exports.createUsers = (count) => Array.from({length: count}, (_, index) => {
   const lastName = USER_LAST_NAMES[getRandomInteger(0, USER_LAST_NAMES.length - 1)];
   const email = `${ firstName.eng }_${ lastName.eng }_${ id }@mail.local`.toLowerCase();
   const password = getRandomInteger(PasswordRestrict.MIN, PasswordRestrict.MAX);
-  const avatar = `/img/avatar-${ id }.png`;
+  const avatar = `avatar-${ id }.png`;
 
   return {
     id,

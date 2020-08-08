@@ -1,10 +1,25 @@
 'use strict';
 
 class CategoryService {
-  findAll(articles) {
-    const categories = articles.reduce((accumulator, {category}) => accumulator.add(...category), new Set());
+  constructor(dataBase, logger) {
+    this._dataBase = dataBase;
+    this._models = dataBase.models;
+    this._logger = logger;
+    this._selectOptions = {
+      raw: true,
+    };
+  }
 
-    return [...categories];
+  async findAll() {
+    const {Category} = this._models;
+
+    try {
+      return await Category.findAll(this._selectOptions);
+    } catch (error) {
+      this._logger.error(`Не могу найти категории. Ошибка: ${ error }`);
+
+      return null;
+    }
   }
 }
 

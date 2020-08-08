@@ -12,7 +12,7 @@ const {Route} = require(`./constants`);
 const createRouter = ({articleService, commentService, categoryService, logger}) => {
   const router = new Router();
 
-  const commentRouter = createCommentRouter({articleService, commentService, logger});
+  const commentRouter = createCommentRouter({commentService, logger});
   const articleRouter = createArticleRouter({articleService, commentRouter, logger});
   const categoryRouter = createCategoryRouter(articleService, categoryService);
   const searchRouter = createSearchRouter(articleService);

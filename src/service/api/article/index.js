@@ -13,43 +13,70 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
   const isRequestDataValidMiddleware = isRequestDataValid({expectedProperties: EXPECTED_PROPERTIES, logger});
   const isArticleExistsMiddleware = isArticleExists({service: articleService, logger});
 
-  router.get(Route.INDEX, (req, res) => {
-    const articles = articleService.findAll();
+  router.get(Route.INDEX, async (req, res, next) => {
+    try {
+      const articles = await articleService.findAll();
 
-    res.status(HttpStatusCode.OK).json(articles);
+      res.status(HttpStatusCode.OK).json(articles);
+    } catch (error) {
+      next(error);
+    }
   });
 
-  router.post(Route.INDEX, isRequestDataValidMiddleware, (req, res) => {
-    const {title, announce, fullText, category} = req.body;
+  router.post(Route.INDEX, isRequestDataValidMiddleware, async (req, res, next) => {
+    const {image, title, announce, fullText, category} = req.body;
 
-    const newArticle = articleService.create({title, announce, fullText, category});
+    try {
+      const newArticle = await articleService.create({image, title, announce, fullText, categories: category});
 
-    res.status(HttpStatusCode.CREATED).json(newArticle);
+      res.status(HttpStatusCode.CREATED).json(newArticle);
+    } catch (error) {
+      next(error);
+    }
   });
 
-  router.get(Route.ARTICLE, isArticleExistsMiddleware, (req, res) => {
+  router.get(Route.ARTICLE, isArticleExistsMiddleware, async (req, res, next) => {
     const {articleId} = req.params;
 
-    const article = articleService.findById(articleId);
+    try {
+      const article = await articleService.findById(articleId);
 
-    res.status(HttpStatusCode.OK).json(article);
+      res.status(HttpStatusCode.OK).json(article);
+    } catch (error) {
+      next(error);
+    }
   });
 
-  router.put(Route.ARTICLE, [isArticleExistsMiddleware, isRequestDataValidMiddleware], (req, res) => {
+  router.put(Route.ARTICLE, [isArticleExistsMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
     const {articleId} = req.params;
-    const {title, announce, fullText, category} = req.body;
+    const {image, title, announce, fullText, category} = req.body;
 
-    const updatedArticle = articleService.update({id: articleId, title, announce, fullText, category});
+    try {
+      const updatedArticle = await articleService.update({
+        id: articleId,
+        image,
+        title,
+        announce,
+        fullText,
+        categories: category,
+      });
 
-    res.status(HttpStatusCode.OK).json(updatedArticle);
+      res.status(HttpStatusCode.OK).json(updatedArticle);
+    } catch (error) {
+      next(error);
+    }
   });
 
-  router.delete(Route.ARTICLE, isArticleExistsMiddleware, (req, res) => {
+  router.delete(Route.ARTICLE, isArticleExistsMiddleware, async (req, res, next) => {
     const {articleId} = req.params;
 
-    const deletedArticle = articleService.delete(articleId);
+    try {
+      const deletedArticle = await articleService.delete(articleId);
 
-    res.status(HttpStatusCode.OK).json(deletedArticle);
+      res.status(HttpStatusCode.OK).json(deletedArticle);
+    } catch (error) {
+      next(error);
+    }
   });
 
   router.use(Route.COMMENTS, isArticleExistsMiddleware, commentRouter);

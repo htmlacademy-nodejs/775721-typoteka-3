@@ -1,109 +1,43 @@
 'use strict';
 
-const {describe, it, expect} = require(`@jest/globals`);
-
+const {describe, it, expect, afterAll} = require(`@jest/globals`);
 const request = require(`supertest`);
 
 const {createServer} = require(`../../server`);
+const testDataBase = require(`../../database/test-data-base`);
 
 describe(`Category API end-points`, () => {
+  const server = createServer({dataBase: testDataBase});
+
+  afterAll(() => {
+    testDataBase.sequelize.close();
+  });
+
   describe(`GET api/categories`, () => {
     it(`should return empty array if no articles`, async () => {
-      const server = await createServer({articles: []});
+      await testDataBase.resetDataBase({});
 
       const res = await request(server).get(`/api/categories`);
 
       expect(res.body).toEqual([]);
     });
 
-    it(`should return ["Без рамки", "IT"]`, async () => {
-      const mockArticle1 = {
-        id: `BNe8ED`,
-        title: `Как начать программировать`,
-        createdDate: `20.05.2020, 04:51:59`,
-        announce: `Первая большая ёлка была установлена только в 1938 году.`,
-        fullText: `Он написал больше 30 хитов. Собрать камни бесконечности легко, если вы прирожденный герой.`,
-        category: [
-          `Без рамки`,
-        ],
-        comments: [
-          {
-            id: `bA0DIb`,
-            text: `Плюсую, но слишком много буквы!`,
-          },
-          {
-            id: `hpnG7J`,
-            text: `Это где ж такие красоты? Планируете записать видосик на эту тему?`,
-          },
-        ],
-      };
-      const mockArticle2 = {
-        id: `8MqcDu`,
-        title: `Ёлки. История деревьев`,
-        createdDate: `21.05.2020, 08:55:16`,
-        announce: `Собрать камни бесконечности легко, если вы прирожденный герой. Программировать не настолько сложно, как об этом говорят. Из под его пера вышло 8 платиновых альбомов. Это один из лучших рок-музыкантов.`,
-        fullText: `Это один из лучших рок-музыкантов. Он написал больше 30 хитов. Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Этот смартфон — настоящая находка. Большой и яркий экран, мощнейший процессор — всё это в небольшом гаджете. Из под его пера вышло 8 платиновых альбомов. Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле? Первая большая ёлка была установлена только в 1938 году. Помните, небольшое количество ежедневных упражнений лучше, чем один раз, но много. Ёлки — это не просто красивое дерево. Это прочная древесина. Как начать действовать? Для начала просто соберитесь. Простые ежедневные упражнения помогут достичь успеха. Альбом стал настоящим открытием года. Мощные гитарные рифы и скоростные соло-партии не дадут заскучать.`,
-        category: [
-          `IT`,
-        ],
-        comments: [
-          {
-            id: `ENMOl2`,
-            text: `Совсем немного... Это где ж такие красоты? Согласен с автором!`,
-          },
-        ],
-      };
-      const mockArticles = [mockArticle1, mockArticle2];
-      const server = await createServer({articles: mockArticles});
+    it(`should return ["Животные", "Посуда"]`, async () => {
+      const categories = [
+        {
+          id: 1,
+          title: `Программирование`,
+        },
+        {
+          id: 2,
+          title: `Кино и сериалы`,
+        },
+      ];
+      await testDataBase.resetDataBase({categories});
 
       const res = await request(server).get(`/api/categories`);
 
-      expect(res.body).toEqual([`Без рамки`, `IT`]);
-    });
-
-    it(`should return ["IT"] if offers have same category`, async () => {
-      const mockArticle1 = {
-        id: `BNe8ED`,
-        title: `Как начать программировать`,
-        createdDate: `20.05.2020, 04:51:59`,
-        announce: `Первая большая ёлка была установлена только в 1938 году.`,
-        fullText: `Он написал больше 30 хитов. Собрать камни бесконечности легко, если вы прирожденный герой.`,
-        category: [
-          `IT`,
-        ],
-        comments: [
-          {
-            id: `bA0DIb`,
-            text: `Плюсую, но слишком много буквы!`,
-          },
-          {
-            id: `hpnG7J`,
-            text: `Это где ж такие красоты? Планируете записать видосик на эту тему?`,
-          },
-        ],
-      };
-      const mockArticle2 = {
-        id: `8MqcDu`,
-        title: `Ёлки. История деревьев`,
-        createdDate: `21.05.2020, 08:55:16`,
-        announce: `Собрать камни бесконечности легко, если вы прирожденный герой. Программировать не настолько сложно, как об этом говорят. Из под его пера вышло 8 платиновых альбомов. Это один из лучших рок-музыкантов.`,
-        fullText: `Это один из лучших рок-музыкантов. Он написал больше 30 хитов. Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Этот смартфон — настоящая находка. Большой и яркий экран, мощнейший процессор — всё это в небольшом гаджете. Из под его пера вышло 8 платиновых альбомов. Рок-музыка всегда ассоциировалась с протестами. Так ли это на самом деле? Первая большая ёлка была установлена только в 1938 году. Помните, небольшое количество ежедневных упражнений лучше, чем один раз, но много. Ёлки — это не просто красивое дерево. Это прочная древесина. Как начать действовать? Для начала просто соберитесь. Простые ежедневные упражнения помогут достичь успеха. Альбом стал настоящим открытием года. Мощные гитарные рифы и скоростные соло-партии не дадут заскучать.`,
-        category: [
-          `IT`,
-        ],
-        comments: [
-          {
-            id: `ENMOl2`,
-            text: `Совсем немного... Это где ж такие красоты? Согласен с автором!`,
-          },
-        ],
-      };
-      const mockArticles = [mockArticle1, mockArticle2];
-      const server = await createServer({articles: mockArticles});
-
-      const res = await request(server).get(`/api/categories`);
-
-      expect(res.body).toEqual([`IT`]);
+      expect(res.body).toEqual(categories);
     });
   });
 });

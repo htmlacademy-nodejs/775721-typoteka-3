@@ -45,7 +45,7 @@ exports.createArticleModel = (sequelize, DataTypes) => {
   return Article;
 };
 
-exports.createArticleAssociations = ({Article, User, Category}) => {
+exports.createArticleAssociations = ({Article, User, Category, Comment}) => {
   Article.belongsTo(User, {
     foreignKey: `user_id`,
   });
@@ -55,5 +55,10 @@ exports.createArticleAssociations = ({Article, User, Category}) => {
     foreignKey: `article_id`,
     timestamps: false,
     paranoid: false,
+  });
+
+  Article.hasMany(Comment, {
+    as: `comments`,
+    foreignKey: `article_id`,
   });
 };

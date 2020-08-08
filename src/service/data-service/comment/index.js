@@ -1,35 +1,75 @@
 'use strict';
 
-const {nanoid} = require(`nanoid`);
-
-const {MAX_ID_LENGTH} = require(`../../constants`);
-
 class CommentService {
-  findAll(articles) {
-    return articles.comments;
-  }
-
-  create(article, text) {
-    const newComment = {
-      id: nanoid(MAX_ID_LENGTH),
-      text,
+  constructor(dataBase, logger) {
+    this._dataBase = dataBase;
+    this._models = dataBase.models;
+    this._logger = logger;
+    this._selectOptions = {
+      raw: true,
+      attributes: [
+        `id`,
+        `message`,
+        `created_date`,
+      ],
     };
-
-    article.comments.push(newComment);
-
-    return newComment;
   }
 
-  delete(article, commentId) {
-    const deletedComment = article.comments.find(({id}) => id === commentId);
+  async findAll(articleId) {
+    const {Article} = this._models;
 
-    if (!deletedComment) {
+    try {
+      const article = await Article.findByPk(articleId);
+
+      return await article.getComments(this._selectOptions);
+    } catch (error) {
+      this._logger.error(`Не могу найти комментарии для публикации с id ${ articleId }. Ошибка: ${ error }`);
+
       return null;
     }
+  }
 
-    article.comments = article.comments.filter(({id}) => id !== commentId);
+  async create(articleId, text) {
+    const {Article, Comment} = this._models;
 
-    return deletedComment;
+    try {
+      const article = await Article.findByPk(articleId);
+
+      const newComment = await article.createComment({
+        message: text,
+        user_id: 1, /* eslint-disable-line */
+      });
+
+      return await Comment.findByPk(newComment.id, this._selectOptions);
+    } catch (error) {
+      this._logger.error(`Не могу создать комментарий для публикации с id ${ articleId }. Ошибка: ${ error }`);
+
+      return null;
+    }
+  }
+
+  async delete(id) {
+    const {Comment} = this._models;
+
+    try {
+      const deletedComment = await Comment.findByPk(id, this._selectOptions);
+      const deletedRows = await Comment.destroy({
+        where: {
+          id,
+        },
+        ...this._selectOptions,
+      });
+
+      if (!deletedRows) {
+        return null;
+      }
+
+      return deletedComment;
+    } catch (error) {
+      this._logger.error(`Не могу удалить комментарий с id: ${ id }. Ошибка: ${ error }`);
+
+      return null;
+    }
   }
 }
 

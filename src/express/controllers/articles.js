@@ -2,15 +2,17 @@
 
 const {request} = require(`../request`);
 const {HttpStatusCode} = require(`../../constants`);
-const {readContent} = require(`../../utils/readContent`);
-const {FilePath} = require(`../../constants`);
 const {API_SERVER_URL} = require(`../../config`);
 
 exports.getAddArticle = async (req, res, next) => {
   try {
-    const categories = await readContent(FilePath.CATEGORIES);
+    const categoriesResult = await request.get({url: `${ API_SERVER_URL }/categories`, json: true});
 
-    return res.render(`articles/new-post`, {categories});
+    if (categoriesResult.statusCode === HttpStatusCode.NOT_FOUND) {
+      return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
+    }
+
+    return res.render(`articles/new-post`, {categories: categoriesResult.body});
   } catch (error) {
     return next();
   }
@@ -34,9 +36,13 @@ exports.postAddArticle = async (req, res, next) => {
       return res.redirect(`/my`);
     }
 
-    const categories = await readContent(FilePath.CATEGORIES);
+    const categoriesResult = await request.get({url: `${ API_SERVER_URL }/categories`, json: true});
 
-    return res.render(`articles/new-post`, {article, categories});
+    if (categoriesResult.statusCode === HttpStatusCode.NOT_FOUND) {
+      return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
+    }
+
+    return res.render(`articles/new-post`, {article, categories: categoriesResult.body});
   } catch (error) {
     return next();
   }
@@ -51,9 +57,13 @@ exports.getEditArticle = async (req, res, next) => {
       return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
     }
 
-    const categories = await readContent(FilePath.CATEGORIES);
+    const categoriesResult = await request.get({url: `${ API_SERVER_URL }/categories`, json: true});
 
-    return res.render(`articles/new-post`, {article, categories});
+    if (categoriesResult.statusCode === HttpStatusCode.NOT_FOUND) {
+      return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
+    }
+
+    return res.render(`articles/new-post`, {article, categories: categoriesResult.body});
   } catch (error) {
     return next(error);
   }

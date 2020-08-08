@@ -47,12 +47,12 @@ CREATE TABLE categories
 CREATE TABLE articles
 (
   id BIGSERIAL PRIMARY KEY,
-  user_id BIGINT NOT NULL,
   image TEXT,
-  created_date TIMESTAMP NOT NULL,
   title VARCHAR(250) NOT NULL CHECK (char_length(title) >= 30),
   announce VARCHAR(250) NOT NULL CHECK (char_length(announce) >= 30),
   text VARCHAR(1000),
+  created_date TIMESTAMP NOT NULL,
+  user_id BIGINT NOT NULL,
   FOREIGN KEY(user_id) REFERENCES users
     ON UPDATE CASCADE
     ON DELETE CASCADE
@@ -77,10 +77,10 @@ CREATE TABLE articles_categories
 CREATE TABLE comments
 (
   id BIGSERIAL PRIMARY KEY,
+  message VARCHAR(300) NOT NULL CHECK (char_length(message) >= 20),
+  created_date TIMESTAMP NOT NULL,
   user_id BIGINT NOT NULL,
   article_id BIGINT NOT NULL,
-  created_date TIMESTAMP NOT NULL,
-  message VARCHAR(300) NOT NULL CHECK (char_length(message) >= 20),
   FOREIGN KEY(user_id) REFERENCES users
     ON UPDATE CASCADE
     ON DELETE CASCADE,
