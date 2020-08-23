@@ -15,9 +15,11 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
 
   router.get(Route.INDEX, async (req, res, next) => {
     try {
-      const articles = await articleService.findAll();
+      const {offset, limit} = req.query;
 
-      res.status(HttpStatusCode.OK).json(articles);
+      const result = await articleService.findAll(offset, limit);
+
+      res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       next(error);
     }

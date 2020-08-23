@@ -44,11 +44,24 @@ class ArticleService {
     };
   }
 
-  async findAll() {
+  async findAll(offset, limit) {
     const {Article} = this._models;
 
     try {
-      return await Article.findAll(this._selectOptions);
+      const [quantity, articles] = await Promise.all([
+        Article.count(),
+        Article.findAll({
+          ...this._selectOptions,
+          offset,
+          limit,
+          subQuery: false,
+        }),
+      ]);
+
+      return {
+        quantity,
+        articles,
+      };
     } catch (error) {
       this._logger.error(`Не могу найти публикации. Ошибка: ${ error }`);
 
