@@ -124,11 +124,7 @@ class ArticleService {
     try {
       const user = await User.findByPk(1);
 
-      const lastArticleId = await Article.max('id', {raw: true});
-      const newArticleId = lastArticleId + 1; // TODO: разобраться почему createArticle не может создать верный id
-
       const newArticle = await user.createArticle({
-        id: newArticleId,
         image,
         title,
         announce,
