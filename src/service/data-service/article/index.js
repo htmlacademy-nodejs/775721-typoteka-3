@@ -50,6 +50,7 @@ class ArticleService {
     try {
       const [quantity, articles] = await Promise.all([
         Article.count(),
+        // TODO: заменить на сырой запрос. Возвращает неверное кол-во
         Article.findAll({
           ...this._selectOptions,
           offset,
