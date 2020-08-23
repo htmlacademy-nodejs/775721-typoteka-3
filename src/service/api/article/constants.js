@@ -6,4 +6,4 @@ exports.Route = {
   COMMENTS: `/:articleId/comments`,
 };
 
-exports.EXPECTED_PROPERTIES = [`title`, `announce`, `fullText`, `category`];
+exports.EXPECTED_PROPERTIES = [`title`, `announce`, `fullText`, `categories`];

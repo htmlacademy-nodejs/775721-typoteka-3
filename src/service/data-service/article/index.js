@@ -2,18 +2,20 @@
 
 class ArticleService {
   constructor(dataBase, logger) {
-    const {sequelize, models} = dataBase;
+    const {models} = dataBase;
     const {Category, Comment} = models;
 
     this._dataBase = dataBase;
     this._models = models;
     this._logger = logger;
     this._selectOptions = {
-      raw: false,
       include: [
         {
           model: Category,
-          attributes: [],
+          attributes: [
+            `id`,
+            `title`,
+          ],
           through: {
             attributes: [],
           },
@@ -35,9 +37,7 @@ class ArticleService {
         `announce`,
         [`text`, `fullText`],
         [`created_date`, `createdDate`],
-        [sequelize.fn(`ARRAY_AGG`, sequelize.col(`categories.title`)), `category`],
       ],
-      group: [`article.id`, `article.image`, `article.title`, `article.announce`, `article.text`, `article.created_date`, `comments.id`],
       order: [
         [`created_date`, `DESC`],
       ],
@@ -50,12 +50,10 @@ class ArticleService {
     try {
       const [quantity, articles] = await Promise.all([
         Article.count(),
-        // TODO: заменить на сырой запрос. Возвращает неверное кол-во
         Article.findAll({
           ...this._selectOptions,
           offset,
           limit,
-          subQuery: false,
         }),
       ]);
 
@@ -126,7 +124,11 @@ class ArticleService {
     try {
       const user = await User.findByPk(1);
 
+      const lastArticleId = await Article.max('id', {raw: true});
+      const newArticleId = lastArticleId + 1; // TODO: разобраться почему createArticle не может создать верный id
+
       const newArticle = await user.createArticle({
+        id: newArticleId,
         image,
         title,
         announce,

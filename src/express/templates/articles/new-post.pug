@@ -29,7 +29,7 @@ block content
                       id='category-checkbox-' + category.id type='checkbox',
                       name='category',
                       value=category.id,
-                      checked=(article && article.category ? article.category.includes(category.title) : false)
+                      checked=(article && article.categories ? article.categories.some(({title}) => title === category.title) : false)
                     )
                     label(for='category-checkbox-' + category.id) #{category.title}
                 a.new-publication__form-link.button.button--transparent(href='#') Добавить категорию

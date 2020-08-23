@@ -4,9 +4,9 @@ section.articles-category__list.preview
     each article in articles
       li.preview__item.preview__item--noimage
         ul.preview__breadcrumbs
-          each category in article.category
+          each category in article.categories
             li.preview__breadcrumbs-item
-              a.preview__breadcrumbs-link(href='#') #{category}
+              a.preview__breadcrumbs-link(href='#') #{category.title}
         time.preview__time(datetime=article.createdDate) #{article.createdDate}
         h3.preview__name
           a.preview__name-link(href='#') #{article.title}
