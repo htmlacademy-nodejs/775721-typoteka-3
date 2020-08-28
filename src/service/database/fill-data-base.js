@@ -30,8 +30,6 @@ exports.fillDataBase = async ({dataBase, mocks}) => {
     });
 
     await Promise.all(addCategoryPromises);
-
-    await dataBase.sequelize.query(`ALTER SEQUENCE articles_id_seq RESTART WITH 1453`);
   } catch (error) {
     console.log(`Не могу заполнить базу данных. Ошибка: ${ error }`);
   }

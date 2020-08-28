@@ -122,6 +122,9 @@ class ArticleService {
     const {Article, Category, User} = this._models;
 
     try {
+      await sequelize.query(`ALTER SEQUENCE articles_id_seq RESTART`);
+      await sequelize.query(`UPDATE articles SET id = DEFAULT`);
+
       const user = await User.findByPk(1);
 
       const newArticle = await user.createArticle({

@@ -4,9 +4,7 @@ const {request} = require(`../request`);
 const {API_SERVER_URL} = require(`../../config`);
 const {createPaginationPages} = require(`./utils/create-pagination-pages`);
 const {HttpStatusCode} = require(`../../constants`);
-const {ARTICLES_LIMIT_QUANTITY_ON_PAGE} = require(`./constants`);
-
-const DEFAULT_PAGE = 1;
+const {ARTICLES_LIMIT_QUANTITY_ON_PAGE, DEFAULT_PAGE} = require(`./constants`);
 
 exports.getMain = async (req, res, next) => {
   const {page} = req.query;
