@@ -2,18 +2,20 @@
 
 class ArticleService {
   constructor(dataBase, logger) {
-    const {sequelize, models} = dataBase;
+    const {models} = dataBase;
     const {Category, Comment} = models;
 
     this._dataBase = dataBase;
     this._models = models;
     this._logger = logger;
     this._selectOptions = {
-      raw: false,
       include: [
         {
           model: Category,
-          attributes: [],
+          attributes: [
+            `id`,
+            `title`,
+          ],
           through: {
             attributes: [],
           },
@@ -35,20 +37,30 @@ class ArticleService {
         `announce`,
         [`text`, `fullText`],
         [`created_date`, `createdDate`],
-        [sequelize.fn(`ARRAY_AGG`, sequelize.col(`categories.title`)), `category`],
       ],
-      group: [`article.id`, `article.image`, `article.title`, `article.announce`, `article.text`, `article.created_date`, `comments.id`],
       order: [
         [`created_date`, `DESC`],
       ],
     };
   }
 
-  async findAll() {
+  async findAll(offset, limit) {
     const {Article} = this._models;
 
     try {
-      return await Article.findAll(this._selectOptions);
+      const [quantity, articles] = await Promise.all([
+        Article.count(),
+        Article.findAll({
+          ...this._selectOptions,
+          offset,
+          limit,
+        }),
+      ]);
+
+      return {
+        quantity,
+        articles,
+      };
     } catch (error) {
       this._logger.error(`Не могу найти публикации. Ошибка: ${ error }`);
 
@@ -110,6 +122,9 @@ class ArticleService {
     const {Article, Category, User} = this._models;
 
     try {
+      await sequelize.query(`ALTER SEQUENCE articles_id_seq RESTART`);
+      await sequelize.query(`UPDATE articles SET id = DEFAULT`);
+
       const user = await User.findByPk(1);
 
       const newArticle = await user.createArticle({

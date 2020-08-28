@@ -91,6 +91,12 @@ describe(`Article API end-points`, () => {
       expect(res.statusCode).toBe(200);
     });
 
+    it(`should return correct quantity of articles`, async () => {
+      const res = await request(server).get(`/api/articles`);
+
+      expect(res.body.quantity).toEqual(articles.length);
+    });
+
     it(`should return correct articles if request was successful`, async () => {
       const expectedFirstArticle = {
         id: 1,
@@ -98,7 +104,13 @@ describe(`Article API end-points`, () => {
         title: `Как начать программировать за 21 день.`,
         announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
         fullText: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-        category: [`Программирование`, `Кино и сериалы`],
+        categories: [{
+          id: 1,
+          title: `Программирование`,
+        }, {
+          id: 2,
+          title: `Кино и сериалы`,
+        }],
         comments: [{
           id: 1,
           message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
@@ -110,7 +122,10 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-9000`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [`Железо`],
+        categories: [{
+          id: 3,
+          title: `Железо`,
+        }],
         comments: [{
           id: 2,
           message: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
@@ -119,10 +134,216 @@ describe(`Article API end-points`, () => {
 
       const res = await request(server).get(`/api/articles`);
 
-      const [firstArticle, secondArticle] = res.body;
+      const [firstArticle, secondArticle] = res.body.articles;
 
       expect(firstArticle).toMatchObject(expectedFirstArticle);
       expect(secondArticle).toMatchObject(expectedSecondArticle);
+    });
+
+    it(`with offset = 1 should return articles without first article`, async () => {
+      const offset = 1;
+      const articlesForTestOffset = [
+        {
+          id: 1,
+          image: `item01.jpg`,
+          title: `Как начать программировать за 21 день.`,
+          announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+          text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+          user_id: 1, /* eslint-disable-line */
+        },
+        {
+          id: 2,
+          image: `item02.jpg`,
+          title: `Обзор новейшего смартфона BFG-9000`,
+          announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+          text: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+          user_id: 1, /* eslint-disable-line */
+        },
+        {
+          id: 3,
+          image: `item03.jpg`,
+          title: `Самый лучший музыкальный альбом этого года.`,
+          announce: `Программировать не настолько сложно, как об этом говорят.`,
+          text: `Достичь успеха помогут ежедневные повторения. Программировать не настолько сложно, как об этом говорят. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+          user_id: 1, /* eslint-disable-line */
+        },
+      ];
+      const articlesCategoriesForTestOffset = [
+        {
+          articleId: 1,
+          categoriesIds: [1],
+        },
+        {
+          articleId: 2,
+          categoriesIds: [2],
+        },
+        {
+          articleId: 3,
+          categoriesIds: [3],
+        },
+      ];
+      const expectedFirstArticle = {
+        id: 2,
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [{
+          id: 2,
+          title: `Кино и сериалы`
+        }],
+        comments: [],
+      };
+      const expectedSecondArticle = {
+        id: 3,
+        image: `item03.jpg`,
+        title: `Самый лучший музыкальный альбом этого года.`,
+        announce: `Программировать не настолько сложно, как об этом говорят.`,
+        fullText: `Достичь успеха помогут ежедневные повторения. Программировать не настолько сложно, как об этом говорят. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [{
+          id: 3,
+          title: `Железо`,
+        }],
+        comments: [],
+      };
+
+      await testDataBase.resetDataBase({
+        users,
+        categories,
+        articles: articlesForTestOffset,
+        articlesCategories: articlesCategoriesForTestOffset,
+      });
+
+      const res = await request(server).get(`/api/articles?offset=${ offset }`);
+      const [firstArticle, secondArticle] = res.body.articles;
+
+      expect(firstArticle).toMatchObject(expectedFirstArticle);
+      expect(secondArticle).toMatchObject(expectedSecondArticle);
+    });
+
+    it(`with limit = 1 should return first article`, async () => {
+      const limit = 1;
+      const articlesForTestLimit = [
+        {
+          id: 1,
+          image: `item01.jpg`,
+          title: `Как начать программировать за 21 день.`,
+          announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+          text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+          user_id: 1, /* eslint-disable-line */
+        },
+        {
+          id: 2,
+          image: `item02.jpg`,
+          title: `Самый лучший музыкальный альбом этого года.`,
+          announce: `Программировать не настолько сложно, как об этом говорят.`,
+          text: `Достичь успеха помогут ежедневные повторения. Программировать не настолько сложно, как об этом говорят. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+          user_id: 1, /* eslint-disable-line */
+        },
+      ];
+      const articlesCategoriesForTestLimit = [
+        {
+          articleId: 1,
+          categoriesIds: [1],
+        },
+        {
+          articleId: 2,
+          categoriesIds: [2],
+        },
+      ];
+      const expectedArticle = {
+        id: 1,
+        image: `item01.jpg`,
+        title: `Как начать программировать за 21 день.`,
+        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+        fullText: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+        categories: [{
+          id: 1,
+          title: `Программирование`,
+        }],
+        comments: [],
+      };
+
+      await testDataBase.resetDataBase({
+        users,
+        categories,
+        articles: articlesForTestLimit,
+        articlesCategories: articlesCategoriesForTestLimit,
+      });
+
+      const res = await request(server).get(`/api/articles?limit=${ limit }`);
+      const [article] = res.body.articles;
+
+      expect(article).toMatchObject(expectedArticle);
+    });
+
+    it(`with offset = 1 and limit = 1 should return article with id = 2`, async () => {
+      const offset = 1;
+      const limit = 1;
+      const articlesForTestOffsetAndLimit = [
+        {
+          id: 1,
+          image: `item01.jpg`,
+          title: `Самый лучший музыкальный альбом этого года.`,
+          announce: `Программировать не настолько сложно, как об этом говорят.`,
+          text: `Достичь успеха помогут ежедневные повторения. Программировать не настолько сложно, как об этом говорят. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+          user_id: 1, /* eslint-disable-line */
+        },
+        {
+          id: 2,
+          image: `item02.jpg`,
+          title: `Обзор новейшего смартфона BFG-9000`,
+          announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+          text: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+          user_id: 1, /* eslint-disable-line */
+        },
+        {
+          id: 3,
+          image: `item03.jpg`,
+          title: `Как начать программировать за 21 день.`,
+          announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+          text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+          user_id: 1, /* eslint-disable-line */
+        },
+      ];
+      const articlesCategoriesForTestOffsetAndLimit = [
+        {
+          articleId: 1,
+          categoriesIds: [1],
+        },
+        {
+          articleId: 2,
+          categoriesIds: [2],
+        },
+        {
+          articleId: 3,
+          categoriesIds: [3],
+        },
+      ];
+      const expectedArticle = {
+        id: 2,
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [{
+          id: 2,
+          title: `Кино и сериалы`,
+        }],
+        comments: [],
+      };
+
+      await testDataBase.resetDataBase({
+        users,
+        categories,
+        articles: articlesForTestOffsetAndLimit,
+        articlesCategories: articlesCategoriesForTestOffsetAndLimit,
+      });
+
+      const res = await request(server).get(`/api/articles?offset=${ offset }&limit=${ limit }`);
+      const [article] = res.body.articles;
+
+      expect(article).toMatchObject(expectedArticle);
     });
   });
 
@@ -167,7 +388,7 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-3000`,
         announce: `Он обязательно понравится геймерам со стажем.`,
         fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [1],
+        categories: [1],
       };
 
       const res = await request(server).post(`/api/articles`).send(data);
@@ -181,7 +402,7 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-3000`,
         announce: `Он обязательно понравится геймерам со стажем.`,
         fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [1],
+        categories: [1],
       };
       const expectedArticle = {
         id: 1,
@@ -189,7 +410,10 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-3000`,
         announce: `Он обязательно понравится геймерам со стажем.`,
         fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [`Программирование`],
+        categories: [{
+          id: 1,
+          title: `Программирование`,
+        }],
       };
 
       const res = await request(server).post(`/api/articles`).send(data);
@@ -204,7 +428,7 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-3000`,
         announce: `Он обязательно понравится геймерам со стажем.`,
         fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [1],
+        categories: [1],
         token: `token`,
       };
 
@@ -219,13 +443,13 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-3000`,
         announce: `Он обязательно понравится геймерам со стажем.`,
         fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [1],
+        categories: [1],
       };
 
       const {body: newArticle} = await request(server).post(`/api/articles`).send(data);
       const res = await request(server).get(`/api/articles`);
 
-      expect(res.body).toContainEqual(newArticle);
+      expect(res.body.articles).toContainEqual(newArticle);
     });
   });
 
@@ -311,7 +535,10 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-9000`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [`Кино и сериалы`],
+        categories: [{
+          id: 2,
+          title: `Кино и сериалы`,
+        }],
         comments: [{
           id: 1,
           message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
@@ -370,7 +597,7 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-9000`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [2],
+        categories: [2],
       };
       const res = await request(server).put(`/api/articles/1234`).send(data);
 
@@ -382,7 +609,7 @@ describe(`Article API end-points`, () => {
         image: `item02.jpg`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [2],
+        categories: [2],
       };
       const res = await request(server).put(`/api/articles/1`).send(data);
 
@@ -395,7 +622,7 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-9000`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [2],
+        categories: [2],
       };
       const res = await request(server).put(`/api/articles/1`).send(data);
 
@@ -408,7 +635,7 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-9000`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [2],
+        categories: [2],
       };
       const expectedArticle = {
         id: 1,
@@ -416,7 +643,10 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-9000`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [`Кино и сериалы`],
+        categories: [{
+          id: 2,
+          title: `Кино и сериалы`,
+        }],
       };
 
       const res = await request(server).put(`/api/articles/1`).send(data);
@@ -494,7 +724,10 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-9000`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [`Программирование`],
+        categories: [{
+          id: 1,
+          title: `Программирование`,
+        }],
       };
 
       const res = await request(server).delete(`/api/articles/2`);
@@ -509,7 +742,10 @@ describe(`Article API end-points`, () => {
         title: `Обзор новейшего смартфона BFG-9000`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        category: [`Программирование`],
+        categories: [{
+          id: 1,
+          title: `Программирование`
+        }],
       };
 
       await request(server).delete(`/api/articles/2`);

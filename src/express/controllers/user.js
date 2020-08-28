@@ -9,7 +9,7 @@ const REQUIRED_NUMBER_OF_COMMENTS = 3;
 exports.getUserMain = async (req, res, next) => {
   try {
     const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/articles`, json: true});
-    const articles = statusCode === HttpStatusCode.OK ? body : [];
+    const articles = statusCode === HttpStatusCode.OK ? body.articles : [];
 
     res.render(`user/my`, {articles});
   } catch (error) {
@@ -20,7 +20,7 @@ exports.getUserMain = async (req, res, next) => {
 exports.getUserComments = async (req, res, next) => {
   try {
     const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/articles`, json: true});
-    const articles = statusCode === HttpStatusCode.OK ? body : [];
+    const articles = statusCode === HttpStatusCode.OK ? body.articles : [];
     const requiredArticles = articles.slice(0, REQUIRED_NUMBER_OF_COMMENTS);
     const requiredArticlesIds = requiredArticles.map(({id}) => id);
 

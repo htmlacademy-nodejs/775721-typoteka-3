@@ -25,7 +25,7 @@ exports.postAddArticle = async (req, res, next) => {
     const article = {
       title,
       createdDate,
-      category,
+      categories: category,
       announce,
       fullText,
     };

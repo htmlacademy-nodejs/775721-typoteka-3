@@ -15,19 +15,21 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
 
   router.get(Route.INDEX, async (req, res, next) => {
     try {
-      const articles = await articleService.findAll();
+      const {offset, limit} = req.query;
 
-      res.status(HttpStatusCode.OK).json(articles);
+      const result = await articleService.findAll(offset, limit);
+
+      res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       next(error);
     }
   });
 
   router.post(Route.INDEX, isRequestDataValidMiddleware, async (req, res, next) => {
-    const {image, title, announce, fullText, category} = req.body;
+    const {image, title, announce, fullText, categories} = req.body;
 
     try {
-      const newArticle = await articleService.create({image, title, announce, fullText, categories: category});
+      const newArticle = await articleService.create({image, title, announce, fullText, categories});
 
       res.status(HttpStatusCode.CREATED).json(newArticle);
     } catch (error) {
@@ -49,7 +51,7 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
 
   router.put(Route.ARTICLE, [isArticleExistsMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
     const {articleId} = req.params;
-    const {image, title, announce, fullText, category} = req.body;
+    const {image, title, announce, fullText, categories} = req.body;
 
     try {
       const updatedArticle = await articleService.update({
@@ -58,7 +60,7 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
         title,
         announce,
         fullText,
-        categories: category,
+        categories,
       });
 
       res.status(HttpStatusCode.OK).json(updatedArticle);

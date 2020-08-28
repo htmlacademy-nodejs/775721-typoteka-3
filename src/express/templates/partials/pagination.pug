@@ -1,0 +1,8 @@
+.preview__toggle-wrapper
+  ul.preview__pagination.pagination
+    each page in pages
+      li(class=(page.isPreviousPageLink || page.isNextPageLink) ? '' : 'pagination__item')
+        a(class=(`${ page.isPreviousPageLink ? 'pagination__button button button--backwards' : '' } ${ page.isNextPageLink ? 'pagination__button button button--forward' : '' } ${ page.isDisabled ? 'button--disabled' : '' }`.trim())
+          href=page.href
+          aria-label=(page.label || '')
+        ) #{page.title}
