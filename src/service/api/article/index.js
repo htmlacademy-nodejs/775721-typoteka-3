@@ -4,7 +4,9 @@ const {Router} = require(`express`);
 
 const {isArticleExists} = require(`../../middlewares/is-article-exists`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
+const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
 const {articleDataSchema} = require(`../../schema/article-data`);
+const {articleParamsSchema} = require(`../../schema/article-params`);
 const {Route} = require(`./constants`);
 const {HttpStatusCode} = require(`../../../constants`);
 
@@ -13,6 +15,7 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
 
   const isRequestDataValidMiddleware = isRequestDataValid({schema: articleDataSchema, logger});
   const isArticleExistsMiddleware = isArticleExists({service: articleService, logger});
+  const isRequestParamsValidMiddleware = isRequestParamsValid({schema: articleParamsSchema, logger});
 
   router.get(Route.INDEX, async (req, res, next) => {
     try {
@@ -38,7 +41,7 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
     }
   });
 
-  router.get(Route.ARTICLE, isArticleExistsMiddleware, async (req, res, next) => {
+  router.get(Route.ARTICLE, [isRequestParamsValidMiddleware, isArticleExistsMiddleware], async (req, res, next) => {
     const {articleId} = req.params;
 
     try {
@@ -50,7 +53,7 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
     }
   });
 
-  router.put(Route.ARTICLE, [isArticleExistsMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
+  router.put(Route.ARTICLE, [isRequestParamsValidMiddleware, isArticleExistsMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
     const {articleId} = req.params;
     const {image, title, announce, fullText, categories} = req.body;
 
@@ -70,7 +73,7 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
     }
   });
 
-  router.delete(Route.ARTICLE, isArticleExistsMiddleware, async (req, res, next) => {
+  router.delete(Route.ARTICLE, [isRequestParamsValidMiddleware, isArticleExistsMiddleware], async (req, res, next) => {
     const {articleId} = req.params;
 
     try {
@@ -82,7 +85,7 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
     }
   });
 
-  router.use(Route.COMMENTS, isArticleExistsMiddleware, commentRouter);
+  router.use(Route.COMMENTS, [isRequestParamsValidMiddleware, isArticleExistsMiddleware], commentRouter);
 
   return router;
 };

@@ -653,6 +653,12 @@ describe(`Article API end-points`, () => {
       await testDataBase.resetDataBase({users, categories, articles, comments, articlesCategories});
     });
 
+    it(`should return status 400 if have sent invalid id`, async () => {
+      const res = await request(server).get(`/api/articles/abc`);
+
+      expect(res.statusCode).toBe(400);
+    });
+
     it(`should return status 404 if article doesn't exist`, async () => {
       const res = await request(server).get(`/api/articles/1234`);
 
@@ -727,6 +733,19 @@ describe(`Article API end-points`, () => {
 
     beforeEach(async () => {
       await testDataBase.resetDataBase({users, categories, articles, articlesCategories});
+    });
+
+    it(`should return status 400 if have sent invalid id`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [2],
+      };
+      const res = await request(server).put(`/api/articles/abc`).send(data);
+
+      expect(res.statusCode).toBe(400);
     });
 
     it(`should return status 404 if article doesn't exist`, async () => {
@@ -979,6 +998,12 @@ describe(`Article API end-points`, () => {
 
     beforeEach(async () => {
       await testDataBase.resetDataBase({users, categories, articles, articlesCategories});
+    });
+
+    it(`should return status 400 if have sent invalid id`, async () => {
+      const res = await request(server).delete(`/api/articles/abc`);
+
+      expect(res.statusCode).toBe(400);
     });
 
     it(`should return status 404 if articles doesn't exist`, async () => {
