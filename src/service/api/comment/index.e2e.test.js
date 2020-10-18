@@ -190,6 +190,18 @@ describe(`Comment API end-points`, () => {
       await testDataBase.resetDataBase({users, categories, articles, articlesCategories, comments});
     });
 
+    it(`should return status 400 if have sent invalid article id`, async () => {
+      const res = await request(server).delete(`/api/articles/abc/comments/1`);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent invalid comment id`, async () => {
+      const res = await request(server).delete(`/api/articles/1/comments/abc`);
+
+      expect(res.statusCode).toBe(400);
+    });
+
     it(`should return status 404 if article doesn't exist`, async () => {
       const res = await request(server).delete(`/api/articles/1234/comments/1`);
 
