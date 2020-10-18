@@ -4,12 +4,16 @@ const {Router} = require(`express`);
 
 const {HttpStatusCode} = require(`../../../constants`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
-const {Route, EXPECTED_PROPERTIES} = require(`./constants`);
+const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
+const {commentSchema} = require(`../../schema/comment-data`);
+const {commentParamsSchema} = require(`../../schema/comment-params`);
+const {Route} = require(`./constants`);
 
 const createCommentRouter = ({commentService, logger}) => {
   const router = new Router({mergeParams: true});
 
-  const isRequestDataValidMiddleware = isRequestDataValid({expectedProperties: EXPECTED_PROPERTIES, logger});
+  const isRequestParamsValidMiddleware = isRequestParamsValid({schema: commentParamsSchema, logger});
+  const isRequestDataValidMiddleware = isRequestDataValid({schema: commentSchema, logger});
 
   router.get(Route.INDEX, async (req, res, next) => {
     const {articleId} = req.params;
@@ -36,7 +40,7 @@ const createCommentRouter = ({commentService, logger}) => {
     }
   });
 
-  router.delete(Route.COMMENT, async (req, res, next) => {
+  router.delete(Route.COMMENT, isRequestParamsValidMiddleware, async (req, res, next) => {
     const {commentId} = req.params;
 
     try {

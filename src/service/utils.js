@@ -16,17 +16,3 @@ exports.shuffle = (someArray) => {
 
   return someArray;
 };
-
-exports.hasAllExpectedProperties = (object, expectedProperties) => {
-  const objectProperties = Object.keys(object);
-
-  return expectedProperties.every((expectedProperty) => objectProperties.includes(expectedProperty));
-};
-
-exports.getMissingProperties = (object, expectedProperties) => expectedProperties.reduce((missingProperties, property) => {
-  if (property in object) {
-    return missingProperties;
-  }
-
-  return [property, ...missingProperties];
-}, []);

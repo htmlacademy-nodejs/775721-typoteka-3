@@ -190,7 +190,7 @@ describe(`Article API end-points`, () => {
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
         categories: [{
           id: 2,
-          title: `Кино и сериалы`
+          title: `Кино и сериалы`,
         }],
         comments: [],
       };
@@ -369,7 +369,145 @@ describe(`Article API end-points`, () => {
       await testDataBase.resetDataBase({users, categories});
     });
 
-    it(`should return status 400 if didn't send category`, async () => {
+    it(`should return status 400 if have sent title shorter than 30 letters`, async () => {
+      const data = {
+        image: `item01.jpg`,
+        title: `Обзор`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent title longer than 250 letters`, async () => {
+      const data = {
+        image: `item01.jpg`,
+        title: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if haven't sent title`, async () => {
+      const data = {
+        image: `item01.jpg`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent not jpg or png picture`, async () => {
+      const data = {
+        image: `item01.gif`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent announce shorter than 30 letters`, async () => {
+      const data = {
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent announce longer than 250 letters`, async () => {
+      const data = {
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем. Он обязательно понравится геймерам со стажем. Он обязательно понравится геймерам со стажем. Он обязательно понравится геймерам со стажем. Он обязательно понравится геймерам со стажем. Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if haven't sent announce`, async () => {
+      const data = {
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent text longer than 1000 letters`, async () => {
+      const data = {
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent wrong type of categories`, async () => {
+      const data = {
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [{id: 1}],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent empty categories`, async () => {
+      const data = {
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if haven't sent category`, async () => {
       const data = {
         image: `item01.jpg`,
         title: `Обзор новейшего смартфона BFG-3000`,
@@ -515,6 +653,12 @@ describe(`Article API end-points`, () => {
       await testDataBase.resetDataBase({users, categories, articles, comments, articlesCategories});
     });
 
+    it(`should return status 400 if have sent invalid id`, async () => {
+      const res = await request(server).get(`/api/articles/abc`);
+
+      expect(res.statusCode).toBe(400);
+    });
+
     it(`should return status 404 if article doesn't exist`, async () => {
       const res = await request(server).get(`/api/articles/1234`);
 
@@ -591,6 +735,19 @@ describe(`Article API end-points`, () => {
       await testDataBase.resetDataBase({users, categories, articles, articlesCategories});
     });
 
+    it(`should return status 400 if have sent invalid id`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [2],
+      };
+      const res = await request(server).put(`/api/articles/abc`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
     it(`should return status 404 if article doesn't exist`, async () => {
       const data = {
         image: `item02.jpg`,
@@ -604,12 +761,150 @@ describe(`Article API end-points`, () => {
       expect(res.statusCode).toBe(404);
     });
 
-    it(`should return status 400 if didn't send title`, async () => {
+    it(`should return status 400 if have sent title shorter than 30 letters`, async () => {
       const data = {
         image: `item02.jpg`,
+        title: `Обзор`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent title longer than 250 letters`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        title: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if haven't sent title`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent not jpg or png picture`, async () => {
+      const data = {
+        image: `item02.gif`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent announce shorter than 30 letters`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent announce longer than 250 letters`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем. Он обязательно понравится геймерам со стажем. Он обязательно понравится геймерам со стажем. Он обязательно понравится геймерам со стажем. Он обязательно понравится геймерам со стажем. Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if haven't sent announce`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent text longer than 1000 letters`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent wrong type of categories`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [{id: 1}],
+      };
+
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if have sent empty categories`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [],
+      };
+
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if haven't sent category`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        categories: [2],
       };
       const res = await request(server).put(`/api/articles/1`).send(data);
 
@@ -705,6 +1000,12 @@ describe(`Article API end-points`, () => {
       await testDataBase.resetDataBase({users, categories, articles, articlesCategories});
     });
 
+    it(`should return status 400 if have sent invalid id`, async () => {
+      const res = await request(server).delete(`/api/articles/abc`);
+
+      expect(res.statusCode).toBe(400);
+    });
+
     it(`should return status 404 if articles doesn't exist`, async () => {
       const res = await request(server).delete(`/api/articles/1234`);
 
@@ -744,7 +1045,7 @@ describe(`Article API end-points`, () => {
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
         categories: [{
           id: 1,
-          title: `Программирование`
+          title: `Программирование`,
         }],
       };
 

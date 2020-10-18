@@ -1,18 +1,16 @@
 'use strict';
 
 const {HttpStatusCode} = require(`../../constants`);
-const {hasAllExpectedProperties, getMissingProperties} = require(`../utils`);
 
-const isRequestDataValid = ({expectedProperties, logger}) => (req, res, next) => {
-  const hasNotAllProperties = !hasAllExpectedProperties(req.body, expectedProperties);
+const isRequestDataValid = ({schema, logger}) => async (req, res, next) => {
+  const {body} = req;
 
-  if (hasNotAllProperties) {
-    const receivedProperties = Object.keys(req.body);
-    const missingProperties = getMissingProperties(req.body, expectedProperties);
+  try {
+    await schema.validateAsync(body, {abortEarly: false});
+  } catch (error) {
+    res.status(HttpStatusCode.BAD_REQUEST).json(error);
 
-    res.status(HttpStatusCode.BAD_REQUEST).send(`Получены неверные данные`);
-
-    return logger.error(`Ожидаются следующие свойства: ${ expectedProperties }, но получены: ${ receivedProperties }. Отсутствуют следующие свойства: ${missingProperties}.`);
+    return logger.error(`Получены неверные данные. Полученные данные: ${ body }. Ошибка: ${ error }`);
   }
 
   return next();
