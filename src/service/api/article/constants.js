@@ -5,5 +5,3 @@ exports.Route = {
   ARTICLE: `/:articleId`,
   COMMENTS: `/:articleId/comments`,
 };
-
-exports.EXPECTED_PROPERTIES = [`title`, `announce`, `fullText`, `categories`];

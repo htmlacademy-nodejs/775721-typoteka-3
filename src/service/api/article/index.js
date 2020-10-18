@@ -4,13 +4,14 @@ const {Router} = require(`express`);
 
 const {isArticleExists} = require(`../../middlewares/is-article-exists`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
-const {Route, EXPECTED_PROPERTIES} = require(`./constants`);
+const {articleDataSchema} = require(`../../schema/article-data`);
+const {Route} = require(`./constants`);
 const {HttpStatusCode} = require(`../../../constants`);
 
 const createArticleRouter = ({articleService, commentRouter, logger}) => {
   const router = new Router();
 
-  const isRequestDataValidMiddleware = isRequestDataValid({expectedProperties: EXPECTED_PROPERTIES, logger});
+  const isRequestDataValidMiddleware = isRequestDataValid({schema: articleDataSchema, logger});
   const isArticleExistsMiddleware = isArticleExists({service: articleService, logger});
 
   router.get(Route.INDEX, async (req, res, next) => {
