@@ -20,17 +20,24 @@ exports.getAddArticle = async (req, res, next) => {
 
 exports.postAddArticle = async (req, res, next) => {
   try {
-    const {createdDate, title, category, announce, fullText} = req.body;
+    const {createdDate, title, category = [], announce, fullText} = req.body;
 
+    const categories = Array.isArray(category) ? category : [category];
     const article = {
       title,
-      createdDate,
-      categories: category,
       announce,
-      fullText,
+      categories,
     };
 
-    const {statusCode} = await request.post({url: `${ API_SERVER_URL }/articles`, json: true, body: article});
+    if (createdDate) {
+      article.createdDate = new Date(createdDate).toISOString();
+    }
+
+    if (fullText) {
+      article.fullText = fullText;
+    }
+
+    const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/articles`, json: true, body: article});
 
     if (statusCode === HttpStatusCode.CREATED) {
       return res.redirect(`/my`);
@@ -42,7 +49,16 @@ exports.postAddArticle = async (req, res, next) => {
       return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
     }
 
-    return res.render(`articles/new-post`, {article, categories: categoriesResult.body});
+    const errorDetails = body?.details ?? [];
+    const errorMessages = errorDetails.reduce((messages, {path, message}) => {
+      const key = path.toString();
+
+      messages[key] = message;
+
+      return messages;
+    }, {});
+
+    return res.render(`articles/new-post`, {article, categories: categoriesResult.body, errors: errorMessages});
   } catch (error) {
     return next();
   }

@@ -9,6 +9,8 @@ exports.articleDataSchema = Joi.object({
   .min(ArticleTitleRequirements.length.MIN)
   .max(ArticleTitleRequirements.length.MAX)
   .required(),
+  createdDate: Joi.string()
+  .isoDate(),
   image: Joi.string()
   .pattern(/\w\.(jpg|png)/)
   .allow(``),
