@@ -13,7 +13,13 @@ exports.fillDataBase = async ({dataBase, mocks}) => {
       Category.bulkCreate(categories),
     ]);
 
+    await sequelize.query(`ALTER SEQUENCE users_id_seq RESTART`);
+    await sequelize.query(`UPDATE users SET id = DEFAULT`);
+
     await Article.bulkCreate(articles);
+    await sequelize.query(`ALTER SEQUENCE articles_id_seq RESTART`);
+    await sequelize.query(`UPDATE articles SET id = DEFAULT`);
+
     await Comment.bulkCreate(comments);
 
     const addCategoryPromises = articlesCategories.map(async ({articleId, categoriesIds}) => {
