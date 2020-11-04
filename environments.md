@@ -22,3 +22,7 @@
 `TEST_DB_USER_NAME` - имя пользователя;  
 `TEST_DB_NAME` - название БД;  
 `TEST_DB_PASSWORD` - пароль;  
+
+## Безопасность
+
+`PASSWORD_SALT_ROUNDS` - коэффициент сложности хеширования
