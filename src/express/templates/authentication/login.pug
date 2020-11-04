@@ -10,11 +10,11 @@ block content
           | окно
         h2.visually-hidden Форма регистрации
         ul.popup__tabs
-          li.popup__tab.popup__tab--active.popup__tab--register
+          li.popup__tab.popup__tab--register
             button.popup__tab-switcher.button(type='button') Регистрация
-          li.popup__tab.popup__tab--log-in
+          li.popup__tab.popup__tab--active.popup__tab--log-in
             button.popup__tab-switcher.button(type='button') Войти
-        .popup__form.popup__form--active.form.form--register
+        .popup__form.form.form--register.popup__form--hidden
           form(action='#', method='get')
             .form__field
               label
@@ -38,7 +38,7 @@ block content
                 input.visually-hidden(type='file')
                 | Загрузить фото профиля
             button.form__submit-btn.form__submit-btn--register.button.button--colored(type='submit') Зарегистрироваться
-        .popup__form.popup__form--hidden.form.form--log-in
+        .popup__form.popup__form--active.form.form--log-in
           form(action='#', method='get')
             .form__field
               label
