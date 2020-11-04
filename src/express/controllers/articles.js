@@ -49,7 +49,7 @@ exports.postAddArticle = async (req, res, next) => {
       return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
     }
 
-    const errorDetails = body?.details ?? [];
+    const errorDetails = body.details || [];
     const errorMessages = errorDetails.reduce((messages, {path, message}) => {
       const key = path.toString();
 
