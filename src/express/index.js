@@ -4,6 +4,7 @@ const path = require(`path`);
 
 const express = require(`express`);
 const chalk = require(`chalk`);
+const formidableMiddleware = require(`express-formidable`);
 
 const mainRouter = require(`./routes/main`);
 const authenticationRouter = require(`./routes/authentication`);
@@ -12,12 +13,18 @@ const articlesRouter = require(`./routes/articles`);
 const categoriesRouter = require(`./routes/categories`);
 const {DirName} = require(`./constants`);
 const {HttpStatusCode} = require(`../constants`);
-const {FRONT_SERVER_DEFAULT_PORT} = require(`../config`);
+const {FRONT_SERVER_DEFAULT_PORT, UPLOAD_DIR} = require(`../config`);
 
 const app = express();
 
 app.set(`view engine`, `pug`);
 app.set(`views`, path.resolve(__dirname, DirName.TEMPLATES));
+
+app.use(formidableMiddleware({
+  encoding: `utf-8`,
+  uploadDir: UPLOAD_DIR,
+  multiples: false,
+}));
 
 app.use(express.static(path.resolve(__dirname, DirName.PUBLIC)));
 
