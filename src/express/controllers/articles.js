@@ -3,6 +3,8 @@
 const {request} = require(`../request`);
 const {HttpStatusCode} = require(`../../constants`);
 const {API_SERVER_URL} = require(`../../config`);
+const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-to-error-messages`);
+
 
 exports.getAddArticle = async (req, res, next) => {
   try {
@@ -50,13 +52,7 @@ exports.postAddArticle = async (req, res, next) => {
     }
 
     const errorDetails = body.details || [];
-    const errorMessages = errorDetails.reduce((messages, {path, message}) => {
-      const key = path.toString();
-
-      messages[key] = message;
-
-      return messages;
-    }, {});
+    const errorMessages = parseErrorDetailsToErrorMessages(errorDetails);
 
     return res.render(`articles/new-post`, {article, categories: categoriesResult.body, errors: errorMessages});
   } catch (error) {
