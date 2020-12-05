@@ -15,7 +15,7 @@ block content
           li.popup__tab.popup__tab--log-in
             button.popup__tab-switcher.button(type='button') Войти
         .popup__form.popup__form--active.form.form--register
-          form(action='/register', method='POST', enctype='multipart/form-data')
+          form(action=(`/register?_csrf=${csrfToken}`), method='POST', enctype='multipart/form-data')
             .form__field
               label
                 input(type='email', placeholder='Электронная почта', name='email', value=(user && user.email || ''), required)

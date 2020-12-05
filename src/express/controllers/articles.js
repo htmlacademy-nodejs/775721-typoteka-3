@@ -22,8 +22,8 @@ exports.getAddArticle = async (req, res, next) => {
 
 exports.postAddArticle = async (req, res, next) => {
   try {
-    const {createdDate, title, category = [], announce, fullText} = req.body;
-
+    const {createdDate, title, category = [], announce, fullText} = req.fields;
+    const {headers} = res.locals;
     const categories = Array.isArray(category) ? category : [category];
     const article = {
       title,
@@ -39,7 +39,7 @@ exports.postAddArticle = async (req, res, next) => {
       article.fullText = fullText;
     }
 
-    const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/articles`, json: true, body: article});
+    const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/articles`, headers, json: true, body: article});
 
     if (statusCode === HttpStatusCode.CREATED) {
       return res.redirect(`/my`);

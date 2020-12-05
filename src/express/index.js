@@ -6,6 +6,7 @@ const express = require(`express`);
 const chalk = require(`chalk`);
 const formidableMiddleware = require(`express-formidable`);
 const cookieParser = require(`cookie-parser`);
+const csrf = require(`csurf`);
 
 const mainRouter = require(`./routes/main`);
 const authenticationRouter = require(`./routes/authentication`);
@@ -19,6 +20,7 @@ const {request} = require(`./request`);
 const {isUserHasAccess} = require(`./middlewares/is-user-has-access`);
 
 const app = express();
+const csrfProtection = csrf({cookie: true});
 
 app.set(`view engine`, `pug`);
 app.set(`views`, path.resolve(__dirname, DirName.TEMPLATES));
@@ -35,6 +37,14 @@ app.use(express.urlencoded({extended: false}));
 
 app.use(cookieParser());
 
+app.use(csrfProtection);
+
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+
+  next();
+});
+
 app.use(async (req, res, next) => {
   const authorization = req.cookies[AUTHORIZATION_KEY];
 
@@ -48,6 +58,7 @@ app.use(async (req, res, next) => {
 
       res.cookie(AUTHORIZATION_KEY, authorizationValue, {httpOnly: true, sameSite: `strict`});
       res.locals = {
+        ...res.locals,
         isAuthorized: true,
         tokens: body,
         headers: {
