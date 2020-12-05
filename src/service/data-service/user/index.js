@@ -29,7 +29,7 @@ class UserService {
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
     try {
-      return await User.create({
+      return User.create({
         firstName,
         lastName,
         email,
@@ -47,7 +47,7 @@ class UserService {
     const {User} = this._models;
 
     try {
-      return await User.findOne({
+      return User.findOne({
         ...this._selectOptions,
         where: {
           email,
@@ -62,6 +62,10 @@ class UserService {
 
   async isExist(email) {
     return !!await this.findByEmail(email);
+  }
+
+  async isUserPasswordCorrect(password, passwordHash) {
+    return bcrypt.compare(password, passwordHash);
   }
 }
 

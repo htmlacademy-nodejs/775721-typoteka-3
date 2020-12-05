@@ -2,7 +2,15 @@
 
 const Joi = require(`joi`);
 
-exports.userDataSchema = Joi.object({
+const emailSchema = Joi.string()
+  .email()
+  .max(320)
+  .required();
+const passwordSchema = Joi.string()
+  .min(6)
+  .required();
+
+exports.userRegisterDataSchema = Joi.object({
   firstName: Joi.string()
   .pattern(/^[a-zA-Zа-яА-Я\s]+$/)
   .max(50)
@@ -11,17 +19,21 @@ exports.userDataSchema = Joi.object({
   .pattern(/^[a-zA-Zа-яА-Я\s]+$/)
   .max(50)
   .required(),
-  email: Joi.string()
-  .email()
-  .max(320)
-  .required(),
-  password: Joi.string()
-  .min(6)
-  .required(),
+  email: emailSchema,
+  password: passwordSchema,
   passwordRepeat: Joi.any()
   .valid(Joi.ref(`password`))
   .required(),
   avatar: Joi.string()
   .pattern(/\w\.(jpg|png)/)
   .allow(``),
+});
+
+exports.userLoginDataSchema = Joi.object({
+  email: emailSchema,
+  password: passwordSchema,
+});
+
+exports.tokenDataSchema = Joi.object({
+  token: Joi.string().required(),
 });

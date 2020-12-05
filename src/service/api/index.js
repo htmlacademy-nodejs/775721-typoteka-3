@@ -10,14 +10,14 @@ const {createUserRouter} = require(`./user`);
 const {Route} = require(`./constants`);
 
 
-const createRouter = ({articleService, commentService, categoryService, userService, logger}) => {
+const createRouter = ({articleService, commentService, categoryService, userService, refreshTokenService, logger}) => {
   const router = new Router();
 
   const commentRouter = createCommentRouter({commentService, logger});
   const articleRouter = createArticleRouter({articleService, commentRouter, logger});
   const categoryRouter = createCategoryRouter(articleService, categoryService);
   const searchRouter = createSearchRouter(articleService);
-  const userRouter = createUserRouter({userService, logger});
+  const userRouter = createUserRouter({userService, refreshTokenService, logger});
 
   router.use(Route.ARTICLES, articleRouter);
   router.use(Route.CATEGORIES, categoryRouter);
