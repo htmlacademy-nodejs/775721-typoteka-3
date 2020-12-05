@@ -29,7 +29,7 @@ class CommentService {
     }
   }
 
-  async create(articleId, text) {
+  async create({articleId, userId, text}) {
     const {Article, Comment} = this._models;
 
     try {
@@ -37,7 +37,7 @@ class CommentService {
 
       const newComment = await article.createComment({
         message: text,
-        user_id: 1, /* eslint-disable-line */
+        [`user_id`]: userId,
       });
 
       return await Comment.findByPk(newComment.id, this._selectOptions);
@@ -69,6 +69,41 @@ class CommentService {
       this._logger.error(`Не могу удалить комментарий с id: ${ id }. Ошибка: ${ error }`);
 
       return null;
+    }
+  }
+
+  async isExists(id) {
+    const {Comment} = this._models;
+    const commentId = Number.parseInt(id, 10);
+
+    try {
+      const comment = await Comment.findByPk(commentId);
+
+      return !!comment;
+    } catch (error) {
+      this._logger.error(`Не могу приверить существование комментария. Ошибка: ${ error }`);
+
+      return false;
+    }
+  }
+
+  async isCommentBelongToUser(commentId, userId) {
+    const {Comment} = this._models;
+
+    try {
+      const comment = await Comment.findByPk(commentId, {
+        raw: true,
+        attributes: [
+          `id`,
+          [`user_id`, `userId`],
+        ],
+      });
+
+      return comment.userId === userId;
+    } catch (error) {
+      this._logger.error(`Не могу проверить кому принадлежит комментарий. Ошибка: ${ error }`);
+
+      return false;
     }
   }
 }

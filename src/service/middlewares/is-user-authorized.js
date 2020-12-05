@@ -22,12 +22,14 @@ const isUserAuthorized = ({logger}) => async (req, res, next) => {
     return res.sendStatus(HttpStatusCode.UNAUTHORIZED);
   }
 
-  jwt.verify(accessToken, JWT_ACCESS_SECRET, (error) => {
+  jwt.verify(accessToken, JWT_ACCESS_SECRET, (error, data) => {
     if (error) {
       logger.error(`Не могу авторизовать пользователя. Неверный токен доступа`);
 
       return res.sendStatus(HttpStatusCode.FORBIDDEN);
     }
+
+    res.locals.userId = data.id;
 
     return next();
   });

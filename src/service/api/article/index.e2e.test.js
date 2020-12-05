@@ -8,83 +8,61 @@ const testDataBase = require(`../../database/test-data-base`);
 
 describe(`Article API end-points`, () => {
   const server = createServer({dataBase: testDataBase});
+  const userData = {
+    firstName: `James`,
+    lastName: `Bond`,
+    email: `jamesBond@mail.com`,
+    password: `123456`,
+    passwordRepeat: `123456`,
+    avatar: `avatar.png`,
+  };
+  const categories = [
+    {
+      id: 1,
+      title: `Программирование`,
+    },
+    {
+      id: 2,
+      title: `Кино и сериалы`,
+    },
+    {
+      id: 3,
+      title: `Железо`,
+    },
+  ];
+  const firstArticleData = {
+    image: `item01.jpg`,
+    title: `Как начать программировать за 21 день.`,
+    announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+    fullText: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+    categories: [1, 2],
+  };
+  const secondArticleData = {
+    image: `item02.jpg`,
+    title: `Обзор новейшего смартфона BFG-9000`,
+    announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+    fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+    categories: [3],
+  };
+  const headers = {};
+
+  beforeEach(async () => {
+    await testDataBase.resetDataBase({categories});
+
+    await request(server).post(`/api/user`).send(userData);
+
+    const {body: loginBody} = await request(server).post(`/api/user/login`).send({email: userData.email, password: userData.password});
+    headers.authorization = `Bearer ${loginBody.accessToken} ${loginBody.refreshToken}`;
+
+    await request(server).post(`/api/articles`).send(firstArticleData).set(headers);
+    await request(server).post(`/api/articles`).send(secondArticleData).set(headers);
+  });
 
   afterAll(() => {
     testDataBase.sequelize.close();
   });
 
   describe(`GET api/articles`, () => {
-    const users = [
-      {
-        id: 1,
-        firstName: `Иван`,
-        lastName: `Абрамов`,
-        email: `ivan_abramov@mail.local`,
-        password: 123456,
-        avatar: `avatar01.jpg`,
-      },
-    ];
-    const categories = [
-      {
-        id: 1,
-        title: `Программирование`,
-      },
-      {
-        id: 2,
-        title: `Кино и сериалы`,
-      },
-      {
-        id: 3,
-        title: `Железо`,
-      },
-    ];
-    const articles = [
-      {
-        id: 1,
-        image: `item01.jpg`,
-        title: `Как начать программировать за 21 день.`,
-        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
-        text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-        user_id: 1, /* eslint-disable-line */
-      },
-      {
-        id: 2,
-        image: `item02.jpg`,
-        title: `Обзор новейшего смартфона BFG-9000`,
-        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
-        text: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        user_id: 1, /* eslint-disable-line */
-      },
-    ];
-    const comments = [
-      {
-        id: 1,
-        message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
-        user_id: 1, /* eslint-disable-line */
-        article_id: 1, /* eslint-disable-line */
-      },
-      {
-        id: 2,
-        message: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
-        user_id: 1, /* eslint-disable-line */
-        article_id: 2, /* eslint-disable-line */
-      },
-    ];
-    const articlesCategories = [
-      {
-        articleId: 1,
-        categoriesIds: [1, 2],
-      },
-      {
-        articleId: 2,
-        categoriesIds: [3],
-      },
-    ];
-
-    beforeEach(async () => {
-      await testDataBase.resetDataBase({users, categories, articles, comments, articlesCategories});
-    });
-
     it(`should return status 200 if request was successful`, async () => {
       const res = await request(server).get(`/api/articles`);
 
@@ -94,7 +72,7 @@ describe(`Article API end-points`, () => {
     it(`should return correct quantity of articles`, async () => {
       const res = await request(server).get(`/api/articles`);
 
-      expect(res.body.quantity).toEqual(articles.length);
+      expect(res.body.quantity).toEqual(2);
     });
 
     it(`should return correct articles if request was successful`, async () => {
@@ -104,17 +82,17 @@ describe(`Article API end-points`, () => {
         title: `Как начать программировать за 21 день.`,
         announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
         fullText: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-        categories: [{
-          id: 1,
-          title: `Программирование`,
-        }, {
-          id: 2,
-          title: `Кино и сериалы`,
-        }],
-        comments: [{
-          id: 1,
-          message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
-        }],
+        categories: [
+          {
+            id: 1,
+            title: `Программирование`,
+          },
+          {
+            id: 2,
+            title: `Кино и сериалы`,
+          }
+        ],
+        comments: [],
       };
       const expectedSecondArticle = {
         id: 2,
@@ -126,150 +104,58 @@ describe(`Article API end-points`, () => {
           id: 3,
           title: `Железо`,
         }],
-        comments: [{
-          id: 2,
-          message: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
-        }],
+        comments: [],
       };
 
       const res = await request(server).get(`/api/articles`);
 
       const [firstArticle, secondArticle] = res.body.articles;
 
-      expect(firstArticle).toMatchObject(expectedFirstArticle);
-      expect(secondArticle).toMatchObject(expectedSecondArticle);
+      expect(firstArticle).toMatchObject(expectedSecondArticle);
+      expect(secondArticle).toMatchObject(expectedFirstArticle);
     });
 
-    it(`with offset = 1 should return articles without first article`, async () => {
+    it(`with offset = 1 should return first article`, async () => {
       const offset = 1;
-      const articlesForTestOffset = [
-        {
-          id: 1,
-          image: `item01.jpg`,
-          title: `Как начать программировать за 21 день.`,
-          announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
-          text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-          user_id: 1, /* eslint-disable-line */
-        },
-        {
-          id: 2,
-          image: `item02.jpg`,
-          title: `Обзор новейшего смартфона BFG-9000`,
-          announce: `Простые ежедневные упражнения помогут достичь успеха.`,
-          text: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-          user_id: 1, /* eslint-disable-line */
-        },
-        {
-          id: 3,
-          image: `item03.jpg`,
-          title: `Самый лучший музыкальный альбом этого года.`,
-          announce: `Программировать не настолько сложно, как об этом говорят.`,
-          text: `Достичь успеха помогут ежедневные повторения. Программировать не настолько сложно, как об этом говорят. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-          user_id: 1, /* eslint-disable-line */
-        },
-      ];
-      const articlesCategoriesForTestOffset = [
-        {
-          articleId: 1,
-          categoriesIds: [1],
-        },
-        {
-          articleId: 2,
-          categoriesIds: [2],
-        },
-        {
-          articleId: 3,
-          categoriesIds: [3],
-        },
-      ];
       const expectedFirstArticle = {
+        id: 1,
+        image: `item01.jpg`,
+        title: `Как начать программировать за 21 день.`,
+        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+        fullText: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+        categories: [
+          {
+            id: 1,
+            title: `Программирование`,
+          },
+          {
+            id: 2,
+            title: `Кино и сериалы`,
+          }
+        ],
+        comments: [],
+      };
+
+      const res = await request(server).get(`/api/articles?offset=${ offset }`);
+      const [firstArticle] = res.body.articles;
+
+      expect(firstArticle).toMatchObject(expectedFirstArticle);
+    });
+
+    it(`with limit = 1 should return second article`, async () => {
+      const limit = 1;
+      const expectedArticle = {
         id: 2,
         image: `item02.jpg`,
         title: `Обзор новейшего смартфона BFG-9000`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
         categories: [{
-          id: 2,
-          title: `Кино и сериалы`,
-        }],
-        comments: [],
-      };
-      const expectedSecondArticle = {
-        id: 3,
-        image: `item03.jpg`,
-        title: `Самый лучший музыкальный альбом этого года.`,
-        announce: `Программировать не настолько сложно, как об этом говорят.`,
-        fullText: `Достичь успеха помогут ежедневные повторения. Программировать не настолько сложно, как об этом говорят. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        categories: [{
           id: 3,
           title: `Железо`,
         }],
         comments: [],
       };
-
-      await testDataBase.resetDataBase({
-        users,
-        categories,
-        articles: articlesForTestOffset,
-        articlesCategories: articlesCategoriesForTestOffset,
-      });
-
-      const res = await request(server).get(`/api/articles?offset=${ offset }`);
-      const [firstArticle, secondArticle] = res.body.articles;
-
-      expect(firstArticle).toMatchObject(expectedFirstArticle);
-      expect(secondArticle).toMatchObject(expectedSecondArticle);
-    });
-
-    it(`with limit = 1 should return first article`, async () => {
-      const limit = 1;
-      const articlesForTestLimit = [
-        {
-          id: 1,
-          image: `item01.jpg`,
-          title: `Как начать программировать за 21 день.`,
-          announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
-          text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-          user_id: 1, /* eslint-disable-line */
-        },
-        {
-          id: 2,
-          image: `item02.jpg`,
-          title: `Самый лучший музыкальный альбом этого года.`,
-          announce: `Программировать не настолько сложно, как об этом говорят.`,
-          text: `Достичь успеха помогут ежедневные повторения. Программировать не настолько сложно, как об этом говорят. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-          user_id: 1, /* eslint-disable-line */
-        },
-      ];
-      const articlesCategoriesForTestLimit = [
-        {
-          articleId: 1,
-          categoriesIds: [1],
-        },
-        {
-          articleId: 2,
-          categoriesIds: [2],
-        },
-      ];
-      const expectedArticle = {
-        id: 1,
-        image: `item01.jpg`,
-        title: `Как начать программировать за 21 день.`,
-        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
-        fullText: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-        categories: [{
-          id: 1,
-          title: `Программирование`,
-        }],
-        comments: [],
-      };
-
-      await testDataBase.resetDataBase({
-        users,
-        categories,
-        articles: articlesForTestLimit,
-        articlesCategories: articlesCategoriesForTestLimit,
-      });
 
       const res = await request(server).get(`/api/articles?limit=${ limit }`);
       const [article] = res.body.articles;
@@ -277,68 +163,27 @@ describe(`Article API end-points`, () => {
       expect(article).toMatchObject(expectedArticle);
     });
 
-    it(`with offset = 1 and limit = 1 should return article with id = 2`, async () => {
+    it(`with offset = 1 and limit = 1 should return article with id = 1`, async () => {
       const offset = 1;
       const limit = 1;
-      const articlesForTestOffsetAndLimit = [
-        {
-          id: 1,
-          image: `item01.jpg`,
-          title: `Самый лучший музыкальный альбом этого года.`,
-          announce: `Программировать не настолько сложно, как об этом говорят.`,
-          text: `Достичь успеха помогут ежедневные повторения. Программировать не настолько сложно, как об этом говорят. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-          user_id: 1, /* eslint-disable-line */
-        },
-        {
-          id: 2,
-          image: `item02.jpg`,
-          title: `Обзор новейшего смартфона BFG-9000`,
-          announce: `Простые ежедневные упражнения помогут достичь успеха.`,
-          text: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-          user_id: 1, /* eslint-disable-line */
-        },
-        {
-          id: 3,
-          image: `item03.jpg`,
-          title: `Как начать программировать за 21 день.`,
-          announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
-          text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-          user_id: 1, /* eslint-disable-line */
-        },
-      ];
-      const articlesCategoriesForTestOffsetAndLimit = [
-        {
-          articleId: 1,
-          categoriesIds: [1],
-        },
-        {
-          articleId: 2,
-          categoriesIds: [2],
-        },
-        {
-          articleId: 3,
-          categoriesIds: [3],
-        },
-      ];
       const expectedArticle = {
-        id: 2,
-        image: `item02.jpg`,
-        title: `Обзор новейшего смартфона BFG-9000`,
-        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
-        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        categories: [{
-          id: 2,
-          title: `Кино и сериалы`,
-        }],
+        id: 1,
+        image: `item01.jpg`,
+        title: `Как начать программировать за 21 день.`,
+        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+        fullText: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+        categories: [
+          {
+            id: 1,
+            title: `Программирование`,
+          },
+          {
+            id: 2,
+            title: `Кино и сериалы`,
+          }
+        ],
         comments: [],
       };
-
-      await testDataBase.resetDataBase({
-        users,
-        categories,
-        articles: articlesForTestOffsetAndLimit,
-        articlesCategories: articlesCategoriesForTestOffsetAndLimit,
-      });
 
       const res = await request(server).get(`/api/articles?offset=${ offset }&limit=${ limit }`);
       const [article] = res.body.articles;
@@ -348,27 +193,6 @@ describe(`Article API end-points`, () => {
   });
 
   describe(`POST api/articles`, () => {
-    const users = [
-      {
-        id: 1,
-        firstName: `Иван`,
-        lastName: `Абрамов`,
-        email: `ivan_abramov@mail.local`,
-        password: 123456,
-        avatar: `avatar01.jpg`,
-      },
-    ];
-    const categories = [
-      {
-        id: 1,
-        title: `Программирование`,
-      },
-    ];
-
-    beforeEach(async () => {
-      await testDataBase.resetDataBase({users, categories});
-    });
-
     it(`should return status 400 if have sent title shorter than 30 letters`, async () => {
       const data = {
         image: `item01.jpg`,
@@ -378,7 +202,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -392,7 +216,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -405,7 +229,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -419,7 +243,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -433,7 +257,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -447,7 +271,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -460,7 +284,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -474,7 +298,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -488,7 +312,7 @@ describe(`Article API end-points`, () => {
         categories: [{id: 1}],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -502,7 +326,7 @@ describe(`Article API end-points`, () => {
         categories: [],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -515,9 +339,23 @@ describe(`Article API end-points`, () => {
         fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 401 if didn't send headers`, async () => {
+      const data = {
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data);
+
+      expect(res.statusCode).toBe(401);
     });
 
     it(`should return status 201 if sent valid data`, async () => {
@@ -529,7 +367,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.statusCode).toBe(201);
     });
@@ -543,7 +381,6 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
       const expectedArticle = {
-        id: 1,
         image: `item01.jpg`,
         title: `Обзор новейшего смартфона BFG-3000`,
         announce: `Он обязательно понравится геймерам со стажем.`,
@@ -554,7 +391,7 @@ describe(`Article API end-points`, () => {
         }],
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.body).toHaveProperty(`id`);
       expect(res.body).toMatchObject(expectedArticle);
@@ -570,7 +407,7 @@ describe(`Article API end-points`, () => {
         token: `token`,
       };
 
-      const res = await request(server).post(`/api/articles`).send(data);
+      const res = await request(server).post(`/api/articles`).send(data).set(headers);
 
       expect(res.body).not.toHaveProperty(`token`);
     });
@@ -584,75 +421,14 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const {body: newArticle} = await request(server).post(`/api/articles`).send(data);
-      const res = await request(server).get(`/api/articles`);
+      const {body: newArticle} = await request(server).post(`/api/articles`).send(data).set(headers);
+      const res = await request(server).get(`/api/articles`).set(headers);
 
       expect(res.body.articles).toContainEqual(newArticle);
     });
   });
 
   describe(`GET api/articles/:articleId`, () => {
-    const users = [
-      {
-        id: 1,
-        firstName: `Иван`,
-        lastName: `Абрамов`,
-        email: `ivan_abramov@mail.local`,
-        password: 123456,
-        avatar: `avatar01.jpg`,
-      },
-    ];
-    const categories = [
-      {
-        id: 1,
-        title: `Программирование`,
-      },
-      {
-        id: 2,
-        title: `Кино и сериалы`,
-      },
-    ];
-    const articles = [
-      {
-        id: 1,
-        image: `item01.jpg`,
-        title: `Как начать программировать за 21 день.`,
-        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
-        text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-        user_id: 1, /* eslint-disable-line */
-      },
-      {
-        id: 2,
-        image: `item02.jpg`,
-        title: `Обзор новейшего смартфона BFG-9000`,
-        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
-        text: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        user_id: 1, /* eslint-disable-line */
-      },
-    ];
-    const comments = [
-      {
-        id: 1,
-        message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
-        user_id: 1, /* eslint-disable-line */
-        article_id: 2, /* eslint-disable-line */
-      },
-    ];
-    const articlesCategories = [
-      {
-        articleId: 1,
-        categoriesIds: [1],
-      },
-      {
-        articleId: 2,
-        categoriesIds: [2],
-      },
-    ];
-
-    beforeEach(async () => {
-      await testDataBase.resetDataBase({users, categories, articles, comments, articlesCategories});
-    });
-
     it(`should return status 400 if have sent invalid id`, async () => {
       const res = await request(server).get(`/api/articles/abc`);
 
@@ -674,19 +450,15 @@ describe(`Article API end-points`, () => {
     it(`should return article if article exists`, async () => {
       const res = await request(server).get(`/api/articles/2`);
       const expectedArticle = {
-        id: 2,
         image: `item02.jpg`,
         title: `Обзор новейшего смартфона BFG-9000`,
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
         categories: [{
-          id: 2,
-          title: `Кино и сериалы`,
+          id: 3,
+          title: `Железо`,
         }],
-        comments: [{
-          id: 1,
-          message: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
-        }],
+        comments: [],
       };
 
       expect(res.body).toMatchObject(expectedArticle);
@@ -694,47 +466,6 @@ describe(`Article API end-points`, () => {
   });
 
   describe(`PUT api/articles/:articleId`, () => {
-    const users = [
-      {
-        id: 1,
-        firstName: `Иван`,
-        lastName: `Абрамов`,
-        email: `ivan_abramov@mail.local`,
-        password: 123456,
-        avatar: `avatar01.jpg`,
-      },
-    ];
-    const categories = [
-      {
-        id: 1,
-        title: `Программирование`,
-      },
-      {
-        id: 2,
-        title: `Кино и сериалы`,
-      },
-    ];
-    const articles = [
-      {
-        id: 1,
-        image: `item01.jpg`,
-        title: `Как начать программировать за 21 день.`,
-        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
-        text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-        user_id: 1, /* eslint-disable-line */
-      },
-    ];
-    const articlesCategories = [
-      {
-        articleId: 1,
-        categoriesIds: [1],
-      },
-    ];
-
-    beforeEach(async () => {
-      await testDataBase.resetDataBase({users, categories, articles, articlesCategories});
-    });
-
     it(`should return status 400 if have sent invalid id`, async () => {
       const data = {
         image: `item02.jpg`,
@@ -743,7 +474,7 @@ describe(`Article API end-points`, () => {
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
         categories: [2],
       };
-      const res = await request(server).put(`/api/articles/abc`).send(data);
+      const res = await request(server).put(`/api/articles/abc`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -756,7 +487,7 @@ describe(`Article API end-points`, () => {
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
         categories: [2],
       };
-      const res = await request(server).put(`/api/articles/1234`).send(data);
+      const res = await request(server).put(`/api/articles/1234`).send(data).set(headers);
 
       expect(res.statusCode).toBe(404);
     });
@@ -770,7 +501,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -784,7 +515,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -797,7 +528,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -811,7 +542,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -825,7 +556,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -839,7 +570,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -852,7 +583,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -866,7 +597,7 @@ describe(`Article API end-points`, () => {
         categories: [1],
       };
 
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -880,7 +611,7 @@ describe(`Article API end-points`, () => {
         categories: [{id: 1}],
       };
 
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -894,7 +625,7 @@ describe(`Article API end-points`, () => {
         categories: [],
       };
 
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -906,9 +637,49 @@ describe(`Article API end-points`, () => {
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
       };
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 401 if didn't send valid headers`, async () => {
+      const data = {
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [2],
+      };
+      const res = await request(server).put(`/api/articles/1`).send(data);
+
+      expect(res.statusCode).toBe(401);
+    });
+
+    it(`should return status 403 if tried to update someone else's article`, async () => {
+      const secondUserData = {
+        firstName: `Ivan`,
+        lastName: `Ivanov`,
+        email: `ivanIvamon@mail.com`,
+        password: `123456`,
+        passwordRepeat: `123456`,
+        avatar: `avatar.png`,
+      };
+      await request(server).post(`/api/user`).send(secondUserData);
+
+      const {body: loginBody} = await request(server).post(`/api/user/login`).send({email: secondUserData.email, password: secondUserData.password});
+      const authorizationHeader = `Bearer ${loginBody.accessToken} ${loginBody.refreshToken}`;
+
+      const data = {
+        image: `item02.jpg`,
+        title: `Обзор новейшего смартфона BFG-9000`,
+        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
+        fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [2],
+      };
+
+      const res = await request(server).put(`/api/articles/1`).send(data).set({authorization: authorizationHeader});
+
+      expect(res.statusCode).toBe(403);
     });
 
     it(`should return status 200 if article was updated`, async () => {
@@ -919,7 +690,7 @@ describe(`Article API end-points`, () => {
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
         categories: [2],
       };
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.statusCode).toBe(200);
     });
@@ -944,76 +715,52 @@ describe(`Article API end-points`, () => {
         }],
       };
 
-      const res = await request(server).put(`/api/articles/1`).send(data);
+      const res = await request(server).put(`/api/articles/1`).send(data).set(headers);
 
       expect(res.body).toMatchObject(expectedArticle);
     });
   });
 
   describe(`DELETE api/articles/:articleId`, () => {
-    const users = [
-      {
-        id: 1,
-        firstName: `Иван`,
-        lastName: `Абрамов`,
-        email: `ivan_abramov@mail.local`,
-        password: 123456,
-        avatar: `avatar01.jpg`,
-      },
-    ];
-    const categories = [
-      {
-        id: 1,
-        title: `Программирование`,
-      },
-    ];
-    const articles = [
-      {
-        id: 1,
-        image: `item01.jpg`,
-        title: `Как начать программировать за 21 день.`,
-        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
-        text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-        user_id: 1, /* eslint-disable-line */
-      },
-      {
-        id: 2,
-        image: `item02.jpg`,
-        title: `Обзор новейшего смартфона BFG-9000`,
-        announce: `Простые ежедневные упражнения помогут достичь успеха.`,
-        text: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
-        user_id: 1, /* eslint-disable-line */
-      },
-    ];
-    const articlesCategories = [
-      {
-        articleId: 1,
-        categoriesIds: [1],
-      },
-      {
-        articleId: 2,
-        categoriesIds: [1],
-      },
-    ];
-
-    beforeEach(async () => {
-      await testDataBase.resetDataBase({users, categories, articles, articlesCategories});
-    });
-
     it(`should return status 400 if have sent invalid id`, async () => {
-      const res = await request(server).delete(`/api/articles/abc`);
+      const res = await request(server).delete(`/api/articles/abc`).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
 
     it(`should return status 404 if articles doesn't exist`, async () => {
-      const res = await request(server).delete(`/api/articles/1234`);
+      const res = await request(server).delete(`/api/articles/1234`).set(headers);
 
       expect(res.statusCode).toBe(404);
     });
 
-    it(`should return status 200 if articles was deleted`, async () => {
+    it(`should return status 401 if didn't send headers`, async () => {
       const res = await request(server).delete(`/api/articles/2`);
+
+      expect(res.statusCode).toBe(401);
+    });
+
+    it(`should return status 403 if tried to delete someone else's article`, async () => {
+      const secondUserData = {
+        firstName: `Ivan`,
+        lastName: `Ivanov`,
+        email: `ivanIvamon@mail.com`,
+        password: `123456`,
+        passwordRepeat: `123456`,
+        avatar: `avatar.png`,
+      };
+      await request(server).post(`/api/user`).send(secondUserData);
+
+      const {body: loginBody} = await request(server).post(`/api/user/login`).send({email: secondUserData.email, password: secondUserData.password});
+      const authorizationHeader = `Bearer ${loginBody.accessToken} ${loginBody.refreshToken}`;
+
+      const res = await request(server).delete(`/api/articles/2`).set({authorization: authorizationHeader});
+
+      expect(res.statusCode).toBe(403);
+    });
+
+    it(`should return status 200 if articles was deleted`, async () => {
+      const res = await request(server).delete(`/api/articles/2`).set(headers);
 
       expect(res.statusCode).toBe(200);
     });
@@ -1026,12 +773,12 @@ describe(`Article API end-points`, () => {
         announce: `Простые ежедневные упражнения помогут достичь успеха.`,
         fullText: `Освоить вёрстку несложно. Возьмите книгу новую книгу и закрепите все упражнения на практике. Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
         categories: [{
-          id: 1,
-          title: `Программирование`,
+          id: 3,
+          title: `Железо`,
         }],
       };
 
-      const res = await request(server).delete(`/api/articles/2`);
+      const res = await request(server).delete(`/api/articles/2`).set(headers);
 
       expect(res.body).toMatchObject(expectedArticle);
     });
@@ -1050,7 +797,7 @@ describe(`Article API end-points`, () => {
       };
 
       await request(server).delete(`/api/articles/2`);
-      const res = await request(server).get(`/api/articles`);
+      const res = await request(server).get(`/api/articles`).set(headers);
 
       expect(res.body).not.toContainEqual(expectedArticle);
     });
