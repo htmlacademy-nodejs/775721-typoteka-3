@@ -4,6 +4,7 @@ const {createUserModel, createUserAssociations} = require(`./user`);
 const {createArticleModel, createArticleAssociations} = require(`./article`);
 const {createCategoryModel, createCategoryAssociations} = require(`./category`);
 const {createCommentModel, createCommentAssociations} = require(`./comment`);
+const {createRefreshTokenModel} = require(`./refresh-token`);
 
 exports.createModels = (sequelize) => {
   const DataTypes = sequelize.Sequelize.DataTypes;
@@ -12,6 +13,7 @@ exports.createModels = (sequelize) => {
   const Article = createArticleModel(sequelize, DataTypes);
   const Category = createCategoryModel(sequelize, DataTypes);
   const Comment = createCommentModel(sequelize, DataTypes);
+  const RefreshToken = createRefreshTokenModel(sequelize, DataTypes);
 
   createUserAssociations({Article, User, Comment});
   createArticleAssociations({Article, Category, User, Comment});
@@ -23,5 +25,6 @@ exports.createModels = (sequelize) => {
     Article,
     Category,
     Comment,
+    RefreshToken,
   };
 };

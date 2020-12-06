@@ -39,12 +39,14 @@ block content
                 | Загрузить фото профиля
             button.form__submit-btn.form__submit-btn--register.button.button--colored(type='submit') Зарегистрироваться
         .popup__form.popup__form--active.form.form--log-in
-          form(action='#', method='get')
+          form(action=(`/login?_csrf=${csrfToken}`), method='post', enctype='multipart/form-data')
             .form__field
               label
-                input(type='email', placeholder='Электронная почта', required)
+                input(type='email', name='email', placeholder='Электронная почта', required)
+            p.form__error-message #{errors ? errors['email'] : ''}
             .form__field
               label
-                input(type='password', placeholder='Пароль', required)
+                input(type='password', name='password', placeholder='Пароль', required)
+            p.form__error-message #{errors ? errors['password'] : ''}
             button.form__submit-btn.form__submit-btn--log-in.button.button--colored(type='submit') Войти
       .modal__overlay

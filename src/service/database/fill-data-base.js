@@ -1,9 +1,9 @@
 'use strict';
 
-exports.fillDataBase = async ({dataBase, mocks}) => {
+exports.fillDataBase = async ({dataBase, mocks = {}}) => {
   const {sequelize, models} = dataBase;
-  const {User, Category, Article, Comment} = models;
-  const {users = [], categories = [], articles = [], comments = [], articlesCategories = []} = mocks;
+  const {User, Category, Article, Comment, RefreshToken} = models;
+  const {users = [], categories = [], articles = [], comments = [], articlesCategories = [], tokens = []} = mocks;
 
   try {
     await sequelize.sync({force: true});
@@ -21,6 +21,8 @@ exports.fillDataBase = async ({dataBase, mocks}) => {
     await sequelize.query(`UPDATE articles SET id = DEFAULT`);
 
     await Comment.bulkCreate(comments);
+
+    await RefreshToken.bulkCreate(tokens);
 
     const addCategoryPromises = articlesCategories.map(async ({articleId, categoriesIds}) => {
       const article = await Article.findByPk(articleId);

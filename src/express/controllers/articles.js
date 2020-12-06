@@ -3,6 +3,8 @@
 const {request} = require(`../request`);
 const {HttpStatusCode} = require(`../../constants`);
 const {API_SERVER_URL} = require(`../../config`);
+const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-to-error-messages`);
+
 
 exports.getAddArticle = async (req, res, next) => {
   try {
@@ -20,8 +22,8 @@ exports.getAddArticle = async (req, res, next) => {
 
 exports.postAddArticle = async (req, res, next) => {
   try {
-    const {createdDate, title, category = [], announce, fullText} = req.body;
-
+    const {createdDate, title, category = [], announce, fullText} = req.fields;
+    const {headers} = res.locals;
     const categories = Array.isArray(category) ? category : [category];
     const article = {
       title,
@@ -37,7 +39,7 @@ exports.postAddArticle = async (req, res, next) => {
       article.fullText = fullText;
     }
 
-    const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/articles`, json: true, body: article});
+    const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/articles`, headers, json: true, body: article});
 
     if (statusCode === HttpStatusCode.CREATED) {
       return res.redirect(`/my`);
@@ -50,13 +52,7 @@ exports.postAddArticle = async (req, res, next) => {
     }
 
     const errorDetails = body.details || [];
-    const errorMessages = errorDetails.reduce((messages, {path, message}) => {
-      const key = path.toString();
-
-      messages[key] = message;
-
-      return messages;
-    }, {});
+    const errorMessages = parseErrorDetailsToErrorMessages(errorDetails);
 
     return res.render(`articles/new-post`, {article, categories: categoriesResult.body, errors: errorMessages});
   } catch (error) {

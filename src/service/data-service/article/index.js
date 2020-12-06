@@ -117,12 +117,12 @@ class ArticleService {
     }
   }
 
-  async create({image, title, announce, fullText, categories: categoriesIds}) {
+  async create({image, title, announce, fullText, categories: categoriesIds, userId}) {
     const {sequelize} = this._dataBase;
     const {Article, Category, User} = this._models;
 
     try {
-      const user = await User.findByPk(1);
+      const user = await User.findByPk(userId);
 
       const newArticle = await user.createArticle({
         image,
@@ -210,6 +210,26 @@ class ArticleService {
       this._logger.error(`Не могу удалить публикацию. Ошибка: ${ error }`);
 
       return null;
+    }
+  }
+
+  async isArticleBelongsToUser(offerId, userId) {
+    const {Article} = this._models;
+
+    try {
+      const article = await Article.findByPk(offerId, {
+        raw: true,
+        attributes: [
+          `id`,
+          [`user_id`, `userId`],
+        ],
+      });
+
+      return article.userId === userId;
+    } catch (error) {
+      this._logger.error(`Не могу проверить кому принадлежит публикация. Ошибка: ${ error }`);
+
+      return false;
     }
   }
 }

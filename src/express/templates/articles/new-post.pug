@@ -5,7 +5,7 @@ block content
     section.modal.modal--flex
       .popup.popup--new-publication.popup--flex
         .new-publication
-          form(action='/articles/add', method='POST')
+          form(action=(`/articles/add?_csrf=${csrfToken}`), method='POST', enctype='multipart/form-data')
             .new-publication__header
               h1 Новая публикация
               .new-publication__date-form
