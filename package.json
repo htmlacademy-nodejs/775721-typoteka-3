@@ -7,9 +7,11 @@
     "test::rest": "jest --maxWorkers=1 src/service/api/.*.e2e.test.js",
     "test": "npm run eslint && npm run test::rest",
     "eslint": "eslint --ext .js src/",
-    "start::debug": "cross-env LOG_LEVEL=debug nodemon ./src/service/service.js --server 3000 | pino-pretty",
-    "start": "cross-env LOG_LEVEL=error nodemon ./src/service/service.js --server 3000 > src/service/logs",
+    "start-rest-server::debug": "cross-env LOG_LEVEL=debug nodemon ./src/service/service.js --server 3000 | pino-pretty",
+    "start-rest-server": "cross-env LOG_LEVEL=error nodemon ./src/service/service.js --server 3000 > src/service/logs",
     "start-front-server": "nodemon ./src/express/index.js",
+    "start": "concurrently \"npm:start-rest-server\" \"npm:start-front-server\"",
+    "start::debug": "concurrently \"npm:start-rest-server::debug\" \"npm:start-front-server\"",
     "fill-db": "node ./src/service/service.js --fill-db 15"
   },
   "repository": {
