@@ -190,6 +190,33 @@ describe(`Article API end-points`, () => {
 
       expect(article).toMatchObject(expectedArticle);
     });
+
+    it(`with categoryId = 1 should return articles from category "Программирование"`, async () => {
+      const categoryId = 1;
+      const expectedArticle = {
+        id: 1,
+        image: `item01.jpg`,
+        title: `Как начать программировать за 21 день.`,
+        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+        fullText: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+        categories: [
+          {
+            id: 1,
+            title: `Программирование`,
+          },
+          {
+            id: 2,
+            title: `Кино и сериалы`,
+          }
+        ],
+        comments: [],
+      };
+
+      const res = await request(server).get(`/api/articles?categoryId=${categoryId}`);
+      const [article] = res.body.articles;
+
+      expect(article).toMatchObject(expectedArticle);
+    });
   });
 
   describe(`POST api/articles`, () => {

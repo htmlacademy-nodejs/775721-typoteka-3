@@ -15,7 +15,7 @@ const createRouter = ({articleService, commentService, categoryService, userServ
 
   const commentRouter = createCommentRouter({commentService, logger});
   const articleRouter = createArticleRouter({articleService, commentRouter, logger});
-  const categoryRouter = createCategoryRouter(articleService, categoryService);
+  const categoryRouter = createCategoryRouter({categoryService, logger});
   const searchRouter = createSearchRouter(articleService);
   const userRouter = createUserRouter({userService, refreshTokenService, logger});
 

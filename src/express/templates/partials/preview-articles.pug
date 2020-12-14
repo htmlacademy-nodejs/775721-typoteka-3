@@ -6,7 +6,7 @@ section.articles-category__list.preview
         ul.preview__breadcrumbs
           each category in article.categories
             li.preview__breadcrumbs-item
-              a.preview__breadcrumbs-link(href='#') #{category.title}
+              a.preview__breadcrumbs-link(href=`/articles/category/${category.id}`) #{category.title}
         time.preview__time(datetime=article.createdDate) #{article.createdDate}
         h3.preview__name
           a.preview__name-link(href='#') #{article.title}

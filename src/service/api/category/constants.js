@@ -2,4 +2,5 @@
 
 exports.Route = {
   INDEX: `/`,
+  CATEGORY: `/:categoryId`,
 };

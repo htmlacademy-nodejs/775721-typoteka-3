@@ -1,0 +1,5 @@
+each categoryItem in categories
+  li.themes__item
+    a(href=`/articles/category/${categoryItem.id}` class=(categoryItem.isActive ? 'themes__item-link themes__item-link--active' : 'themes__item-link'))
+      | #{categoryItem.title}
+      sup #{categoryItem.quantity}

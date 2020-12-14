@@ -44,10 +44,41 @@ class ArticleService {
     };
   }
 
-  async findAll(offset, limit) {
-    const {Article} = this._models;
+  async findAll({offset, limit, categoryId}) {
+    const {Article, Category} = this._models;
 
     try {
+      if (categoryId) {
+        const articlesWithCategoryId = await Article.findAll({
+          include: [
+            {
+              model: Category,
+              where: {
+                id: categoryId
+              },
+            },
+          ],
+          attributes: [`id`],
+          raw: true,
+        });
+
+        const articleIdsWithCategoryId = articlesWithCategoryId.map(({id}) => id);
+
+        const articles = await Article.findAll({
+          ...this._selectOptions,
+          offset,
+          limit,
+          where: {
+            id: articleIdsWithCategoryId,
+          }
+        });
+
+        return {
+          quantity: articleIdsWithCategoryId.length,
+          articles,
+        };
+      }
+
       const [quantity, articles] = await Promise.all([
         Article.count(),
         Article.findAll({
@@ -73,7 +104,7 @@ class ArticleService {
     const {Article} = this._models;
 
     try {
-      return await Article.findAll({
+      return Article.findAll({
         ...this._selectOptions,
         where: {
           title: {
@@ -94,7 +125,7 @@ class ArticleService {
     const articleId = Number.parseInt(id, 10);
 
     try {
-      return await Article.findByPk(articleId, this._selectOptions);
+      return Article.findByPk(articleId, this._selectOptions);
     } catch (error) {
       this._logger.error(`Не могу найти публикацию с id: ${ articleId }. Ошибка: ${ error }`);
 
@@ -141,7 +172,7 @@ class ArticleService {
 
       await newArticle.addCategories(categories);
 
-      return await Article.findByPk(newArticle.id, this._selectOptions);
+      return Article.findByPk(newArticle.id, this._selectOptions);
     } catch (error) {
       this._logger.error(`Не могу создать публикацию. Ошибка: ${ error }`);
 
@@ -181,7 +212,7 @@ class ArticleService {
 
       await updatedArticle.setCategories(categories);
 
-      return await Article.findByPk(updatedArticle.id, this._selectOptions);
+      return Article.findByPk(updatedArticle.id, this._selectOptions);
     } catch (error) {
       this._logger.error(`Не могу обновить публикацию. Ошибка: ${ error }`);
 

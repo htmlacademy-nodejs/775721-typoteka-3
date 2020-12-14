@@ -80,3 +80,19 @@ exports.getEditArticle = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.getArticlesByCategory = async (req, res, next) => {
+  const {categoryId} = req.params;
+
+  try {
+    const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/categories/${categoryId}`, json: true});
+
+    if (statusCode === HttpStatusCode.NOT_FOUND) {
+      return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
+    }
+
+    return res.render(`articles/articles-by-category`, {category: body});
+  } catch (error) {
+    return next(error);
+  }
+};

@@ -23,9 +23,9 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
 
   router.get(Route.INDEX, async (req, res, next) => {
     try {
-      const {offset, limit} = req.query;
+      const {offset, limit, categoryId} = req.query;
 
-      const result = await articleService.findAll(offset, limit);
+      const result = await articleService.findAll({offset, limit, categoryId});
 
       res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
