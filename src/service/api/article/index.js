@@ -7,6 +7,7 @@ const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
 const {isArticleBelongsToUser} = require(`../../middlewares/is-article-belongs-to-user`);
 const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
+const {mostCommentedArticlesParams} = require(`../../schema/most-commented-articles-params`);
 const {articleDataSchema} = require(`../../schema/article-data`);
 const {articleParamsSchema} = require(`../../schema/article-params`);
 const {Route} = require(`./constants`);
@@ -18,6 +19,7 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
   const isRequestDataValidMiddleware = isRequestDataValid({schema: articleDataSchema, logger});
   const isArticleExistsMiddleware = isArticleExists({service: articleService, logger});
   const isRequestParamsValidMiddleware = isRequestParamsValid({schema: articleParamsSchema, logger});
+  const isMostCommentedArticlesParamsValidMiddleware = isRequestParamsValid({schema: mostCommentedArticlesParams, logger});
   const isUserAuthorizedMiddleware = isUserAuthorized({logger});
   const isArticleBelongsToUserMiddleware = isArticleBelongsToUser({logger, service: articleService});
 
@@ -41,6 +43,17 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
       const newArticle = await articleService.create({image, title, announce, fullText, categories, userId});
 
       res.status(HttpStatusCode.CREATED).json(newArticle);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get(Route.MOST_COMMENTED, [isMostCommentedArticlesParamsValidMiddleware], async (req, res, next) => {
+    try {
+      const {limit} = req.query;
+      const result = await articleService.findAllMostCommentedArticles({limit});
+
+      res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       next(error);
     }

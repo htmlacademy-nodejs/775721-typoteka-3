@@ -219,6 +219,58 @@ describe(`Article API end-points`, () => {
     });
   });
 
+  describe(`GET ape/articles/most_commented`, () => {
+    const firstCommentData = {
+      text: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
+    };
+    const secondCommentData = {
+      text: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
+    };
+    const thirdCommentData = {
+      text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+    };
+
+    beforeEach(async () => {
+      const {body} = await request(server).get(`/api/articles`);
+
+      const articles = body.articles;
+
+      await request(server).post(`/api/articles/${articles[0].id}/comments`).send(firstCommentData).set(headers);
+      await request(server).post(`/api/articles/${articles[1].id}/comments`).send(secondCommentData).set(headers);
+      await request(server).post(`/api/articles/${articles[1].id}/comments`).send(thirdCommentData).set(headers);
+    });
+
+    it(`should return status 200 if request was successful`, async () => {
+      const res = await request(server).get(`/api/articles/most_commented`);
+
+      expect(res.statusCode).toBe(200);
+    });
+
+    it(`should return array with 2 articles`, async () => {
+      const {body} = await request(server).get(`/api/articles/most_commented`);
+
+      expect(body.length).toBe(2);
+    });
+
+    it(`should return array where first article with 2 comments`, async () => {
+      const {body} = await request(server).get(`/api/articles/most_commented`);
+
+      expect(body[0].commentsQuantity).toBe(`2`);
+    });
+
+    it(`should return status 500 if sent invalid params`, async () => {
+      const {statusCode} = await request(server).get(`/api/articles/most_commented?limit=abc`);
+
+      expect(statusCode).toBe(500);
+    });
+
+    it(`should return array with one article if sent limit = 1`, async () => {
+      const {body} = await request(server).get(`/api/articles/most_commented?limit=1`);
+
+      expect(body.length).toBe(1);
+    });
+  });
+
   describe(`POST api/articles`, () => {
     it(`should return status 400 if have sent title shorter than 30 letters`, async () => {
       const data = {

@@ -99,6 +99,38 @@ class ArticleService {
     }
   }
 
+  async findAllMostCommentedArticles({limit}) {
+    const {sequelize} = this._dataBase;
+    const {Article, Comment} = this._models;
+
+    try {
+      return Article.findAll({
+        include: [
+          {
+            model: Comment,
+            as: `comments`,
+            attributes: [],
+          },
+        ],
+        attributes: [
+          `id`,
+          `title`,
+          [sequelize.fn(`COUNT`, sequelize.col(`comments.id`)), `commentsQuantity`],
+        ],
+        group: [`article.id`, `article.title`],
+        order: [
+          [sequelize.col(`commentsQuantity`), `DESC`],
+        ],
+        subQuery: false,
+        limit,
+      });
+    } catch (error) {
+      this._logger.error(`Не могу найти самые популярные публикации. Ошибка: ${ error }`);
+
+      return null;
+    }
+  }
+
   async findAllByTitle(title) {
     const {sequelize} = this._dataBase;
     const {Article} = this._models;

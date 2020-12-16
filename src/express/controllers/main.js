@@ -4,8 +4,20 @@ const {request} = require(`../request`);
 const {API_SERVER_URL} = require(`../../config`);
 const {HttpStatusCode} = require(`../../constants`);
 
-exports.getMain = async (req, res) => {
-  return res.render(`main/main`);
+const TOP_COMMENTED_LIMIT = 5;
+
+exports.getMain = async (req, res, next) => {
+  try {
+    const {statusCode, body} = await request.get({
+      url: `${ API_SERVER_URL }/articles/most_commented?limit=${TOP_COMMENTED_LIMIT}`,
+      json: true,
+    });
+    const hotArticles = statusCode === HttpStatusCode.OK ? body : [];
+
+    res.render(`main/main`, {hotArticles});
+  } catch (error) {
+    next(error);
+  }
 };
 
 exports.getSearch = async (req, res, next) => {
