@@ -4,8 +4,6 @@ const {request} = require(`../request`);
 const {HttpStatusCode} = require(`../../constants`);
 const {API_SERVER_URL} = require(`../../config`);
 
-const REQUIRED_NUMBER_OF_COMMENTS = 3;
-
 exports.getUserMain = async (req, res, next) => {
   try {
     const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/articles`, json: true});
@@ -18,21 +16,13 @@ exports.getUserMain = async (req, res, next) => {
 };
 
 exports.getUserComments = async (req, res, next) => {
+  const {user} = res.locals;
+
   try {
-    const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/articles`, json: true});
-    const articles = statusCode === HttpStatusCode.OK ? body.articles : [];
-    const requiredArticles = articles.slice(0, REQUIRED_NUMBER_OF_COMMENTS);
-    const requiredArticlesIds = requiredArticles.map(({id}) => id);
+    const {statusCode, body} = request.get({url: `${ API_SERVER_URL }/comments?userId=${user.id}`, json: true});
+    const comments = statusCode === HttpStatusCode.OK ? body.articles : [];
 
-    const commentsRequests = requiredArticlesIds.map((id) => request.get({
-      url: `${ API_SERVER_URL }/articles/${ id }/comments`,
-      json: true,
-    }));
-    const commentsResponses = await Promise.all(commentsRequests);
-    const comments = commentsResponses.map(({statusCode: commentsStatusCode, body: commentsBody}) => commentsStatusCode === HttpStatusCode.OK ? commentsBody : []);
-    const userComments = comments.flat();
-
-    res.render(`user/comments`, {comments: userComments});
+    res.render(`user/comments`, {comments});
   } catch (error) {
     next(error);
   }

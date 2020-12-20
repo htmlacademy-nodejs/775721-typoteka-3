@@ -54,7 +54,8 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
         });
       }
 
-      const isPasswordIncorrect = !await userService.isUserPasswordCorrect(password, user.password);
+      const {password: userPassword, id, ...otherUserInformation} = user;
+      const isPasswordIncorrect = !await userService.isUserPasswordCorrect(password, userPassword);
 
       if (isPasswordIncorrect) {
         const message = `Неверный пароль`;
@@ -71,13 +72,17 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
         });
       }
 
-      const {accessToken, refreshToken} = makeTokens({id: user.id});
+      const {accessToken, refreshToken} = makeTokens({id});
 
       refreshTokenService.add(refreshToken);
 
       return res.json({
         accessToken,
         refreshToken,
+        user: {
+          id,
+          ...otherUserInformation,
+        },
       });
     } catch (error) {
       return next(error);
@@ -100,11 +105,17 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
         }
 
         const newTokens = makeTokens({id});
+        const user = await userService.findById(id);
+
+        delete user.password;
 
         await refreshTokenService.delete(token);
         await refreshTokenService.add(newTokens.refreshToken);
 
-        return res.json(newTokens);
+        return res.json({
+          ...newTokens,
+          user,
+        });
       });
     } catch (error) {
       return next(error);

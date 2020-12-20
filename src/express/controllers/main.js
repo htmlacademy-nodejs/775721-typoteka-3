@@ -8,13 +8,20 @@ const TOP_COMMENTED_LIMIT = 5;
 
 exports.getMain = async (req, res, next) => {
   try {
-    const {statusCode, body} = await request.get({
+    const mostCommentedArticlesResponse = await request.get({
       url: `${ API_SERVER_URL }/articles/most_commented?limit=${TOP_COMMENTED_LIMIT}`,
       json: true,
     });
-    const hotArticles = statusCode === HttpStatusCode.OK ? body : [];
+    const hotArticles = mostCommentedArticlesResponse.statusCode === HttpStatusCode.OK ? mostCommentedArticlesResponse.body : [];
 
-    res.render(`main/main`, {hotArticles});
+    const commentsResponse = await request.get({
+      url: `${ API_SERVER_URL }/comments?limit=3`,
+      json: true,
+    });
+
+    const comments = commentsResponse.statusCode === HttpStatusCode.OK ? commentsResponse.body : [];
+
+    res.render(`main/main`, {hotArticles, comments});
   } catch (error) {
     next(error);
   }

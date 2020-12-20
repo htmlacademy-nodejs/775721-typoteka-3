@@ -398,6 +398,22 @@ describe(`User API end-points`, () => {
       expect(body).toHaveProperty(`accessToken`);
       expect(body).toHaveProperty(`refreshToken`);
     });
+
+    it(`should return user information if sent correct data`, async () => {
+      const data = {
+        email: `jamesBond@mail.com`,
+        password: `123456`,
+      };
+      const expectedUserData = {
+        firstName: `James`,
+        lastName: `Bond`,
+        email: `jamesBond@mail.com`,
+      };
+
+      const {body: {user}} = await request(server).post(PATH).send(data);
+
+      expect(user).toMatchObject(expectedUserData);
+    });
   });
 
   describe(`POST api/user/refresh`, () => {
@@ -410,8 +426,18 @@ describe(`User API end-points`, () => {
           value: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjA1NzEzMTc2fQ.hzY0AvYGpeBagHnrECWH46apmpK9p8xJ8cUhFCI3z3Y`,
         }
       ];
+      const users = [
+        {
+          id: 1,
+          firstName: `James`,
+          lastName: `Bond`,
+          email: `jamesBond@mail.com`,
+          password: `123456`,
+          avatar: `avatar.png`,
+        }
+      ];
 
-      await testDataBase.resetDataBase({tokens});
+      await testDataBase.resetDataBase({tokens, users});
     });
 
     it(`should return status 400 if sent invalid token`, async () => {
@@ -447,6 +473,18 @@ describe(`User API end-points`, () => {
 
       expect(body).toHaveProperty(`accessToken`);
       expect(body).toHaveProperty(`refreshToken`);
+    });
+
+    it(`should return user information if token was refreshed`, async () => {
+      const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjA1NzEzMTc2fQ.hzY0AvYGpeBagHnrECWH46apmpK9p8xJ8cUhFCI3z3Y`;
+      const expectedUserData = {
+        firstName: `James`,
+        lastName: `Bond`,
+        email: `jamesBond@mail.com`,
+      };
+      const {body: {user}} = await request(server).post(PATH).send({token});
+
+      expect(user).toMatchObject(expectedUserData);
     });
 
     it(`should return another refresh token if token was refreshed`, async () => {

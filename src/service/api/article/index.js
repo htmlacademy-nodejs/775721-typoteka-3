@@ -13,7 +13,7 @@ const {articleParamsSchema} = require(`../../schema/article-params`);
 const {Route} = require(`./constants`);
 const {HttpStatusCode} = require(`../../../constants`);
 
-const createArticleRouter = ({articleService, commentRouter, logger}) => {
+const createArticleRouter = ({articleService, logger}) => {
   const router = new Router();
 
   const isRequestDataValidMiddleware = isRequestDataValid({schema: articleDataSchema, logger});
@@ -113,8 +113,6 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
       next(error);
     }
   });
-
-  router.use(Route.COMMENTS, [isRequestParamsValidMiddleware, isArticleExistsMiddleware], commentRouter);
 
   return router;
 };

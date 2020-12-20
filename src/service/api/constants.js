@@ -5,4 +5,5 @@ exports.Route = {
   CATEGORIES: `/categories`,
   SEARCH: `/search`,
   USER: `/user`,
+  COMMENTS: `/comments`,
 };

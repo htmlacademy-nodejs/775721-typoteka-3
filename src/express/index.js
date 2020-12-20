@@ -54,13 +54,18 @@ app.use(async (req, res, next) => {
     const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/user/refresh`, json: true, body: {token: refreshToken}});
 
     if (statusCode === HttpStatusCode.OK) {
-      const authorizationValue = `Bearer ${body.accessToken} ${body.refreshToken}`;
+      const {accessToken, refreshToken: newRefreshToken, user} = body;
+      const authorizationValue = `Bearer ${accessToken} ${newRefreshToken}`;
 
       res.cookie(AUTHORIZATION_KEY, authorizationValue, {httpOnly: true, sameSite: `strict`});
       res.locals = {
         ...res.locals,
         isAuthorized: true,
-        tokens: body,
+        user,
+        tokens: {
+          accessToken,
+          refreshToken: newRefreshToken,
+        },
         headers: {
           [AUTHORIZATION_KEY]: authorizationValue,
         },

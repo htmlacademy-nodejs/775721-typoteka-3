@@ -64,6 +64,18 @@ class UserService {
     return !!await this.findByEmail(email);
   }
 
+  async findById(id) {
+    const {User} = this._models;
+
+    try {
+      return User.findByPk(id, this._selectOptions);
+    } catch (error) {
+      this._logger.error(`Пользователь с id: ${ id } не найден. Ошибка: ${ error }`);
+
+      return null;
+    }
+  }
+
   async isUserPasswordCorrect(password, passwordHash) {
     return bcrypt.compare(password, passwordHash);
   }

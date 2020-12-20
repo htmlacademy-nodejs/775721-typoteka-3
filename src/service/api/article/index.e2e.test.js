@@ -220,24 +220,26 @@ describe(`Article API end-points`, () => {
   });
 
   describe(`GET ape/articles/most_commented`, () => {
-    const firstCommentData = {
-      text: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
-    };
-    const secondCommentData = {
-      text: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
-    };
-    const thirdCommentData = {
-      text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
-    };
-
     beforeEach(async () => {
       const {body} = await request(server).get(`/api/articles`);
 
       const articles = body.articles;
+      const firstCommentData = {
+        articleId: articles[0].id,
+        text: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
+      };
+      const secondCommentData = {
+        articleId: articles[1].id,
+        text: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
+      };
+      const thirdCommentData = {
+        articleId: articles[1].id,
+        text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+      };
 
-      await request(server).post(`/api/articles/${articles[0].id}/comments`).send(firstCommentData).set(headers);
-      await request(server).post(`/api/articles/${articles[1].id}/comments`).send(secondCommentData).set(headers);
-      await request(server).post(`/api/articles/${articles[1].id}/comments`).send(thirdCommentData).set(headers);
+      await request(server).post(`/api/comments`).send(firstCommentData).set(headers);
+      await request(server).post(`/api/comments`).send(secondCommentData).set(headers);
+      await request(server).post(`/api/comments`).send(thirdCommentData).set(headers);
     });
 
     it(`should return status 200 if request was successful`, async () => {

@@ -3,7 +3,12 @@
 const {HttpStatusCode} = require(`../../constants`);
 
 const isArticleExists = ({service, logger}) => async (req, res, next) => {
-  const {articleId} = req.params;
+  const articleId = req.params.articleId || req.query.articleId || req.body.articleId;
+
+  if (!articleId) {
+    return next();
+  }
+
   const isNotExists = !await service.isExists(articleId);
 
   if (isNotExists) {
