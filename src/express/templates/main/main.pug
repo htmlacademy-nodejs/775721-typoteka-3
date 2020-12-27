@@ -26,7 +26,7 @@ block content
               ul.hot__list
                 each hotArticleItem in hotArticles
                   li.hot__list-item
-                    a.hot__list-link(href=`/articles/${hotArticleItem.id}`)
+                    a.hot__list-link(href=`/articles/${hotArticleItem.id}?previousUrl=${currentPath}`)
                       | #{hotArticleItem.title}
                       sup.hot__link-sup #{hotArticleItem.commentsQuantity}
         section.main-page__last.last
@@ -42,7 +42,7 @@ block content
                 li.last__list-item
                   img.last__list-image(src=`img/${commentsItem.user.avatar}`, width='20', height='20', alt=`Аватар пользователя: ${commentsItem.user.firstName} ${commentsItem.user.lastName}`)
                   b.last__list-name #{`${commentsItem.user.firstName} ${commentsItem.user.lastName}`}
-                  a.last__list-link(href=`/articles/${commentsItem.articleId}`) #{commentsItem.message}
+                  a.last__list-link(href=`/articles/${commentsItem.articleId}?previousUrl=${currentPath}#comment-${commentsItem.id}`) #{commentsItem.message}
 
       include ../partials/preview-articles
 

@@ -3,7 +3,7 @@
 class ArticleService {
   constructor(dataBase, logger) {
     const {models} = dataBase;
-    const {Category, Comment} = models;
+    const {Category, Comment, User} = models;
 
     this._dataBase = dataBase;
     this._models = models;
@@ -27,6 +27,17 @@ class ArticleService {
             `id`,
             `message`,
             [`created_date`, `createdDate`],
+          ],
+          include: [
+            {
+              model: User,
+              attributes: [
+                `id`,
+                `firstName`,
+                `lastName`,
+                `avatar`,
+              ],
+            },
           ],
         },
       ],

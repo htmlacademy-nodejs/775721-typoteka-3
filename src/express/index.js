@@ -76,6 +76,12 @@ app.use(async (req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  res.locals.currentPath = req.originalUrl;
+
+  next();
+});
+
 app.use(mainRouter);
 app.use(authenticationRouter);
 app.use(`/my`, [isUserHasAccess], userRouter);

@@ -96,3 +96,23 @@ exports.getArticlesByCategory = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.getArticle = async (req, res, next) => {
+  const {id} = req.params;
+  const {previousUrl} = req.query;
+  const {categories} = res.locals;
+
+  try {
+    const {statusCode, body: article} = await request.get({url: `${ API_SERVER_URL }/articles/${id}`, json: true});
+
+    if (statusCode === HttpStatusCode.NOT_FOUND) {
+      return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
+    }
+
+    const articleCategories = categories.filter((categoryItem) => article.categories.find((articleCategoryId) => categoryItem.id === articleCategoryId.id));
+
+    return res.render(`articles/post`, {article, categories: articleCategories, previousUrl});
+  } catch (error) {
+    return next(error);
+  }
+};
