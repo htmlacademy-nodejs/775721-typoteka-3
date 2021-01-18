@@ -3,7 +3,7 @@ header.header
     img.logo__image(src='/img/icons/logo-image-only.svg', alt='логотип Типотеки')
     span.logo__name Типотека
 
-  if isAuthorized
+  if isAdmin
     button.button.button--colored.header__button-new Новая запись
     .header__dropdown
       a.button.button--burger.header__burger(href='#') Открыть меню
@@ -11,6 +11,15 @@ header.header
         li.navigation__item
           a(href='/logout') Выход
 
+  else if isAuthorized
+    nav.header__nav
+      ul.header__nav-list
+        li.header__list-item
+          p #{user.firstName} #{user.lastName}
+        li.header__list-item
+          a.header__exit(href='/logout') Выйти
+    a.header__avatar.avatar
+      img(src=user.avatar, alt=`Аватар пользователя: ${user.firstName} ${user.lastName}`)
   else
     nav.header__nav
       ul.header__nav-list
@@ -18,4 +27,5 @@ header.header
           a.header__registration(href='/register') Регистрация
         li.header__list-item
           a.header__enter(href='/login') Вход с паролем
+
   a.header__search.button.button--search(href='/search', aria-label='поиск по сайту')
