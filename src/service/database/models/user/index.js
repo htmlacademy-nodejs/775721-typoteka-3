@@ -35,6 +35,11 @@ exports.createUserModel = (sequelize, DataTypes) => {
         len: [UserPasswordRequirements.length.MIN, UserPasswordRequirements.length.MAX],
       },
     },
+    role: {
+      type: sequelize.Sequelize.ENUM,
+      values: [`admin`, `reader`],
+      allowNull: false,
+    },
     avatar: {
       type: DataTypes.TEXT,
     },

@@ -5,6 +5,7 @@ const request = require(`supertest`);
 
 const {createServer} = require(`../../server`);
 const testDataBase = require(`../../database/test-data-base`);
+const {UserRole} = require(`../../../constants`);
 
 describe(`Search API end-points`, () => {
   const server = createServer({dataBase: testDataBase});
@@ -18,6 +19,7 @@ describe(`Search API end-points`, () => {
         email: `ivan_abramov@mail.local`,
         password: 123456,
         avatar: `avatar01.jpg`,
+        role: UserRole.READER,
       },
     ];
     const categories = [

@@ -22,3 +22,8 @@ exports.FilePath = {
 exports.ExitCode = {
   ERROR: 1,
 };
+
+exports.UserRole = {
+  ADMIN: `admin`,
+  READER: `reader`,
+};

@@ -14,7 +14,7 @@ const userRouter = require(`./routes/user`);
 const articlesRouter = require(`./routes/articles`);
 const categoriesRouter = require(`./routes/categories`);
 const {DirName, AUTHORIZATION_KEY} = require(`./constants`);
-const {HttpStatusCode} = require(`../constants`);
+const {HttpStatusCode, UserRole} = require(`../constants`);
 const {FRONT_SERVER_DEFAULT_PORT, UPLOAD_DIR, API_SERVER_URL} = require(`../config`);
 const {request} = require(`./request`);
 const {isUserHasAccess} = require(`./middlewares/is-user-has-access`);
@@ -56,11 +56,13 @@ app.use(async (req, res, next) => {
     if (statusCode === HttpStatusCode.OK) {
       const {accessToken, refreshToken: newRefreshToken, user} = body;
       const authorizationValue = `Bearer ${accessToken} ${newRefreshToken}`;
+      const isAdmin = user.role === UserRole.ADMIN;
 
       res.cookie(AUTHORIZATION_KEY, authorizationValue, {httpOnly: true, sameSite: `strict`});
       res.locals = {
         ...res.locals,
         isAuthorized: true,
+        isAdmin,
         user,
         tokens: {
           accessToken,
