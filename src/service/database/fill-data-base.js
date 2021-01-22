@@ -21,6 +21,8 @@ exports.fillDataBase = async ({dataBase, mocks = {}}) => {
     await sequelize.query(`UPDATE articles SET id = DEFAULT`);
 
     await Comment.bulkCreate(comments);
+    await sequelize.query(`ALTER SEQUENCE comments_id_seq RESTART`);
+    await sequelize.query(`UPDATE comments SET id = DEFAULT`);
 
     await RefreshToken.bulkCreate(tokens);
 

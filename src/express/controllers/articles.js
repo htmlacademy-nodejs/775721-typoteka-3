@@ -99,10 +99,12 @@ exports.getArticlesByCategory = async (req, res, next) => {
 
 exports.getArticle = async (req, res, next) => {
   const {id} = req.params;
-  const {previousUrl} = req.query;
+  const {previousUrl, errorMessages: errorMessagesJSON} = req.query;
   const {categories} = res.locals;
 
   try {
+    const errorMessages = errorMessagesJSON && JSON.parse(errorMessagesJSON);
+
     const {statusCode, body: article} = await request.get({url: `${ API_SERVER_URL }/articles/${id}`, json: true});
 
     if (statusCode === HttpStatusCode.NOT_FOUND) {
@@ -111,7 +113,34 @@ exports.getArticle = async (req, res, next) => {
 
     const articleCategories = categories.filter((categoryItem) => article.categories.find((articleCategoryId) => categoryItem.id === articleCategoryId.id));
 
-    return res.render(`articles/post`, {article, categories: articleCategories, previousUrl});
+    return res.render(`articles/post`, {article, categories: articleCategories, previousUrl, errors: errorMessages});
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.postComment = async (req, res, next) => {
+  const {id} = req.params;
+  const {previousUrl} = req.query;
+  const {headers} = res.locals;
+  const {text} = req.fields;
+  const commentData = {
+    articleId: id,
+    text,
+  };
+
+  try {
+    const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/comments`, headers, body: commentData, json: true});
+
+    if (statusCode === HttpStatusCode.CREATED) {
+      return res.redirect(`/articles/${id}?previousUrl=${previousUrl}`);
+    }
+
+    const errorDetails = body.details || [];
+    const errorMessages = parseErrorDetailsToErrorMessages(errorDetails);
+    const errorMessagesJSON = JSON.stringify(errorMessages);
+
+    return res.redirect(`/articles/${id}?previousUrl=${previousUrl}&errorMessages=${errorMessagesJSON}`);
   } catch (error) {
     return next(error);
   }

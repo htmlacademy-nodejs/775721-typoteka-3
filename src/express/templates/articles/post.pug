@@ -33,10 +33,22 @@ block content
                       p #{`${commentItem.user.firstName} ${commentItem.user.lastName}`} •
                       time.comments__date(datetime=commentItem.createdDate) #{new Date(commentItem.createdDate).toLocaleString()}
                     p.comments__message #{commentItem.message}
-          .comments__footer.comments__footer--user
-            form(action='#', method='POST')
-              .comments__avatar.avatar
-                img(src='/img/avatar-2.png', alt='аватар пользователя')
-              label
-                textarea(rows='1', placeholder='Присоединиться к обсуждению')
-              button.comments__button.button.button--colored(type='submit') Опубликовать
+          if isAuthorized
+            .comments__footer.comments__footer--user
+              form(action=(`/articles/${article.id}/comments?_csrf=${csrfToken}&previousUrl=${previousUrl}`), method='post', enctype='multipart/form-data')
+                .comments__avatar.avatar
+                  img(src=`/img/${user.avatar}`, alt=`Аватар пользователя: ${user.firstName} ${user.lastName}`)
+                label
+                  textarea(rows='1', name='text' placeholder='Присоединиться к обсуждению')
+                  p.form__error-message #{errors ? errors['password'] : ''}
+                button.comments__button.button.button--colored(type='submit') Опубликовать
+              if errors
+                p.comments__error #{errors['text']}
+          else
+            .comments__footer.comments__footer--visitor
+              a.comments__button.button.button--colored(href='/login') Войти
+              .comments__registration
+                p.text.text--signature
+                  a.title.title--small(href='/register') Регистрация
+                  br
+                  | Чтобы присоединиться к переписке нужно зарегистрироваться
