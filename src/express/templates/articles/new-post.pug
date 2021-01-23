@@ -16,9 +16,7 @@ block content
                     input#new-publication-date(type='text', name='createdDate', value=(article ? article.createdDate : '') placeholder='21.03.2019')
                   p.form__error-message #{errors ? errors['createdDate'] : ''}
               button.new-publication__button.button.button--colored(type='submit') Опубликовать
-            button.popup__button.button.button--popup-close(type='button', aria-label='Закрыть окно')
-              | Закрыть
-              | окно
+            a.popup__button.button.button--popup-close(href='/') Закрыть окно
             .new-publication__form.form
               .form__wrapper.form__wrapper--intro
                 .form__field
