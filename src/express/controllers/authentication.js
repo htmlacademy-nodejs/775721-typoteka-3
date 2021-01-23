@@ -51,12 +51,6 @@ exports.postLogin = async (req, res, next) => {
   try {
     const {statusCode, body} = await request.post({url: `${API_SERVER_URL}/user/login`, json: true, body: loginData});
 
-    if (statusCode === HttpStatusCode.FORBIDDEN) {
-      const errorMessages = parseErrorDetailsToErrorMessages(body.details);
-
-      return res.render(`authentication/login`, {errors: errorMessages});
-    }
-
     if (statusCode === HttpStatusCode.OK) {
       const {accessToken, refreshToken} = body;
 
@@ -65,7 +59,9 @@ exports.postLogin = async (req, res, next) => {
       return res.redirect(`/`);
     }
 
-    return res.render(`authentication/login`);
+    const errorMessages = parseErrorDetailsToErrorMessages(body.details);
+
+    return res.render(`authentication/login`, {errors: errorMessages});
   } catch (error) {
     return next(error);
   }
