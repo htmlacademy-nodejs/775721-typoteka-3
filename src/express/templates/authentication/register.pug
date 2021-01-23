@@ -5,15 +5,13 @@ block content
     h1.visually-hidden Регистрация пользователя
     section.modal
       .popup.popup--registration
-        button.popup__button.button.button--popup-close(type='button', aria-label='Закрыть окно')
-          | Закрыть
-          | окно
+        a.popup__button.button.button--popup-close(href='/') Закрыть окно
         h2.visually-hidden Форма регистрации
         ul.popup__tabs
           li.popup__tab.popup__tab--active.popup__tab--register
-            button.popup__tab-switcher.button(type='button') Регистрация
+            a.popup__tab-switcher.button Регистрация
           li.popup__tab.popup__tab--log-in
-            button.popup__tab-switcher.button(type='button') Войти
+            a.popup__tab-switcher.button(href='/login') Войти
         .popup__form.popup__form--active.form.form--register
           form(action=(`/register?_csrf=${csrfToken}`), method='POST', enctype='multipart/form-data')
             .form__field
