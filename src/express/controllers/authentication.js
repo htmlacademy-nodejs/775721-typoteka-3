@@ -16,9 +16,13 @@ exports.getRegister = async (req, res, next) => {
 
 
 exports.postRegister = async (req, res, next) => {
-  try {
-    const userData = req.fields;
+  const avatar = res.locals.imageName;
+  const userData = {
+    ...req.fields,
+    avatar,
+  };
 
+  try {
     const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/user`, json: true, body: userData});
 
     if (statusCode === HttpStatusCode.CREATED) {
