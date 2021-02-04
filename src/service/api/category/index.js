@@ -5,18 +5,31 @@ const {Router} = require(`express`);
 const {Route} = require(`./constants`);
 const {HttpStatusCode} = require(`../../../constants`);
 const {categoryParamsSchema} = require(`../../schema/category-params`);
+const {categoryDataSchema} = require(`../../schema/category-data`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
+const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 
 const createCategoryRouter = ({categoryService, logger}) => {
   const router = new Router();
 
   const isRequestParamsValidMiddleware = isRequestParamsValid({schema: categoryParamsSchema, logger});
+  const isCategoryDataValidMiddleware = isRequestDataValid({schema: categoryDataSchema, logger});
 
   router.get(Route.INDEX, async (req, res, next) => {
     try {
       const categories = await categoryService.findAll();
 
       res.status(HttpStatusCode.OK).json(categories);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post(Route.INDEX, [isCategoryDataValidMiddleware], async (req, res, next) => {
+    try {
+      const newCategory = await categoryService.create(req.body);
+
+      res.status(HttpStatusCode.CREATED).json(newCategory);
     } catch (error) {
       next(error);
     }

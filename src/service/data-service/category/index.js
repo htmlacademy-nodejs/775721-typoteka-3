@@ -16,7 +16,10 @@ class CategoryService {
         model: Article,
         attributes: []
       },
-      group: [`category.id`],
+      group: [`category.id`, `category.created_date`],
+      order: [
+        [sequelize.col(`created_date`), `ASC`],
+      ],
       includeIgnoreAttributes: false,
       raw: true,
     };
@@ -41,6 +44,20 @@ class CategoryService {
       return Category.findByPk(id, this._selectOptions);
     } catch (error) {
       this._logger.error(`Не могу найти категорию с id = ${id}. Ошибка: ${ error }`);
+
+      return null;
+    }
+  }
+
+  async create(params) {
+    const {Category} = this._models;
+
+    try {
+      const {id} = await Category.create(params);
+
+      return Category.findByPk(id, this._selectOptions);
+    } catch (error) {
+      this._logger.error(`Не могу создать категорию. Ошибка: ${error}`);
 
       return null;
     }

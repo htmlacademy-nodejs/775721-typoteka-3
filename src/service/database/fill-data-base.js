@@ -8,13 +8,14 @@ exports.fillDataBase = async ({dataBase, mocks = {}}) => {
   try {
     await sequelize.sync({force: true});
 
-    await Promise.all([
-      User.bulkCreate(users),
-      Category.bulkCreate(categories),
-    ]);
-
+    await User.bulkCreate(users);
     await sequelize.query(`ALTER SEQUENCE users_id_seq RESTART`);
     await sequelize.query(`UPDATE users SET id = DEFAULT`);
+
+    const sortedCategories = categories.sort((categoryA, categoryB) => categoryA.id - categoryB.id);
+    await Category.bulkCreate(sortedCategories);
+    await sequelize.query(`ALTER SEQUENCE categories_id_seq RESTART`);
+    await sequelize.query(`UPDATE categories SET id = DEFAULT`);
 
     await Article.bulkCreate(articles);
     await sequelize.query(`ALTER SEQUENCE articles_id_seq RESTART`);

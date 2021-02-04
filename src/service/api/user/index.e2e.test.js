@@ -576,6 +576,7 @@ describe(`User API end-points`, () => {
         email: `ivan@mail.com`,
         password: `123456`,
         avatar: `avatar01.jpg`,
+        role: UserRole.READER,
       },
     ];
 

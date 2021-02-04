@@ -22,7 +22,8 @@ exports.createCategoryModel = (sequelize, DataTypes) => {
     },
   }, {
     sequelize,
-    timestamps: false,
+    createdAt: `created_date`,
+    updatedAt: false,
     paranoid: false,
     modelName: `category`,
   });
