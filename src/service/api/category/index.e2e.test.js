@@ -186,4 +186,94 @@ describe(`Category API end-points`, () => {
       expect(res.body).toMatchObject(data);
     });
   });
+
+  describe(`PUT api/categories/:categoryId`, () => {
+    const userData = {
+      firstName: `James`,
+      lastName: `Bond`,
+      email: `jamesBond@mail.com`,
+      password: `123456`,
+      passwordRepeat: `123456`,
+      avatar: `avatar.png`,
+    };
+    const headers = {};
+    const firstCategoryData = {
+      title: `Category`,
+    };
+    let category;
+
+    beforeEach(async () => {
+      await testDataBase.resetDataBase();
+
+      await request(server).post(`/api/user`).send(userData);
+
+      const {body: loginBody} = await request(server).post(`/api/user/login`).send({email: userData.email, password: userData.password});
+      headers.authorization = `Bearer ${loginBody.accessToken} ${loginBody.refreshToken}`;
+
+      const response = await request(server).post(`/api/categories`).send(firstCategoryData).set(headers);
+      category = response.body;
+    });
+
+    it(`should return status 400 if sent invalid id`, async () => {
+      const data = {
+        title: `Cat`,
+      };
+      const res = await request(server).put(`/api/categories/abc`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 404 if category doesn't exist`, async () => {
+      const data = {
+        title: `Cat`,
+      };
+      const res = await request(server).put(`/api/categories/123`).send(data);
+
+      expect(res.statusCode).toBe(404);
+    });
+
+    it(`should return status 400 if sent short title`, async () => {
+      const data = {
+        title: `Cat`,
+      };
+      const res = await request(server).put(`/api/categories/${category.id}`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if sent long title`, async () => {
+      const data = {
+        title: `VeryVeryLongTitleOfCategoryName`,
+      };
+      const res = await request(server).put(`/api/categories/${category.id}`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 400 if didn't send title`, async () => {
+      const data = {};
+      const res = await request(server).put(`/api/categories/${category.id}`).send(data);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 201 if have sent valid data`, async () => {
+      const data = {
+        title: `Category`,
+      };
+      const res = await request(server).put(`/api/categories/${category.id}`).send(data);
+
+      expect(res.statusCode).toBe(200);
+    });
+
+    it(`should return category with id and sent title if have sent valid data`, async () => {
+      const data = {
+        title: `Category`,
+      };
+      const res = await request(server).put(`/api/categories/${category.id}`).send(data);
+
+      expect(res.body).toHaveProperty(`id`);
+      expect(res.body).toMatchObject(data);
+    });
+  });
 });

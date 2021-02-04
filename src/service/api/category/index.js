@@ -8,12 +8,14 @@ const {categoryParamsSchema} = require(`../../schema/category-params`);
 const {categoryDataSchema} = require(`../../schema/category-data`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
+const {isCategoryExists} = require(`../../middlewares/is-category-exists`);
 
 const createCategoryRouter = ({categoryService, logger}) => {
   const router = new Router();
 
   const isRequestParamsValidMiddleware = isRequestParamsValid({schema: categoryParamsSchema, logger});
   const isCategoryDataValidMiddleware = isRequestDataValid({schema: categoryDataSchema, logger});
+  const isCategoryExistsMiddleware = isCategoryExists({service: categoryService, logger});
 
   router.get(Route.INDEX, async (req, res, next) => {
     try {
@@ -43,6 +45,26 @@ const createCategoryRouter = ({categoryService, logger}) => {
 
       if (!category) {
         return res.status(HttpStatusCode.NOT_FOUND).send(`Нет категории с id: ${ categoryId }`);
+      }
+
+      return res.status(HttpStatusCode.OK).json(category);
+    } catch (error) {
+      return next(error);
+    }
+  });
+
+  router.put(Route.CATEGORY, [isRequestParamsValidMiddleware, isCategoryExistsMiddleware, isCategoryDataValidMiddleware], async (req, res, next) => {
+    const {categoryId} = req.params;
+    const id = Number.parseInt(categoryId, 10);
+
+    try {
+      const category = await categoryService.update({
+        id,
+        ...req.body,
+      });
+
+      if (!category) {
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send(`Ошибка при обновлении категории с id: ${ categoryId }`);
       }
 
       return res.status(HttpStatusCode.OK).json(category);

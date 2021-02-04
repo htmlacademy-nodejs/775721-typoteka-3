@@ -62,6 +62,42 @@ class CategoryService {
       return null;
     }
   }
+
+  async update({id, title}) {
+    const {Category} = this._models;
+
+    try {
+      const [updatedRows] = await Category.update({
+        title,
+      }, {
+        where: {
+          id,
+        },
+      });
+
+      if (!updatedRows) {
+        return null;
+      }
+
+      return Category.findByPk(id, this._selectOptions);
+    } catch (error) {
+      this._logger.error(`Не могу обновить категорию. Ошибка: ${ error }`);
+
+      return null;
+    }
+  }
+
+  async isExists(id) {
+    try {
+      const category = await this.findById(id);
+
+      return !!category;
+    } catch (error) {
+      this._logger.error(`Не могу проверить наличие категории с id: ${ id }. Ошибка: ${ error }`);
+
+      return false;
+    }
+  }
 }
 
 exports.CategoryService = CategoryService;
