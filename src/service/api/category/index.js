@@ -73,6 +73,19 @@ const createCategoryRouter = ({categoryService, logger}) => {
     }
   });
 
+  router.delete(Route.CATEGORY, [isRequestParamsValidMiddleware, isCategoryExistsMiddleware], async (req, res, next) => {
+    const {categoryId} = req.params;
+    const id = Number.parseInt(categoryId, 10);
+
+    try {
+      await categoryService.delete(id);
+
+      res.sendStatus(HttpStatusCode.NO_CONTENT);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   return router;
 };
 

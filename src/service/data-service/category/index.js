@@ -98,6 +98,22 @@ class CategoryService {
       return false;
     }
   }
+
+  async delete(id) {
+    const {Category} = this._models;
+
+    try {
+      return Category.destroy({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      this._logger.error(`Не могу удалить категорию с id: ${id}. Ошибка: ${error}`);
+
+      return null;
+    }
+  }
 }
 
 exports.CategoryService = CategoryService;

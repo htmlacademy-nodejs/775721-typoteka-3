@@ -53,3 +53,15 @@ exports.postEditCategory = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.getDeleteCategory = async (req, res, next) => {
+  const {id} = req.params;
+
+  try {
+    await request.delete({url: `${ API_SERVER_URL }/categories/${id}`, json: true});
+
+    return res.redirect(`/categories`);
+  } catch (error) {
+    return next(error);
+  }
+};

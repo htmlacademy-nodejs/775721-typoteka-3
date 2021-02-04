@@ -276,4 +276,50 @@ describe(`Category API end-points`, () => {
       expect(res.body).toMatchObject(data);
     });
   });
+
+  describe(`DELETE api/categories/:categoryId`, () => {
+    const userData = {
+      firstName: `James`,
+      lastName: `Bond`,
+      email: `jamesBond@mail.com`,
+      password: `123456`,
+      passwordRepeat: `123456`,
+      avatar: `avatar.png`,
+    };
+    const headers = {};
+    const firstCategoryData = {
+      title: `Category`,
+    };
+    let category;
+
+    beforeEach(async () => {
+      await testDataBase.resetDataBase();
+
+      await request(server).post(`/api/user`).send(userData);
+
+      const {body: loginBody} = await request(server).post(`/api/user/login`).send({email: userData.email, password: userData.password});
+      headers.authorization = `Bearer ${loginBody.accessToken} ${loginBody.refreshToken}`;
+
+      const response = await request(server).post(`/api/categories`).send(firstCategoryData).set(headers);
+      category = response.body;
+    });
+
+    it(`should return status 400 if sent invalid id`, async () => {
+      const res = await request(server).delete(`/api/categories/abc`).set(headers);
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 404 if category doesn't exist`, async () => {
+      const res = await request(server).delete(`/api/categories/123`).set(headers);
+
+      expect(res.statusCode).toBe(404);
+    });
+
+    it(`should return status 204 if category was successfully deleted`, async () => {
+      const res = await request(server).delete(`/api/categories/${category.id}`).set(headers);
+
+      expect(res.statusCode).toBe(204);
+    });
+  });
 });
