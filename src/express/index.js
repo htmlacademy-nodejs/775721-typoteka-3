@@ -88,7 +88,7 @@ app.use(mainRouter);
 app.use(authenticationRouter);
 app.use(`/my`, [isUserHasAccess], userRouter);
 app.use(`/articles`, articlesRouter);
-app.use(`/categories`, categoriesRouter);
+app.use(`/categories`, [isUserHasAccess], categoriesRouter);
 
 app.use((req, res) => res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`));
 

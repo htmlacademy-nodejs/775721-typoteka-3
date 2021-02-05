@@ -9,6 +9,7 @@ const {categoryDataSchema} = require(`../../schema/category-data`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isCategoryExists} = require(`../../middlewares/is-category-exists`);
+const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
 
 const createCategoryRouter = ({categoryService, logger}) => {
   const router = new Router();
@@ -16,6 +17,7 @@ const createCategoryRouter = ({categoryService, logger}) => {
   const isRequestParamsValidMiddleware = isRequestParamsValid({schema: categoryParamsSchema, logger});
   const isCategoryDataValidMiddleware = isRequestDataValid({schema: categoryDataSchema, logger});
   const isCategoryExistsMiddleware = isCategoryExists({service: categoryService, logger});
+  const isUserAuthorizedMiddleware = isUserAuthorized({logger});
 
   router.get(Route.INDEX, async (req, res, next) => {
     try {
@@ -27,7 +29,7 @@ const createCategoryRouter = ({categoryService, logger}) => {
     }
   });
 
-  router.post(Route.INDEX, [isCategoryDataValidMiddleware], async (req, res, next) => {
+  router.post(Route.INDEX, [isUserAuthorizedMiddleware, isCategoryDataValidMiddleware], async (req, res, next) => {
     try {
       const newCategory = await categoryService.create(req.body);
 
@@ -53,7 +55,7 @@ const createCategoryRouter = ({categoryService, logger}) => {
     }
   });
 
-  router.put(Route.CATEGORY, [isRequestParamsValidMiddleware, isCategoryExistsMiddleware, isCategoryDataValidMiddleware], async (req, res, next) => {
+  router.put(Route.CATEGORY, [isUserAuthorizedMiddleware, isRequestParamsValidMiddleware, isCategoryExistsMiddleware, isCategoryDataValidMiddleware], async (req, res, next) => {
     const {categoryId} = req.params;
     const id = Number.parseInt(categoryId, 10);
 
@@ -73,7 +75,7 @@ const createCategoryRouter = ({categoryService, logger}) => {
     }
   });
 
-  router.delete(Route.CATEGORY, [isRequestParamsValidMiddleware, isCategoryExistsMiddleware], async (req, res, next) => {
+  router.delete(Route.CATEGORY, [isUserAuthorizedMiddleware, isRequestParamsValidMiddleware, isCategoryExistsMiddleware], async (req, res, next) => {
     const {categoryId} = req.params;
     const id = Number.parseInt(categoryId, 10);
 

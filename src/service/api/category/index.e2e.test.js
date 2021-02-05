@@ -138,15 +138,30 @@ describe(`Category API end-points`, () => {
   });
 
   describe(`POST api/categories`, () => {
+    const userData = {
+      firstName: `James`,
+      lastName: `Bond`,
+      email: `jamesBond@mail.com`,
+      password: `123456`,
+      passwordRepeat: `123456`,
+      avatar: `avatar.png`,
+    };
+    const headers = {};
+
     beforeEach(async () => {
       await testDataBase.resetDataBase();
+
+      await request(server).post(`/api/user`).send(userData);
+
+      const {body: loginBody} = await request(server).post(`/api/user/login`).send({email: userData.email, password: userData.password});
+      headers.authorization = `Bearer ${loginBody.accessToken} ${loginBody.refreshToken}`;
     });
 
     it(`should return status 400 if sent short title`, async () => {
       const data = {
         title: `Cat`,
       };
-      const res = await request(server).post(`/api/categories`).send(data);
+      const res = await request(server).post(`/api/categories`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -155,23 +170,30 @@ describe(`Category API end-points`, () => {
       const data = {
         title: `VeryVeryLongTitleOfCategoryName`,
       };
-      const res = await request(server).post(`/api/categories`).send(data);
+      const res = await request(server).post(`/api/categories`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
 
     it(`should return status 400 if didn't send title`, async () => {
       const data = {};
-      const res = await request(server).post(`/api/categories`).send(data);
+      const res = await request(server).post(`/api/categories`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 401 if didn't send headers`, async () => {
+      const data = {};
+      const res = await request(server).post(`/api/categories`).send(data);
+
+      expect(res.statusCode).toBe(401);
     });
 
     it(`should return status 201 if have sent valid data`, async () => {
       const data = {
         title: `Category`,
       };
-      const res = await request(server).post(`/api/categories`).send(data);
+      const res = await request(server).post(`/api/categories`).send(data).set(headers);
 
       expect(res.statusCode).toBe(201);
     });
@@ -180,7 +202,7 @@ describe(`Category API end-points`, () => {
       const data = {
         title: `Category`,
       };
-      const res = await request(server).post(`/api/categories`).send(data);
+      const res = await request(server).post(`/api/categories`).send(data).set(headers);
 
       expect(res.body).toHaveProperty(`id`);
       expect(res.body).toMatchObject(data);
@@ -218,7 +240,7 @@ describe(`Category API end-points`, () => {
       const data = {
         title: `Cat`,
       };
-      const res = await request(server).put(`/api/categories/abc`).send(data);
+      const res = await request(server).put(`/api/categories/abc`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -227,7 +249,7 @@ describe(`Category API end-points`, () => {
       const data = {
         title: `Cat`,
       };
-      const res = await request(server).put(`/api/categories/123`).send(data);
+      const res = await request(server).put(`/api/categories/123`).send(data).set(headers);
 
       expect(res.statusCode).toBe(404);
     });
@@ -236,7 +258,7 @@ describe(`Category API end-points`, () => {
       const data = {
         title: `Cat`,
       };
-      const res = await request(server).put(`/api/categories/${category.id}`).send(data);
+      const res = await request(server).put(`/api/categories/${category.id}`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
@@ -245,23 +267,30 @@ describe(`Category API end-points`, () => {
       const data = {
         title: `VeryVeryLongTitleOfCategoryName`,
       };
-      const res = await request(server).put(`/api/categories/${category.id}`).send(data);
+      const res = await request(server).put(`/api/categories/${category.id}`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
     });
 
     it(`should return status 400 if didn't send title`, async () => {
       const data = {};
-      const res = await request(server).put(`/api/categories/${category.id}`).send(data);
+      const res = await request(server).put(`/api/categories/${category.id}`).send(data).set(headers);
 
       expect(res.statusCode).toBe(400);
+    });
+
+    it(`should return status 401 if didn't send headers`, async () => {
+      const data = {};
+      const res = await request(server).put(`/api/categories/${category.id}`).send(data);
+
+      expect(res.statusCode).toBe(401);
     });
 
     it(`should return status 201 if have sent valid data`, async () => {
       const data = {
         title: `Category`,
       };
-      const res = await request(server).put(`/api/categories/${category.id}`).send(data);
+      const res = await request(server).put(`/api/categories/${category.id}`).send(data).set(headers);
 
       expect(res.statusCode).toBe(200);
     });
@@ -270,7 +299,7 @@ describe(`Category API end-points`, () => {
       const data = {
         title: `Category`,
       };
-      const res = await request(server).put(`/api/categories/${category.id}`).send(data);
+      const res = await request(server).put(`/api/categories/${category.id}`).send(data).set(headers);
 
       expect(res.body).toHaveProperty(`id`);
       expect(res.body).toMatchObject(data);
