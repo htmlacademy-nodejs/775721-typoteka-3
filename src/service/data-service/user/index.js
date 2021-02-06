@@ -102,6 +102,18 @@ class UserService {
       return null;
     }
   }
+
+  async isUserAdmin(id) {
+    try {
+      const {role} = await this.findById(id);
+
+      return role === UserRole.ADMIN;
+    } catch (error) {
+      this._logger.error(`Не могу проверить роль пользователя. Ошибка: ${ error }`);
+
+      return null;
+    }
+  }
 }
 
 exports.UserService = UserService;

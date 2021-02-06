@@ -439,6 +439,33 @@ describe(`Article API end-points`, () => {
       expect(res.statusCode).toBe(401);
     });
 
+    it(`should return status 403 if user without admin role tried to create article`, async () => {
+      const secondUserData = {
+        firstName: `Ivan`,
+        lastName: `Ivanov`,
+        email: `ivanIvamon@mail.com`,
+        password: `123456`,
+        passwordRepeat: `123456`,
+        avatar: `avatar.png`,
+      };
+      await request(server).post(`/api/user`).send(secondUserData);
+
+      const {body: loginBody} = await request(server).post(`/api/user/login`).send({email: secondUserData.email, password: secondUserData.password});
+      const authorizationHeader = `Bearer ${loginBody.accessToken} ${loginBody.refreshToken}`;
+
+      const data = {
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data).set({authorization: authorizationHeader});
+
+      expect(res.statusCode).toBe(403);
+    });
+
     it(`should return status 201 if sent valid data`, async () => {
       const data = {
         image: `item01.jpg`,
@@ -736,7 +763,7 @@ describe(`Article API end-points`, () => {
       expect(res.statusCode).toBe(401);
     });
 
-    it(`should return status 403 if tried to update someone else's article`, async () => {
+    it(`should return status 403 if user without admin role tried to update article`, async () => {
       const secondUserData = {
         firstName: `Ivan`,
         lastName: `Ivanov`,
@@ -821,7 +848,7 @@ describe(`Article API end-points`, () => {
       expect(res.statusCode).toBe(401);
     });
 
-    it(`should return status 403 if tried to delete someone else's article`, async () => {
+    it(`should return status 403 if user without admin role tried to delete article`, async () => {
       const secondUserData = {
         firstName: `Ivan`,
         lastName: `Ivanov`,

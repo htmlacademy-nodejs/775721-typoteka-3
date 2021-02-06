@@ -7,13 +7,14 @@ const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
 const {isArticleBelongsToUser} = require(`../../middlewares/is-article-belongs-to-user`);
 const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
+const {isAdmin} = require(`../../middlewares/is-admin`);
 const {mostCommentedArticlesParams} = require(`../../schema/most-commented-articles-params`);
 const {articleDataSchema} = require(`../../schema/article-data`);
 const {articleParamsSchema} = require(`../../schema/article-params`);
 const {Route} = require(`./constants`);
 const {HttpStatusCode} = require(`../../../constants`);
 
-const createArticleRouter = ({articleService, logger}) => {
+const createArticleRouter = ({articleService, userService, logger}) => {
   const router = new Router();
 
   const isRequestDataValidMiddleware = isRequestDataValid({schema: articleDataSchema, logger});
@@ -21,6 +22,7 @@ const createArticleRouter = ({articleService, logger}) => {
   const isRequestParamsValidMiddleware = isRequestParamsValid({schema: articleParamsSchema, logger});
   const isMostCommentedArticlesParamsValidMiddleware = isRequestParamsValid({schema: mostCommentedArticlesParams, logger});
   const isUserAuthorizedMiddleware = isUserAuthorized({logger});
+  const isAdminMiddleware = isAdmin({userService, logger});
   const isArticleBelongsToUserMiddleware = isArticleBelongsToUser({logger, service: articleService});
 
   router.get(Route.INDEX, async (req, res, next) => {
@@ -35,7 +37,7 @@ const createArticleRouter = ({articleService, logger}) => {
     }
   });
 
-  router.post(Route.INDEX, [isUserAuthorizedMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
+  router.post(Route.INDEX, [isUserAuthorizedMiddleware, isAdminMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
     const {image, title, announce, fullText, categories} = req.body;
     const {userId} = res.locals;
 
@@ -73,6 +75,7 @@ const createArticleRouter = ({articleService, logger}) => {
 
   router.put(Route.ARTICLE, [
     isUserAuthorizedMiddleware,
+    isAdminMiddleware,
     isRequestParamsValidMiddleware,
     isArticleExistsMiddleware,
     isArticleBelongsToUserMiddleware,
@@ -99,6 +102,7 @@ const createArticleRouter = ({articleService, logger}) => {
 
   router.delete(Route.ARTICLE, [
     isUserAuthorizedMiddleware,
+    isAdminMiddleware,
     isRequestParamsValidMiddleware,
     isArticleExistsMiddleware,
     isArticleBelongsToUserMiddleware,

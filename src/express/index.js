@@ -17,7 +17,7 @@ const {DirName, AUTHORIZATION_KEY} = require(`./constants`);
 const {HttpStatusCode, UserRole} = require(`../constants`);
 const {FRONT_SERVER_DEFAULT_PORT, UPLOAD_DIR, API_SERVER_URL} = require(`../config`);
 const {request} = require(`./request`);
-const {isUserHasAccess} = require(`./middlewares/is-user-has-access`);
+const {isAdmin} = require(`./middlewares/is-admin`);
 
 const app = express();
 const csrfProtection = csrf({cookie: true});
@@ -56,13 +56,13 @@ app.use(async (req, res, next) => {
     if (statusCode === HttpStatusCode.OK) {
       const {accessToken, refreshToken: newRefreshToken, user} = body;
       const authorizationValue = `Bearer ${accessToken} ${newRefreshToken}`;
-      const isAdmin = user.role === UserRole.ADMIN;
+      const isRoleAdmin = user.role === UserRole.ADMIN;
 
       res.cookie(AUTHORIZATION_KEY, authorizationValue, {httpOnly: true, sameSite: `strict`});
       res.locals = {
         ...res.locals,
         isAuthorized: true,
-        isAdmin,
+        isAdmin: isRoleAdmin,
         user,
         tokens: {
           accessToken,
@@ -86,9 +86,9 @@ app.use((req, res, next) => {
 
 app.use(mainRouter);
 app.use(authenticationRouter);
-app.use(`/my`, [isUserHasAccess], userRouter);
+app.use(`/my`, [isAdmin], userRouter);
 app.use(`/articles`, articlesRouter);
-app.use(`/categories`, [isUserHasAccess], categoriesRouter);
+app.use(`/categories`, [isAdmin], categoriesRouter);
 
 app.use((req, res) => res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`));
 
