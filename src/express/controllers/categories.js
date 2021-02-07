@@ -6,13 +6,12 @@ const {API_SERVER_URL} = require(`../../config`);
 const {HttpStatusCode} = require(`../../constants`);
 
 exports.getCategories = (req, res, next) => {
-  const {categories} = res.locals;
   const {errorMessages: errorMessagesJSON, categoryWithErrorId} = req.query;
 
   try {
     const errors = errorMessagesJSON && JSON.parse(errorMessagesJSON);
 
-    res.render(`categories/all-categories`, {categories, errors, categoryWithErrorId});
+    res.render(`categories/all-categories`, {errors, categoryWithErrorId});
   } catch (error) {
     next(error);
   }

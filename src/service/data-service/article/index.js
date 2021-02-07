@@ -223,7 +223,7 @@ class ArticleService {
     }
   }
 
-  async update({id, image, title, announce, fullText, categories: categoriesIds}) {
+  async update({id, image, title, announce, fullText, createdDate, categories: categoriesIds}) {
     const {sequelize} = this._dataBase;
     const {Article, Category} = this._models;
 
@@ -232,6 +232,7 @@ class ArticleService {
         image,
         title,
         announce,
+        createdDate,
         text: fullText,
       }, {
         where: {

@@ -5,9 +5,9 @@ block content
     section.main-page__notes.notes
       h1.notes__title Мои записи
       ul.notes__list
-        each article in articles
+        each articleItem in articles
           li.notes__list-item
-            time.notes__item-time(datetime=article.createdDate) #{article.createdDate}
-            a.notes__item-text(href='#') #{article.title}
+            time.notes__item-time(datetime=articleItem.createdDate) #{new Date(articleItem.createdDate).toLocaleDateString()}
+            a.notes__item-text(href=`/articles/edit/${articleItem.id}`) #{articleItem.title}
             button.notes__button.button.button--close-item(type='button')
               span.visually-hidden Закрыть строку списка

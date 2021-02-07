@@ -82,7 +82,7 @@ const createArticleRouter = ({articleService, userService, logger}) => {
     isRequestDataValidMiddleware,
   ], async (req, res, next) => {
     const {articleId} = req.params;
-    const {image, title, announce, fullText, categories} = req.body;
+    const {image, title, announce, fullText, categories, createdDate} = req.body;
 
     try {
       const updatedArticle = await articleService.update({
@@ -92,6 +92,7 @@ const createArticleRouter = ({articleService, userService, logger}) => {
         announce,
         fullText,
         categories,
+        createdDate,
       });
 
       res.status(HttpStatusCode.OK).json(updatedArticle);

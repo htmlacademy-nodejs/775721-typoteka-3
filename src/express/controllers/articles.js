@@ -7,24 +7,34 @@ const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-
 
 
 exports.getAddArticle = async (req, res, next) => {
+  const {errorMessages: errorMessagesJSON, articleData: articleDataJSON} = req.query;
+  const action = `/articles/add?_csrf=${res.locals.csrfToken}`;
+
   try {
-    const categoriesResult = await request.get({url: `${ API_SERVER_URL }/categories`, json: true});
+    const errors = errorMessagesJSON && JSON.parse(errorMessagesJSON);
+    const articleData = articleDataJSON && JSON.parse(articleDataJSON);
 
-    if (categoriesResult.statusCode === HttpStatusCode.NOT_FOUND) {
-      return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
-    }
-
-    return res.render(`articles/new-post`, {categories: categoriesResult.body});
+    return res.render(`articles/new-post`, {
+      title: `Новая публикация`,
+      action,
+      errors,
+      article: articleData,
+    });
   } catch (error) {
     return next();
   }
 };
 
 exports.postAddArticle = async (req, res, next) => {
+  const {articleId} = req.query;
+  const url = articleId ? `${ API_SERVER_URL }/articles/${articleId}` : `${ API_SERVER_URL }/articles`;
+  const requestFunction = articleId ? request.put : request.post;
+
   try {
-    const {createdDate, title, category = [], announce, fullText} = req.fields;
+    const {createdDate, title, announce, fullText, ...categoriesObject} = req.fields;
+
     const {headers} = res.locals;
-    const categories = Array.isArray(category) ? category : [category];
+    const categories = Object.values(categoriesObject);
     const article = {
       title,
       announce,
@@ -39,43 +49,45 @@ exports.postAddArticle = async (req, res, next) => {
       article.fullText = fullText;
     }
 
-    const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/articles`, headers, json: true, body: article});
+    const {statusCode, body} = await requestFunction({url, headers, json: true, body: article});
 
-    if (statusCode === HttpStatusCode.CREATED) {
+    if (statusCode === HttpStatusCode.CREATED || statusCode === HttpStatusCode.OK) {
       return res.redirect(`/my`);
-    }
-
-    const categoriesResult = await request.get({url: `${ API_SERVER_URL }/categories`, json: true});
-
-    if (categoriesResult.statusCode === HttpStatusCode.NOT_FOUND) {
-      return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
     }
 
     const errorDetails = body.details || [];
     const errorMessages = parseErrorDetailsToErrorMessages(errorDetails);
+    const errorMessagesJSON = JSON.stringify(errorMessages);
+    const articleDataJSON = JSON.stringify(article);
 
-    return res.render(`articles/new-post`, {article, categories: categoriesResult.body, errors: errorMessages});
+    return res.redirect(`/articles/add?errorMessages=${errorMessagesJSON}&articleData=${articleDataJSON}`);
   } catch (error) {
-    return next();
+    return next(error);
   }
 };
 
 exports.getEditArticle = async (req, res, next) => {
+  const {id} = req.params;
+  const action = `/articles/add?_csrf=${res.locals.csrfToken}&articleId=${id}`;
+
   try {
-    const {id} = req.params;
     const {statusCode, body: article} = await request.get({url: `${ API_SERVER_URL }/articles/${ id }`, json: true});
 
     if (statusCode === HttpStatusCode.NOT_FOUND) {
       return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
     }
 
-    const categoriesResult = await request.get({url: `${ API_SERVER_URL }/categories`, json: true});
+    const categories = article.categories.map(({id: categoryId}) => categoryId.toString());
+    const articleData = {
+      ...article,
+      categories,
+    };
 
-    if (categoriesResult.statusCode === HttpStatusCode.NOT_FOUND) {
-      return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
-    }
-
-    return res.render(`articles/new-post`, {article, categories: categoriesResult.body});
+    return res.render(`articles/new-post`, {
+      title: `Редактировать публикацию`,
+      action,
+      article: articleData,
+    });
   } catch (error) {
     return next(error);
   }

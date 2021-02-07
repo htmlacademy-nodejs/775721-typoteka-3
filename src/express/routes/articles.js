@@ -10,11 +10,11 @@ const {isAdmin} = require(`../middlewares/is-admin`);
 
 const router = new Router();
 
-router.get(`/add`, [isAdmin], getAddArticle);
+router.get(`/add`, [isAdmin, getAllCategories], getAddArticle);
 router.post(`/add`, [isAdmin], postAddArticle);
 router.get(`/:id`, [getAllCategories], getArticle);
 router.post(`/:id/comments`, [isAuthorizedUser], postComment);
-router.get(`/edit/:id`, [isAdmin], getEditArticle);
+router.get(`/edit/:id`, [isAdmin, getAllCategories], getEditArticle);
 router.get(`/category/:categoryId`, [getAllCategories, getArticlesWithPagination], getArticlesByCategory);
 
 module.exports = router;

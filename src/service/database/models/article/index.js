@@ -34,6 +34,10 @@ exports.createArticleModel = (sequelize, DataTypes) => {
       type: DataTypes.STRING(ArticleTextRequirements.length.MAX), /* eslint-disable-line */
       allowNull: false,
     },
+    createdDate: {
+      field: `created_date`,
+      type: DataTypes.DATE,
+    },
   }, {
     sequelize,
     createdAt: `created_date`,
