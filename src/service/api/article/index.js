@@ -5,7 +5,6 @@ const {Router} = require(`express`);
 const {isArticleExists} = require(`../../middlewares/is-article-exists`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
-const {isArticleBelongsToUser} = require(`../../middlewares/is-article-belongs-to-user`);
 const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
 const {isAdmin} = require(`../../middlewares/is-admin`);
 const {mostCommentedArticlesParams} = require(`../../schema/most-commented-articles-params`);
@@ -23,7 +22,6 @@ const createArticleRouter = ({articleService, userService, logger}) => {
   const isMostCommentedArticlesParamsValidMiddleware = isRequestParamsValid({schema: mostCommentedArticlesParams, logger});
   const isUserAuthorizedMiddleware = isUserAuthorized({logger});
   const isAdminMiddleware = isAdmin({userService, logger});
-  const isArticleBelongsToUserMiddleware = isArticleBelongsToUser({logger, service: articleService});
 
   router.get(Route.INDEX, async (req, res, next) => {
     try {
@@ -78,7 +76,6 @@ const createArticleRouter = ({articleService, userService, logger}) => {
     isAdminMiddleware,
     isRequestParamsValidMiddleware,
     isArticleExistsMiddleware,
-    isArticleBelongsToUserMiddleware,
     isRequestDataValidMiddleware,
   ], async (req, res, next) => {
     const {articleId} = req.params;
@@ -106,7 +103,6 @@ const createArticleRouter = ({articleService, userService, logger}) => {
     isAdminMiddleware,
     isRequestParamsValidMiddleware,
     isArticleExistsMiddleware,
-    isArticleBelongsToUserMiddleware,
   ], async (req, res, next) => {
     const {articleId} = req.params;
 

@@ -2,7 +2,7 @@
 
 const {Router} = require(`express`);
 
-const {getAddArticle, postAddArticle, getEditArticle, getArticlesByCategory, getArticle, postComment} = require(`../controllers/articles`);
+const {getAddArticle, postAddArticle, getEditArticle, getArticlesByCategory, getArticle, postComment, getDeleteArticle} = require(`../controllers/articles`);
 const {isAuthorizedUser} = require(`../middlewares/is-authorized-user`);
 const {getAllCategories} = require(`../middlewares/get-all-categories`);
 const {getArticlesWithPagination} = require(`../middlewares/get-articles-with-pagination`);
@@ -15,6 +15,7 @@ router.post(`/add`, [isAdmin], postAddArticle);
 router.get(`/:id`, [getAllCategories], getArticle);
 router.post(`/:id/comments`, [isAuthorizedUser], postComment);
 router.get(`/edit/:id`, [isAdmin, getAllCategories], getEditArticle);
+router.get(`/delete/:id`, [isAdmin], getDeleteArticle);
 router.get(`/category/:categoryId`, [getAllCategories, getArticlesWithPagination], getArticlesByCategory);
 
 module.exports = router;

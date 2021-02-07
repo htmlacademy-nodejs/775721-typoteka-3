@@ -93,6 +93,19 @@ exports.getEditArticle = async (req, res, next) => {
   }
 };
 
+exports.getDeleteArticle = async (req, res, next) => {
+  const {id} = req.params;
+  const {headers} = res.locals;
+
+  try {
+    await request.delete({url: `${ API_SERVER_URL }/articles/${ id }`, headers, json: true});
+
+    return res.redirect(`/my`);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 exports.getArticlesByCategory = async (req, res, next) => {
   const {categoryId} = req.params;
 
