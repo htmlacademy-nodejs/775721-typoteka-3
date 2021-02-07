@@ -3,44 +3,39 @@ extends ../layout
 block content
   main
     h1.visually-hidden Регистрация пользователя
-    section.modal
-      .popup.popup--registration
+    section
+      .popup.popup--registration.popup--anti
         a.popup__button.button.button--popup-close(href='/') Закрыть окно
-        h2.visually-hidden Форма регистрации
-        ul.popup__tabs
-          li.popup__tab.popup__tab--active.popup__tab--register
-            a.popup__tab-switcher.button Регистрация
-          li.popup__tab.popup__tab--log-in
-            a.popup__tab-switcher.button(href='/login') Войти
+        h2.popup__title Регистрация
         .popup__form.popup__form--active.form.form--register
           form(action=(`/register?_csrf=${csrfToken}`), method='POST', enctype='multipart/form-data')
             .form__field
               label
                 input(type='email', placeholder='Электронная почта', name='email', value=(user && user.email || ''), required)
-            p.form__error-message #{errors ? errors['email'] : ''}
             .form__field
               label
                 input(type='text', placeholder='Имя', name='firstName', value=(user && user.firstName || ''), required)
-            p.form__error-message #{errors ? errors['firstName'] : ''}
             .form__field
               label
                 input(type='text', placeholder='Фамилия', name='lastName', value=(user && user.lastName || ''), required)
-            p.form__error-message #{errors ? errors['lastName'] : ''}
             .form__field
               label
                 input(type='password', placeholder='Пароль', name='password', required)
-            p.form__error-message #{errors ? errors['password'] : ''}
             .form__field
               label
                 input(type='password', placeholder='Повтор пароля', name='passwordRepeat', required)
-            p.form__error-message #{errors ? errors['passwordRepeat'] : ''}
+            if(errors && errors.length)
+              .form__validation-error
+                p.form__error-message При регистрации произошли ошибки:
+                ul.form__errors
+                  each errorItem in errors
+                    li.form__error #{errorItem}
             .form__image-loader
               a.form__avatar.avatar
                 img(src='/img/icons/smile.svg', alt='аватар пользователя')
               label
                 input.visually-hidden(type='file', name='avatar')
                 | Загрузить фото профиля
-            p.form__error-message #{errors ? errors['avatar'] : ''}
             button.form__submit-btn.form__submit-btn--register.button.button--colored(type='submit') Зарегистрироваться
         .popup__form.popup__form--hidden.form.form--log-in
           form(action='#', method='get')
@@ -51,4 +46,3 @@ block content
               label
                 input(type='password', placeholder='Пароль', required)
             button.form__submit-btn.form__submit-btn--log-in.button.button--colored(type='submit') Войти
-      .modal__overlay

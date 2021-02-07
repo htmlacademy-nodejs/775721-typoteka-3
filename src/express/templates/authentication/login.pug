@@ -3,40 +3,11 @@ extends ../layout
 block content
   main
     h1.visually-hidden Регистрация пользователя
-    section.modal
-      .popup.popup--registration
+    section
+      .popup.popup--registration.popup--anti
         a.popup__button.button.button--popup-close(href='/') Закрыть окно
-        h2.visually-hidden Форма регистрации
-        ul.popup__tabs
-          li.popup__tab.popup__tab--register
-            a.popup__tab-switcher.button(href='/register') Регистрация
-          li.popup__tab.popup__tab--active.popup__tab--log-in
-            a.popup__tab-switcher.button Войти
-        .popup__form.form.form--register.popup__form--hidden
-          form(action='#', method='get')
-            .form__field
-              label
-                input(type='email', placeholder='Электронная почта', required)
-            .form__field
-              label
-                input(type='text', placeholder='Имя', required)
-            .form__field
-              label
-                input(type='text', placeholder='Фамилия')
-            .form__field
-              label
-                input(type='password', placeholder='Пароль', required)
-            .form__field
-              label
-                input(type='password', placeholder='Повтор пароля', required)
-            .form__image-loader
-              a.form__avatar.avatar
-                img(src='/img/icons/smile.svg', alt='аватар пользователя')
-              label
-                input.visually-hidden(type='file')
-                | Загрузить фото профиля
-            button.form__submit-btn.form__submit-btn--register.button.button--colored(type='submit') Зарегистрироваться
-        .popup__form.popup__form--active.form.form--log-in
+        h2.popup__title Войти
+        .popup__form.form.form--log-in
           form(action=(`/login?_csrf=${csrfToken}`), method='post', enctype='multipart/form-data')
             .form__field
               label
@@ -47,4 +18,3 @@ block content
                 input(type='password', name='password', placeholder='Пароль', required)
             p.form__error-message #{errors ? errors['password'] : ''}
             button.form__submit-btn.form__submit-btn--log-in.button.button--colored(type='submit') Войти
-      .modal__overlay

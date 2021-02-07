@@ -2,8 +2,8 @@ extends ../layout
 
 block content
   main
-    section.modal.modal--flex
-      .popup.popup--new-publication.popup--flex
+    section
+      .popup.popup--new-publication.popup--anti
         .new-publication
           form(action=(`/articles/add?_csrf=${csrfToken}`), method='POST', enctype='multipart/form-data')
             .new-publication__header
@@ -23,27 +23,36 @@ block content
                   label
                     input(type='text', name='title' placeholder='Заголовок', value=(article ? article.title : ''), required)
                 p.form__error-message #{errors ? errors['title'] : ''}
-                .new-publication__checkbox.new-publication__checkbox--auto
+                .form__field.form__field--post-image
+                  label
+                    input#image-name-field(type='text' name='photo' placeholder='Фотография' readonly)
+                  .form__image-loader.form__image-loader--publication
+                    label
+                      input.visually-hidden(type='file' name='upload')
+                      | Обзор
+                  button.button.button--transparent(type='button') Удалить
+                .new-publication__category-wrapper
                   each category in categories
-                    input(
-                      id='category-checkbox-' + category.id type='checkbox',
-                      name='category',
-                      value=category.id,
-                      checked=(article && article.categories ? article.categories.some(({title}) => title === category.title) : false)
-                    )
-                    label(for='category-checkbox-' + category.id) #{category.title}
-                p.form__error-message #{errors ? errors['categories'] : ''}
-                a.new-publication__form-link.button.button--transparent(href='#') Добавить категорию
+                    .new-publication__checkbox.new-publication__checkbox--auto
+                      input(
+                        id='category-checkbox-' + category.id type='checkbox',
+                        name='category',
+                        value=category.id,
+                        checked=(article && article.categories ? article.categories.some(({title}) => title === category.title) : false)
+                      )
+                      label(for='category-checkbox-' + category.id) #{category.title}
+                  a.new-publication__form-link.button.button--transparent(href='/categories') Добавить категорию
+                if(errors && errors['categories'])
+                  p.form__error-message #{errors['categories']}
               .form__wrapper.form__wrapper--text
                 .form__field.form__field--publication-text
                   label
-                    textarea(rows='2', name='announce' placeholder='Анонс публикации')
+                    textarea(rows='5', name='announce' placeholder='Анонс публикации')
                       | #{article ? article.announce : ''}
                 p.form__error-message #{errors ? errors['announce'] : ''}
                 .form__field.form__field--publication-text
                   label
-                    textarea(rows='5', name='fullText' placeholder='Полный текст публикации')
+                    textarea(rows='10', name='fullText' placeholder='Полный текст публикации')
                       | #{article ? article.fullText : ''}
                 p.form__error-message #{errors ? errors['fullText'] : ''}
-      .modal__overlay
 

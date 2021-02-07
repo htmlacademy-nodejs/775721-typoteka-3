@@ -6,12 +6,8 @@ const {API_SERVER_URL} = require(`../../config`);
 const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-to-error-messages`);
 const {AUTHORIZATION_KEY} = require(`../constants`);
 
-exports.getRegister = async (req, res, next) => {
-  try {
-    res.render(`authentication/register`);
-  } catch (error) {
-    next(error);
-  }
+exports.getRegister = async (req, res) => {
+  res.render(`authentication/register`);
 };
 
 
@@ -30,8 +26,9 @@ exports.postRegister = async (req, res, next) => {
     }
 
     const errorMessages = parseErrorDetailsToErrorMessages(body.details);
+    const errors = Object.values(errorMessages);
 
-    return res.render(`authentication/register`, {user: userData, errors: errorMessages});
+    return res.render(`authentication/register`, {user: userData, errors});
   } catch (error) {
     return next(error);
   }
