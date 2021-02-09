@@ -1,6 +1,10 @@
 'use strict';
 
+const path = require(`path`);
+const fs = require(`fs`).promises;
+
 const {request} = require(`../request`);
+const {DirName} = require(`../constants`);
 const {HttpStatusCode} = require(`../../constants`);
 const {API_SERVER_URL} = require(`../../config`);
 const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-to-error-messages`);
@@ -27,6 +31,7 @@ exports.getAddArticle = async (req, res, next) => {
 
 exports.postAddArticle = async (req, res, next) => {
   const {articleId} = req.query;
+  const {imageName} = res.locals;
   const url = articleId ? `${ API_SERVER_URL }/articles/${articleId}` : `${ API_SERVER_URL }/articles`;
   const requestFunction = articleId ? request.put : request.post;
 
@@ -47,6 +52,10 @@ exports.postAddArticle = async (req, res, next) => {
 
     if (fullText) {
       article.fullText = fullText;
+    }
+
+    if (imageName) {
+      article.image = imageName;
     }
 
     const {statusCode, body} = await requestFunction({url, headers, json: true, body: article});
@@ -98,7 +107,14 @@ exports.getDeleteArticle = async (req, res, next) => {
   const {headers} = res.locals;
 
   try {
-    await request.delete({url: `${ API_SERVER_URL }/articles/${ id }`, headers, json: true});
+    const {statusCode, body} = await request.delete({url: `${ API_SERVER_URL }/articles/${ id }`, headers, json: true});
+
+    if (statusCode === HttpStatusCode.OK) {
+      const imageName = body.image;
+      const imagePath = path.resolve(__dirname, `../${DirName.PUBLIC}/img/${imageName}`);
+
+      fs.unlink(imagePath);
+    }
 
     return res.redirect(`/my`);
   } catch (error) {

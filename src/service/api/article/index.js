@@ -36,11 +36,10 @@ const createArticleRouter = ({articleService, userService, logger}) => {
   });
 
   router.post(Route.INDEX, [isUserAuthorizedMiddleware, isAdminMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
-    const {image, title, announce, fullText, categories} = req.body;
     const {userId} = res.locals;
 
     try {
-      const newArticle = await articleService.create({image, title, announce, fullText, categories, userId});
+      const newArticle = await articleService.create({userId, ...req.body});
 
       res.status(HttpStatusCode.CREATED).json(newArticle);
     } catch (error) {

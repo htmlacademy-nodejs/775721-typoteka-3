@@ -191,7 +191,7 @@ class ArticleService {
     }
   }
 
-  async create({image, title, announce, fullText, categories: categoriesIds, userId}) {
+  async create({image, title, announce, fullText, categories: categoriesIds, userId, createdDate}) {
     const {sequelize} = this._dataBase;
     const {Article, Category, User} = this._models;
 
@@ -204,6 +204,10 @@ class ArticleService {
         announce,
         text: fullText,
       });
+
+      if (createdDate) {
+        await this.update({id: newArticle.id, createdDate});
+      }
 
       const categories = await Category.findAll({
         where: {

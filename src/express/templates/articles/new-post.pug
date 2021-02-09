@@ -30,7 +30,7 @@ block content
                 p.form__error-message #{errors ? errors['title'] : ''}
                 .form__field.form__field--post-image
                   label
-                    input#image-name-field(type='text' placeholder='Фотография' readonly)
+                    input#image-name-field(type='text' placeholder='Фотография' readonly value=(article ? article.image : ''))
                   .form__image-loader.form__image-loader--publication
                     label
                       input.visually-hidden(type='file' name='photo')

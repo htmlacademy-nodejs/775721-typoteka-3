@@ -7,11 +7,13 @@ const {isAuthorizedUser} = require(`../middlewares/is-authorized-user`);
 const {getAllCategories} = require(`../middlewares/get-all-categories`);
 const {getArticlesWithPagination} = require(`../middlewares/get-articles-with-pagination`);
 const {isAdmin} = require(`../middlewares/is-admin`);
+const {saveImage} = require(`../middlewares/save-image`);
 
 const router = new Router();
+const savePhotoMiddleware = saveImage(`photo`);
 
 router.get(`/add`, [isAdmin, getAllCategories], getAddArticle);
-router.post(`/add`, [isAdmin], postAddArticle);
+router.post(`/add`, [isAdmin, savePhotoMiddleware], postAddArticle);
 router.get(`/:id`, [getAllCategories], getArticle);
 router.post(`/:id/comments`, [isAuthorizedUser], postComment);
 router.get(`/edit/:id`, [isAdmin, getAllCategories], getEditArticle);
