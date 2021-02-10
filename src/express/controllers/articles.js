@@ -30,37 +30,12 @@ exports.getAddArticle = async (req, res, next) => {
 };
 
 exports.postAddArticle = async (req, res, next) => {
-  const {articleId} = req.query;
-  const {imageName} = res.locals;
-  const url = articleId ? `${ API_SERVER_URL }/articles/${articleId}` : `${ API_SERVER_URL }/articles`;
-  const requestFunction = articleId ? request.put : request.post;
+  const {headers, article} = res.locals;
 
   try {
-    const {createdDate, title, announce, fullText, ...categoriesObject} = req.fields;
+    const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/articles`, headers, json: true, body: article});
 
-    const {headers} = res.locals;
-    const categories = Object.values(categoriesObject);
-    const article = {
-      title,
-      announce,
-      categories,
-    };
-
-    if (createdDate) {
-      article.createdDate = new Date(createdDate).toISOString();
-    }
-
-    if (fullText) {
-      article.fullText = fullText;
-    }
-
-    if (imageName) {
-      article.image = imageName;
-    }
-
-    const {statusCode, body} = await requestFunction({url, headers, json: true, body: article});
-
-    if (statusCode === HttpStatusCode.CREATED || statusCode === HttpStatusCode.OK) {
+    if (statusCode === HttpStatusCode.CREATED) {
       return res.redirect(`/my`);
     }
 
@@ -77,7 +52,7 @@ exports.postAddArticle = async (req, res, next) => {
 
 exports.getEditArticle = async (req, res, next) => {
   const {id} = req.params;
-  const action = `/articles/add?_csrf=${res.locals.csrfToken}&articleId=${id}`;
+  const action = `/articles/edit/${id}?_csrf=${res.locals.csrfToken}`;
 
   try {
     const {statusCode, body: article} = await request.get({url: `${ API_SERVER_URL }/articles/${ id }`, json: true});
@@ -97,6 +72,45 @@ exports.getEditArticle = async (req, res, next) => {
       action,
       article: articleData,
     });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.postEditArticle = async (req, res, next) => {
+  const {id} = req.params;
+  const {headers, article} = res.locals;
+  let previousImageName;
+
+  try {
+    if (article.image) {
+      const {statusCode, body: updatingArticle} = await request.get({url: `${ API_SERVER_URL }/articles/${id}`, json: true});
+
+      if (statusCode === HttpStatusCode.NOT_FOUND) {
+        return res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`);
+      }
+
+      previousImageName = updatingArticle.image;
+    }
+
+    const {statusCode, body} = await request.put({url: `${ API_SERVER_URL }/articles/${id}`, headers, json: true, body: article});
+
+    if (statusCode === HttpStatusCode.OK) {
+      if (previousImageName) {
+        const imagePath = path.resolve(__dirname, `../${DirName.PUBLIC}/img/${previousImageName}`);
+
+        fs.unlink(imagePath);
+      }
+
+      return res.redirect(`/my`);
+    }
+
+    const errorDetails = body.details || [];
+    const errorMessages = parseErrorDetailsToErrorMessages(errorDetails);
+    const errorMessagesJSON = JSON.stringify(errorMessages);
+    const articleDataJSON = JSON.stringify(article);
+
+    return res.redirect(`/articles/edit/${id}?errorMessages=${errorMessagesJSON}&articleData=${articleDataJSON}`);
   } catch (error) {
     return next(error);
   }
