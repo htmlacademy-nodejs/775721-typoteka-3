@@ -51,6 +51,7 @@ class ArticleService {
       ],
       order: [
         [`created_date`, `DESC`],
+        [{model: Comment, as: `comments`}, `created_date`, `ASC`]
       ],
     };
   }
