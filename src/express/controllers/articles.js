@@ -1,7 +1,8 @@
 'use strict';
 
 const path = require(`path`);
-const fs = require(`fs`).promises;
+const fs = require(`fs`);
+const fsPromises = require(`fs`).promises;
 
 const {request} = require(`../request`);
 const {DirName} = require(`../constants`);
@@ -127,7 +128,12 @@ exports.getDeleteArticle = async (req, res, next) => {
       const imageName = body.image;
       const imagePath = path.resolve(__dirname, `../${DirName.PUBLIC}/img/${imageName}`);
 
-      fs.unlink(imagePath);
+      try {
+        await fsPromises.access(imagePath, fs.constants.F_OK);
+        await fsPromises.unlink(imagePath);
+      } catch (error) {
+        console.info(`Изображение ${imagePath} недоступно.`);
+      }
     }
 
     return res.redirect(`/my`);
