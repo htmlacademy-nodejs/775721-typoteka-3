@@ -64,5 +64,6 @@ exports.createArticleAssociations = ({Article, User, Category, Comment}) => {
   Article.hasMany(Comment, {
     as: `comments`,
     foreignKey: `article_id`,
+    onDelete: `CASCADE`,
   });
 };
