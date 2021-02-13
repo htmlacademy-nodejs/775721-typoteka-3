@@ -11,6 +11,7 @@ const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isCategoryExists} = require(`../../middlewares/is-category-exists`);
 const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
 const {isAdmin} = require(`../../middlewares/is-admin`);
+const {isCategoryCanBeDeleted} = require(`../../middlewares/is-category-can-be-deleted`);
 
 const createCategoryRouter = ({categoryService, userService, logger}) => {
   const router = new Router();
@@ -20,6 +21,7 @@ const createCategoryRouter = ({categoryService, userService, logger}) => {
   const isCategoryExistsMiddleware = isCategoryExists({service: categoryService, logger});
   const isUserAuthorizedMiddleware = isUserAuthorized({logger});
   const isAdminMiddleware = isAdmin({userService, logger});
+  const isCategoryCanBeDeletedMiddleware = isCategoryCanBeDeleted({categoryService, logger});
 
   router.get(Route.INDEX, async (req, res, next) => {
     try {
@@ -77,7 +79,13 @@ const createCategoryRouter = ({categoryService, userService, logger}) => {
     }
   });
 
-  router.delete(Route.CATEGORY, [isUserAuthorizedMiddleware, isAdminMiddleware, isRequestParamsValidMiddleware, isCategoryExistsMiddleware], async (req, res, next) => {
+  router.delete(Route.CATEGORY, [
+    isUserAuthorizedMiddleware,
+    isAdminMiddleware,
+    isRequestParamsValidMiddleware,
+    isCategoryExistsMiddleware,
+    isCategoryCanBeDeletedMiddleware,
+  ], async (req, res, next) => {
     const {categoryId} = req.params;
     const id = Number.parseInt(categoryId, 10);
 

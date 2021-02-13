@@ -114,6 +114,19 @@ class CategoryService {
       return null;
     }
   }
+
+  async isEmpty(id) {
+    try {
+      const category = await this.findById(id);
+      const quantity = Number.parseInt(category.quantity, 10);
+
+      return !quantity;
+    } catch (error) {
+      this._logger.error(`Не могу узнать используется ли категория с id: ${id} или нет. Ошибка: ${error}`);
+
+      return null;
+    }
+  }
 }
 
 exports.CategoryService = CategoryService;

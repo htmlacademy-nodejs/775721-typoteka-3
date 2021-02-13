@@ -18,8 +18,10 @@ exports.getCategories = (req, res, next) => {
 };
 
 exports.postCategories = async (req, res, next) => {
+  const {headers} = res.locals;
+
   try {
-    const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/categories`, json: true, body: req.fields});
+    const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/categories`, headers, json: true, body: req.fields});
 
     if (statusCode === HttpStatusCode.BAD_REQUEST) {
       const errorMessages = parseErrorDetailsToErrorMessages(body.details);
@@ -36,9 +38,10 @@ exports.postCategories = async (req, res, next) => {
 
 exports.postEditCategory = async (req, res, next) => {
   const {id} = req.params;
+  const {headers} = res.locals;
 
   try {
-    const {statusCode, body} = await request.put({url: `${ API_SERVER_URL }/categories/${id}`, json: true, body: req.fields});
+    const {statusCode, body} = await request.put({url: `${ API_SERVER_URL }/categories/${id}`, headers, json: true, body: req.fields});
 
     if (statusCode === HttpStatusCode.BAD_REQUEST) {
       const errorMessages = parseErrorDetailsToErrorMessages(body.details);
@@ -55,9 +58,10 @@ exports.postEditCategory = async (req, res, next) => {
 
 exports.getDeleteCategory = async (req, res, next) => {
   const {id} = req.params;
+  const {headers} = res.locals;
 
   try {
-    await request.delete({url: `${ API_SERVER_URL }/categories/${id}`, json: true});
+    await request.delete({url: `${ API_SERVER_URL }/categories/${id}`, headers, json: true});
 
     return res.redirect(`/categories`);
   } catch (error) {
