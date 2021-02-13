@@ -16,11 +16,9 @@ exports.getUserMain = async (req, res, next) => {
 };
 
 exports.getUserComments = async (req, res, next) => {
-  const {user} = res.locals;
-
   try {
-    const {statusCode, body} = request.get({url: `${ API_SERVER_URL }/comments?userId=${user.id}`, json: true});
-    const comments = statusCode === HttpStatusCode.OK ? body.articles : [];
+    const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/comments`, json: true});
+    const comments = statusCode === HttpStatusCode.OK ? body : [];
 
     res.render(`user/comments`, {comments});
   } catch (error) {

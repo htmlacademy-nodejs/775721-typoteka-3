@@ -3,7 +3,7 @@
 class CommentService {
   constructor(dataBase, logger) {
     const {models} = dataBase;
-    const {User} = models;
+    const {User, Article} = models;
 
     this._dataBase = dataBase;
     this._models = models;
@@ -17,6 +17,13 @@ class CommentService {
             `firstName`,
             `lastName`,
             `avatar`,
+          ],
+        },
+        {
+          model: Article,
+          attributes: [
+            `id`,
+            `title`,
           ],
         },
       ],
