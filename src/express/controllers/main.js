@@ -43,3 +43,7 @@ exports.getSearch = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getHttpCodes = (req, res) => {
+  res.render(`main/http-codes`);
+};
