@@ -25,3 +25,16 @@ exports.getUserComments = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getDeleteComment = async (req, res, next) => {
+  const {id} = req.params;
+  const {headers} = res.locals;
+
+  try {
+    await request.delete({url: `${ API_SERVER_URL }/comments/${id}`, headers, json: true});
+
+    res.redirect(`/my/comments`);
+  } catch (error) {
+    next(error);
+  }
+};

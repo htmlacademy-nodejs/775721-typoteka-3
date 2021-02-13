@@ -244,7 +244,7 @@ describe(`Comment API end-points`, () => {
       expect(res.statusCode).toBe(401);
     });
 
-    it(`should return status 403 if tried to delete someone else's comment`, async () => {
+    it(`should return status 403 if user without role === 'admin' tried to delete comment`, async () => {
       const secondUserData = {
         firstName: `Ivan`,
         lastName: `Ivanov`,

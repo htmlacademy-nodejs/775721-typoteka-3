@@ -8,7 +8,7 @@ const {isArticleExists} = require(`../../middlewares/is-article-exists`);
 const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
-const {isCommentBelongsToUser} = require(`../../middlewares/is-comment-belongs-to-user`);
+const {isAdmin} = require(`../../middlewares/is-admin`);
 const {isCommentExists} = require(`../../middlewares/is-comment-exist`);
 const {isUserExists} = require(`../../middlewares/is-user-exists`);
 const {getResponseCommentQueryParamsSchema} = require(`../../schema/get-response-comment-query-params-schema`);
@@ -25,8 +25,8 @@ const createCommentRouter = ({commentService, articleService, userService, logge
   const isRequestDataValidMiddleware = isRequestDataValid({schema: commentSchema, logger});
   const isRequestParamsValidMiddleware = isRequestParamsValid({schema: commentParamsSchema, logger});
   const isCommentExistsMiddleware = isCommentExists({logger, service: commentService});
-  const isCommentBelongsToUserMiddleware = isCommentBelongsToUser({logger, service: commentService});
   const isUserExistsMiddleware = isUserExists({logger, service: userService});
+  const isAdminMiddleware = isAdmin({userService, logger});
 
   router.get(Route.INDEX, [
     isGetRequestQueryParamsValidMiddleware,
@@ -61,9 +61,9 @@ const createCommentRouter = ({commentService, articleService, userService, logge
 
   router.delete(Route.COMMENT, [
     isUserAuthorizedMiddleware,
+    isAdminMiddleware,
     isRequestParamsValidMiddleware,
     isCommentExistsMiddleware,
-    isCommentBelongsToUserMiddleware,
   ], async (req, res, next) => {
     const {commentId} = req.params;
 
