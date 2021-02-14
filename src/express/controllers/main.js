@@ -1,10 +1,9 @@
 'use strict';
 
+const {TOP_COMMENTED_LIMIT} = require(`./constants`);
 const {request} = require(`../request`);
 const {API_SERVER_URL} = require(`../../config`);
 const {HttpStatusCode} = require(`../../constants`);
-
-const TOP_COMMENTED_LIMIT = 5;
 
 exports.getMain = async (req, res, next) => {
   try {

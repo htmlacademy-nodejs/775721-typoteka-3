@@ -133,26 +133,6 @@ class CommentService {
       return false;
     }
   }
-
-  async isCommentBelongToUser(commentId, userId) {
-    const {Comment} = this._models;
-
-    try {
-      const comment = await Comment.findByPk(commentId, {
-        raw: true,
-        attributes: [
-          `id`,
-          [`user_id`, `userId`],
-        ],
-      });
-
-      return comment.userId === userId;
-    } catch (error) {
-      this._logger.error(`Не могу проверить кому принадлежит комментарий. Ошибка: ${ error }`);
-
-      return false;
-    }
-  }
 }
 
 exports.CommentService = CommentService;

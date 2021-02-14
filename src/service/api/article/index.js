@@ -2,6 +2,7 @@
 
 const {Router} = require(`express`);
 
+const {Route} = require(`./constants`);
 const {isArticleExists} = require(`../../middlewares/is-article-exists`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
@@ -10,7 +11,6 @@ const {isAdmin} = require(`../../middlewares/is-admin`);
 const {mostCommentedArticlesParams} = require(`../../schema/most-commented-articles-params`);
 const {articleDataSchema} = require(`../../schema/article-data`);
 const {articleParamsSchema} = require(`../../schema/article-params`);
-const {Route} = require(`./constants`);
 const {HttpStatusCode} = require(`../../../constants`);
 
 const createArticleRouter = ({articleService, userService, logger}) => {

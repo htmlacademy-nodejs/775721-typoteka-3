@@ -2,8 +2,8 @@
 
 const {Router} = require(`express`);
 
-const {HttpStatusCode} = require(`../../../constants`);
 const {Route} = require(`./constants`);
+const {HttpStatusCode} = require(`../../../constants`);
 
 const createSearchRouter = (articlesService) => {
   const router = new Router();

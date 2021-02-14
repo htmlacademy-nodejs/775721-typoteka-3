@@ -4,11 +4,11 @@ const path = require(`path`);
 const fs = require(`fs`);
 const fsPromises = require(`fs`).promises;
 
+const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-to-error-messages`);
 const {request} = require(`../request`);
 const {DirName} = require(`../constants`);
 const {HttpStatusCode} = require(`../../constants`);
 const {API_SERVER_URL} = require(`../../config`);
-const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-to-error-messages`);
 
 
 exports.getAddArticle = async (req, res, next) => {
@@ -26,7 +26,7 @@ exports.getAddArticle = async (req, res, next) => {
       article: articleData,
     });
   } catch (error) {
-    return next();
+    return next(error);
   }
 };
 
@@ -132,7 +132,7 @@ exports.getDeleteArticle = async (req, res, next) => {
         await fsPromises.access(imagePath, fs.constants.F_OK);
         await fsPromises.unlink(imagePath);
       } catch (error) {
-        console.info(`Изображение ${imagePath} недоступно.`);
+        console.error(`Изображение ${imagePath} недоступно.`);
       }
     }
 

@@ -3,7 +3,6 @@
 const {Router} = require(`express`);
 
 const {Route} = require(`./constants`);
-const {HttpStatusCode} = require(`../../../constants`);
 const {categoryParamsSchema} = require(`../../schema/category-params`);
 const {categoryDataSchema} = require(`../../schema/category-data`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
@@ -12,6 +11,7 @@ const {isCategoryExists} = require(`../../middlewares/is-category-exists`);
 const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
 const {isAdmin} = require(`../../middlewares/is-admin`);
 const {isCategoryCanBeDeleted} = require(`../../middlewares/is-category-can-be-deleted`);
+const {HttpStatusCode} = require(`../../../constants`);
 
 const createCategoryRouter = ({categoryService, userService, logger}) => {
   const router = new Router();

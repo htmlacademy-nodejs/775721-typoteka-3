@@ -1,10 +1,10 @@
 'use strict';
 
+const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-to-error-messages`);
+const {AUTHORIZATION_KEY} = require(`../constants`);
 const {request} = require(`../request`);
 const {HttpStatusCode} = require(`../../constants`);
 const {API_SERVER_URL} = require(`../../config`);
-const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-to-error-messages`);
-const {AUTHORIZATION_KEY} = require(`../constants`);
 
 exports.getRegister = async (req, res) => {
   res.render(`authentication/register`);

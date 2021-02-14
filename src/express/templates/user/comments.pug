@@ -8,7 +8,12 @@ block content
         each commentItem in comments
           li.publication__list-item
             .publication__header
-              img.publication__list-image(src=`/img/${commentItem.user.avatar}`, width='20', height='20', alt=`Аватар пользователя: ${commentItem.user.firstName} ${commentItem.user.lastName}`)
+              img.publication__list-image(
+                src=`/img/${commentItem.user.avatar}`,
+                width='20',
+                height='20',
+                alt=`Аватар пользователя: ${commentItem.user.firstName} ${commentItem.user.lastName}`
+              )
               b.publication__list-name #{commentItem.user.firstName} #{commentItem.user.lastName}
               time.publication__item-time(datetime=commentItem.createdDate) #{new Date(commentItem.createdDate).toLocaleString()}
             a.publication__item-text(href=`/articles/${commentItem.articleId}?previousUrl=${currentPath}#comment-${commentItem.id}`)

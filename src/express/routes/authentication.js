@@ -8,7 +8,6 @@ const {redirectAuthorizedUsersToHomePage} = require(`../middlewares/redirect-aut
 const {saveImage} = require(`../middlewares/save-image`);
 
 const router = new Router();
-
 const saveAvatarMiddleware = saveImage(`avatar`);
 
 router.get(`/register`, [redirectAuthorizedUsersToHomePage], getRegister);

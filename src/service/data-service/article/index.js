@@ -292,26 +292,6 @@ class ArticleService {
       return null;
     }
   }
-
-  async isArticleBelongsToUser(offerId, userId) {
-    const {Article} = this._models;
-
-    try {
-      const article = await Article.findByPk(offerId, {
-        raw: true,
-        attributes: [
-          `id`,
-          [`user_id`, `userId`],
-        ],
-      });
-
-      return article.userId === userId;
-    } catch (error) {
-      this._logger.error(`Не могу проверить кому принадлежит публикация. Ошибка: ${ error }`);
-
-      return false;
-    }
-  }
 }
 
 exports.ArticleService = ArticleService;

@@ -27,7 +27,8 @@ block content
                 .form__field
                   label
                     input(type='text', name='title' placeholder='Заголовок', value=(article ? article.title : ''), required)
-                p.form__error-message #{errors ? errors['title'] : ''}
+                if(errors && errors['title'])
+                  p.form__error-message #{errors['title']}
                 .form__field.form__field--post-image
                   label
                     input#image-name-field(type='text' placeholder='Фотография' readonly value=(article ? article.image : ''))
@@ -55,10 +56,12 @@ block content
                   label
                     textarea(rows='5', name='announce' placeholder='Анонс публикации')
                       | #{article ? article.announce : ''}
-                p.form__error-message #{errors ? errors['announce'] : ''}
+                if(errors && errors['announce'])
+                  p.form__error-message #{errors['announce']}
                 .form__field.form__field--publication-text
                   label
                     textarea(rows='10', name='fullText' placeholder='Полный текст публикации')
                       | #{article ? article.fullText : ''}
-                p.form__error-message #{errors ? errors['fullText'] : ''}
+                if(errors && errors['fullText'])
+                  p.form__error-message #{errors['fullText']}
 

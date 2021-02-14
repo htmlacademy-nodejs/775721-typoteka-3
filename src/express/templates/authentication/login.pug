@@ -12,9 +12,11 @@ block content
             .form__field
               label
                 input(type='email', name='email', placeholder='Электронная почта', required)
-            p.form__error-message #{errors ? errors['email'] : ''}
+            if(errors && errors['email'])
+              p.form__error-message #{errors ? errors['email'] : ''}
             .form__field
               label
                 input(type='password', name='password', placeholder='Пароль', required)
-            p.form__error-message #{errors ? errors['password'] : ''}
+            if(errors && errors['password'])
+              p.form__error-message #{errors ? errors['password'] : ''}
             button.form__submit-btn.form__submit-btn--log-in.button.button--colored(type='submit') Войти

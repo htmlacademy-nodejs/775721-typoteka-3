@@ -1,22 +1,22 @@
 section.articles-category__list.preview
   h2.visually-hidden Список превью статей
   ul.preview__list
-    each article in articles
-      li(class=`preview__item ${article.image ? `` : `preview__item--noimage`}`)
+    each articleItem in articles
+      li(class=`preview__item ${articleItem.image ? `` : `preview__item--noimage`}`)
         ul.preview__breadcrumbs
-          each category in article.categories
+          each category in articleItem.categories
             li.preview__breadcrumbs-item
               a.preview__breadcrumbs-link(href=`/articles/category/${category.id}`) #{category.title}
-        if(article.image)
+        if(articleItem.image)
           .preview__background
-            img.preview__background-image(src=`/img/${article.image}` width="460" height="240" alt=article.title)
-        time.preview__time(datetime=article.createdDate) #{new Date(article.createdDate).toLocaleString()}
+            img.preview__background-image(src=`/img/${articleItem.image}` width="460" height="240" alt=articleItem.title)
+        time.preview__time(datetime=articleItem.createdDate) #{new Date(articleItem.createdDate).toLocaleString()}
         h3.preview__name
-          a.preview__name-link(href=`/articles/${article.id}?previousUrl=${currentPath}`) #{article.title}
-        p.preview__text #{article.announce}
-        a.preview__comment(href=`/articles/${article.id}?previousUrl=${currentPath}#comments`)
+          a.preview__name-link(href=`/articles/${articleItem.id}?previousUrl=${currentPath}`) #{articleItem.title}
+        p.preview__text #{articleItem.announce}
+        a.preview__comment(href=`/articles/${articleItem.id}?previousUrl=${currentPath}#comments`)
           | Комментарии
           span.preview__cloud
-          b.preview__comment-count #{article.comments.length}
+          b.preview__comment-count #{articleItem.comments.length}
 
   include ../partials/pagination

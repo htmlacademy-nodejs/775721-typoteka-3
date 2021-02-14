@@ -3,13 +3,13 @@
 const {Router} = require(`express`);
 const jwt = require(`jsonwebtoken`);
 
+const {Route} = require(`./constants`);
+const {makeTokens} = require(`../../jwt`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isUserEmailUnique} = require(`../../middlewares/is-user-email-unique`);
 const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
 const {userRegisterDataSchema, userLoginDataSchema, tokenDataSchema} = require(`../../schema/user-data`);
 const {HttpStatusCode} = require(`../../../constants`);
-const {Route} = require(`./constants`);
-const {makeTokens} = require(`../../jwt`);
 const {JWT_REFRESH_SECRET} = require(`../../../config`);
 
 const createUserRouter = ({userService, refreshTokenService, logger}) => {
