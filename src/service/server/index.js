@@ -58,8 +58,7 @@ const createServer = ({dataBase, logger = pinoLogger} = {}) => {
     return logger.error(`Не могу найти маршрут к url: ${ req.url }.`);
   });
 
-  // eslint-disable-next-line
-  server.use((error, req, res, next) => {
+  server.use((error, req, res, _next) => {
     res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send(Message.INTERNAL_SERVER_ERROR);
 
     return logger.error(`Ошибка сервера: ${ error }.`);

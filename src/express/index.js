@@ -92,8 +92,7 @@ app.use(`/categories`, [isAdmin], categoriesRouter);
 
 app.use((req, res) => res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`));
 
-// eslint-disable-next-line
-app.use((error, req, res, next) => {
+app.use((error, req, res, _next) => {
   console.error(chalk.red(`Произошла ошибка на сервере: ${ error }`));
 
   res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render(`errors/500`);
