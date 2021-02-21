@@ -10,4 +10,4 @@ const isAdmin = (req, res, next) => {
   return next();
 };
 
-exports.isAdmin = isAdmin;
+module.exports.isAdmin = isAdmin;

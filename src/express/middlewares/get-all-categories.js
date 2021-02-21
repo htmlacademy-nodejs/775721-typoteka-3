@@ -4,7 +4,7 @@ const {request} = require(`../request`);
 const {API_SERVER_URL} = require(`../../config`);
 const {HttpStatusCode} = require(`../../constants`);
 
-exports.getAllCategories = async (req, res, next) => {
+module.exports.getAllCategories = async (req, res, next) => {
   const {categoryId} = req.params;
 
   let categories = [];

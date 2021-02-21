@@ -27,4 +27,4 @@ const createRouter = ({articleService, commentService, categoryService, userServ
   return router;
 };
 
-exports.createRouter = createRouter;
+module.exports.createRouter = createRouter;

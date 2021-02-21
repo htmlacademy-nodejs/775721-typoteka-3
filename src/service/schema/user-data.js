@@ -10,7 +10,7 @@ const passwordSchema = Joi.string()
   .min(6)
   .required();
 
-exports.userRegisterDataSchema = Joi.object({
+module.exports.userRegisterDataSchema = Joi.object({
   firstName: Joi.string()
   .pattern(/^[a-zA-Zа-яА-Я\s]+$/)
   .max(50)
@@ -29,11 +29,11 @@ exports.userRegisterDataSchema = Joi.object({
   .allow(``),
 });
 
-exports.userLoginDataSchema = Joi.object({
+module.exports.userLoginDataSchema = Joi.object({
   email: emailSchema,
   password: passwordSchema,
 });
 
-exports.tokenDataSchema = Joi.object({
+module.exports.tokenDataSchema = Joi.object({
   token: Joi.string().required(),
 });

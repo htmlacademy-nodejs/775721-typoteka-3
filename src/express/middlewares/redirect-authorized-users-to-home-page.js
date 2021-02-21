@@ -10,4 +10,4 @@ const redirectAuthorizedUsersToHomePage = (req, res, next) => {
   return next();
 };
 
-exports.redirectAuthorizedUsersToHomePage = redirectAuthorizedUsersToHomePage;
+module.exports.redirectAuthorizedUsersToHomePage = redirectAuthorizedUsersToHomePage;

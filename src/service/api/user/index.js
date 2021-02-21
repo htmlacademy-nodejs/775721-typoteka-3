@@ -138,4 +138,4 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
   return router;
 };
 
-exports.createUserRouter = createUserRouter;
+module.exports.createUserRouter = createUserRouter;

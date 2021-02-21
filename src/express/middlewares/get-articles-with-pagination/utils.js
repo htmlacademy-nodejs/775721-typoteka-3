@@ -1,6 +1,6 @@
 'use strict';
 
-exports.createPaginationPages = ({quantity, currentPage}) => {
+module.exports.createPaginationPages = ({quantity, currentPage}) => {
   const currentPageIndex = currentPage - 1;
   const isPreviousPageDisabled = currentPageIndex === 0;
   const isNextPageDisabled = currentPageIndex === quantity - 1;

@@ -4,7 +4,7 @@ const {request} = require(`../request`);
 const {HttpStatusCode} = require(`../../constants`);
 const {API_SERVER_URL} = require(`../../config`);
 
-exports.getUserMain = async (req, res, next) => {
+module.exports.getUserMain = async (req, res, next) => {
   try {
     const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/articles`, json: true});
     const articles = statusCode === HttpStatusCode.OK ? body.articles : [];
@@ -15,7 +15,7 @@ exports.getUserMain = async (req, res, next) => {
   }
 };
 
-exports.getUserComments = async (req, res, next) => {
+module.exports.getUserComments = async (req, res, next) => {
   try {
     const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/comments`, json: true});
     const comments = statusCode === HttpStatusCode.OK ? body : [];
@@ -26,7 +26,7 @@ exports.getUserComments = async (req, res, next) => {
   }
 };
 
-exports.getDeleteComment = async (req, res, next) => {
+module.exports.getDeleteComment = async (req, res, next) => {
   const {id} = req.params;
   const {headers} = res.locals;
 

@@ -129,4 +129,4 @@ class CategoryService {
   }
 }
 
-exports.CategoryService = CategoryService;
+module.exports.CategoryService = CategoryService;

@@ -16,4 +16,4 @@ const requestPromise = {
   put: putRequestPromise,
 };
 
-exports.request = requestPromise;
+module.exports.request = requestPromise;

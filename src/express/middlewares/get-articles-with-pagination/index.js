@@ -6,7 +6,7 @@ const {request} = require(`../../request`);
 const {API_SERVER_URL} = require(`../../../config`);
 const {HttpStatusCode} = require(`../../../constants`);
 
-exports.getArticlesWithPagination = async (req, res, next) => {
+module.exports.getArticlesWithPagination = async (req, res, next) => {
   const {page} = req.query;
   const {categoryId} = req.params;
   const currentPage = page ? Number.parseInt(page, 10) : DEFAULT_PAGE;

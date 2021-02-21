@@ -11,7 +11,7 @@ const {HttpStatusCode} = require(`../../constants`);
 const {API_SERVER_URL} = require(`../../config`);
 
 
-exports.getAddArticle = async (req, res, next) => {
+module.exports.getAddArticle = async (req, res, next) => {
   const {errorMessages: errorMessagesJSON, articleData: articleDataJSON} = req.query;
   const action = `/articles/add?_csrf=${res.locals.csrfToken}`;
 
@@ -30,7 +30,7 @@ exports.getAddArticle = async (req, res, next) => {
   }
 };
 
-exports.postAddArticle = async (req, res, next) => {
+module.exports.postAddArticle = async (req, res, next) => {
   const {headers, article} = res.locals;
 
   try {
@@ -51,7 +51,7 @@ exports.postAddArticle = async (req, res, next) => {
   }
 };
 
-exports.getEditArticle = async (req, res, next) => {
+module.exports.getEditArticle = async (req, res, next) => {
   const {id} = req.params;
   const action = `/articles/edit/${id}?_csrf=${res.locals.csrfToken}`;
 
@@ -78,7 +78,7 @@ exports.getEditArticle = async (req, res, next) => {
   }
 };
 
-exports.postEditArticle = async (req, res, next) => {
+module.exports.postEditArticle = async (req, res, next) => {
   const {id} = req.params;
   const {headers, article} = res.locals;
   let previousImageName;
@@ -117,7 +117,7 @@ exports.postEditArticle = async (req, res, next) => {
   }
 };
 
-exports.getDeleteArticle = async (req, res, next) => {
+module.exports.getDeleteArticle = async (req, res, next) => {
   const {id} = req.params;
   const {headers} = res.locals;
 
@@ -142,7 +142,7 @@ exports.getDeleteArticle = async (req, res, next) => {
   }
 };
 
-exports.getArticlesByCategory = async (req, res, next) => {
+module.exports.getArticlesByCategory = async (req, res, next) => {
   const {categoryId} = req.params;
 
   try {
@@ -158,7 +158,7 @@ exports.getArticlesByCategory = async (req, res, next) => {
   }
 };
 
-exports.getArticle = async (req, res, next) => {
+module.exports.getArticle = async (req, res, next) => {
   const {id} = req.params;
   const {previousUrl, errorMessages: errorMessagesJSON} = req.query;
   const {categories} = res.locals;
@@ -180,7 +180,7 @@ exports.getArticle = async (req, res, next) => {
   }
 };
 
-exports.postComment = async (req, res, next) => {
+module.exports.postComment = async (req, res, next) => {
   const {id} = req.params;
   const {previousUrl} = req.query;
   const {headers} = res.locals;

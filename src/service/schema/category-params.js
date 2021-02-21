@@ -2,6 +2,6 @@
 
 const Joi = require(`joi`);
 
-exports.categoryParamsSchema = Joi.object({
+module.exports.categoryParamsSchema = Joi.object({
   categoryId: Joi.number(),
 });

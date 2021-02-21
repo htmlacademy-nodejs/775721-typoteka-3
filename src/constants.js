@@ -1,6 +1,6 @@
 'use strict';
 
-exports.HttpStatusCode = {
+module.exports.HttpStatusCode = {
   OK: 200,
   CREATED: 201,
   NO_CONTENT: 204,
@@ -12,18 +12,18 @@ exports.HttpStatusCode = {
   INTERNAL_SERVER_ERROR: 500,
 };
 
-exports.FilePath = {
+module.exports.FilePath = {
   TITLES: `./data/titles.txt`,
   CATEGORIES: `./data/categories.txt`,
   SENTENCES: `./data/sentences.txt`,
   COMMENTS: `./data/comments.txt`,
 };
 
-exports.ExitCode = {
+module.exports.ExitCode = {
   ERROR: 1,
 };
 
-exports.UserRole = {
+module.exports.UserRole = {
   ADMIN: `admin`,
   READER: `reader`,
 };

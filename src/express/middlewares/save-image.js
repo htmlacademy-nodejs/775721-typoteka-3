@@ -7,7 +7,7 @@ const {DirName} = require(`../constants`);
 
 const ALLOW_TYPES = [`image/jpeg`, `image/png`];
 
-exports.saveImage = (imageName) => async (req, res, next) => {
+module.exports.saveImage = (imageName) => async (req, res, next) => {
   const image = req.files[imageName];
 
   if (!image) {

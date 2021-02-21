@@ -26,4 +26,4 @@ const isUserExists = ({service, logger}) => async (req, res, next) => {
   return next();
 };
 
-exports.isUserExists = isUserExists;
+module.exports.isUserExists = isUserExists;

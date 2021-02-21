@@ -1,4 +1,4 @@
 'use strict';
 
-exports.MODULE_NAME = `--fill-db`;
-exports.USERS_COUNT = 2;
+module.exports.MODULE_NAME = `--fill-db`;
+module.exports.USERS_COUNT = 2;

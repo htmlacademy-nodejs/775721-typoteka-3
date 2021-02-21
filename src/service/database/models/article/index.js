@@ -2,7 +2,7 @@
 
 const {ArticleTitleRequirements, ArticleAnnounceRequirements, ArticleTextRequirements} = require(`./constants`);
 
-exports.createArticleModel = (sequelize, DataTypes) => {
+module.exports.createArticleModel = (sequelize, DataTypes) => {
   class Article extends sequelize.Sequelize.Model {
   }
 
@@ -49,7 +49,7 @@ exports.createArticleModel = (sequelize, DataTypes) => {
   return Article;
 };
 
-exports.createArticleAssociations = ({Article, User, Category, Comment}) => {
+module.exports.createArticleAssociations = ({Article, User, Category, Comment}) => {
   Article.belongsTo(User, {
     foreignKey: `user_id`,
   });

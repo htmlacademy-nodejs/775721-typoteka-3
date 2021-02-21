@@ -20,4 +20,4 @@ const isArticleExists = ({service, logger}) => async (req, res, next) => {
   return next();
 };
 
-exports.isArticleExists = isArticleExists;
+module.exports.isArticleExists = isArticleExists;

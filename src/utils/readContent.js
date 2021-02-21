@@ -3,7 +3,7 @@
 const fs = require(`fs`).promises;
 const chalk = require(`chalk`);
 
-exports.readContent = async (filePath) => {
+module.exports.readContent = async (filePath) => {
   let result = [];
 
   try {

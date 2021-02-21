@@ -294,4 +294,4 @@ class ArticleService {
   }
 }
 
-exports.ArticleService = ArticleService;
+module.exports.ArticleService = ArticleService;

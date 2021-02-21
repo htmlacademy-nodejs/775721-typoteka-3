@@ -22,4 +22,4 @@ const isAdmin = ({userService, logger}) => async (req, res, next) => {
   }
 };
 
-exports.isAdmin = isAdmin;
+module.exports.isAdmin = isAdmin;

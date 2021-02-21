@@ -116,4 +116,4 @@ const createArticleRouter = ({articleService, userService, logger}) => {
   return router;
 };
 
-exports.createArticleRouter = createArticleRouter;
+module.exports.createArticleRouter = createArticleRouter;

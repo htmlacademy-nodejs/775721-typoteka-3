@@ -5,7 +5,7 @@ const {request} = require(`../request`);
 const {API_SERVER_URL} = require(`../../config`);
 const {HttpStatusCode} = require(`../../constants`);
 
-exports.getMain = async (req, res, next) => {
+module.exports.getMain = async (req, res, next) => {
   try {
     const mostCommentedArticlesResponse = await request.get({
       url: `${ API_SERVER_URL }/articles/most_commented?limit=${TOP_COMMENTED_LIMIT}`,
@@ -26,7 +26,7 @@ exports.getMain = async (req, res, next) => {
   }
 };
 
-exports.getSearch = async (req, res, next) => {
+module.exports.getSearch = async (req, res, next) => {
   try {
     const searchQuery = req.query.search;
     const encodedQuery = encodeURI(searchQuery);
@@ -43,6 +43,6 @@ exports.getSearch = async (req, res, next) => {
   }
 };
 
-exports.getHttpCodes = (req, res) => {
+module.exports.getHttpCodes = (req, res) => {
   res.render(`main/http-codes`);
 };

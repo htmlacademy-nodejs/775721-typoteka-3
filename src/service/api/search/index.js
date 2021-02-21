@@ -30,4 +30,4 @@ const createSearchRouter = (articlesService) => {
   return router;
 };
 
-exports.createSearchRouter = createSearchRouter;
+module.exports.createSearchRouter = createSearchRouter;

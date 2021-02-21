@@ -7,4 +7,4 @@ const pinoLogger = createLogger({
   level: process.env.LOG_LEVEL || `info`
 });
 
-exports.pinoLogger = pinoLogger;
+module.exports.pinoLogger = pinoLogger;

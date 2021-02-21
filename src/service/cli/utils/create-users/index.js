@@ -9,7 +9,7 @@ const {UserRole} = require(`../../../../constants`);
 
 const saltRounds = parseInt(PASSWORD_SALT_ROUNDS, 10);
 
-exports.createUsers = async (count) => {
+module.exports.createUsers = async (count) => {
   const createUserPromises = Array.from({length: count}, async (_, index) => {
     const id = index + 1;
     const isAdmin = index === 0;

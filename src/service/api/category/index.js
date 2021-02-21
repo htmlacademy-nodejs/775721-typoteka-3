@@ -100,4 +100,4 @@ const createCategoryRouter = ({categoryService, userService, logger}) => {
   return router;
 };
 
-exports.createCategoryRouter = createCategoryRouter;
+module.exports.createCategoryRouter = createCategoryRouter;

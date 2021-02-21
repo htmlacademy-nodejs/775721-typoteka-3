@@ -10,4 +10,4 @@ const isAuthorizedUser = (req, res, next) => {
   return next();
 };
 
-exports.isAuthorizedUser = isAuthorizedUser;
+module.exports.isAuthorizedUser = isAuthorizedUser;

@@ -1,9 +1,9 @@
 'use strict';
 
-exports.USER_ARGUMENTS_START_INDEX = 2;
+module.exports.USER_ARGUMENTS_START_INDEX = 2;
 
-exports.DEFAULT_COMMAND = `--help`;
+module.exports.DEFAULT_COMMAND = `--help`;
 
-exports.FILE_MOCKS_PATH = `mocks.json`;
+module.exports.FILE_MOCKS_PATH = `mocks.json`;
 
-exports.MAX_ID_LENGTH = 6;
+module.exports.MAX_ID_LENGTH = 6;

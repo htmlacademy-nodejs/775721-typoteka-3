@@ -53,4 +53,4 @@ class RefreshTokenService {
 }
 
 
-exports.RefreshTokenService = RefreshTokenService;
+module.exports.RefreshTokenService = RefreshTokenService;

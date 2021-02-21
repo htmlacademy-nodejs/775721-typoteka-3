@@ -10,7 +10,7 @@ const {CommentsQuantityLimit} = require(`./constants`);
 const {CommentTextSentencesLimit} = require(`../../constants`);
 const {FilePath} = require(`../../../../constants`);
 
-exports.createComments = async ({users, articles}) => {
+module.exports.createComments = async ({users, articles}) => {
   let comments = [];
 
   try {

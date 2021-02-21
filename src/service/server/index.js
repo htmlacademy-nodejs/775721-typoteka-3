@@ -67,4 +67,4 @@ const createServer = ({dataBase, logger = pinoLogger} = {}) => {
   return server;
 };
 
-exports.createServer = createServer;
+module.exports.createServer = createServer;

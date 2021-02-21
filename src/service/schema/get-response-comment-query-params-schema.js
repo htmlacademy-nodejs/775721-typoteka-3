@@ -2,7 +2,7 @@
 
 const Joi = require(`joi`);
 
-exports.getResponseCommentQueryParamsSchema = Joi.object({
+module.exports.getResponseCommentQueryParamsSchema = Joi.object({
   limit: Joi.number(),
   userId: Joi.number(),
   articleId: Joi.number(),

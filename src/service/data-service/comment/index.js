@@ -135,4 +135,4 @@ class CommentService {
   }
 }
 
-exports.CommentService = CommentService;
+module.exports.CommentService = CommentService;

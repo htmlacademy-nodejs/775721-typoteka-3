@@ -22,4 +22,4 @@ const isCommentExists = ({service, logger}) => async (req, res, next) => {
   return next();
 };
 
-exports.isCommentExists = isCommentExists;
+module.exports.isCommentExists = isCommentExists;

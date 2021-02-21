@@ -1,6 +1,6 @@
 'use strict';
 
-exports.flattenArticlesCategories = (articlesCategories) => articlesCategories.reduce((articlesCategoriesAccumulator, articleCategoriesItem) => {
+module.exports.flattenArticlesCategories = (articlesCategories) => articlesCategories.reduce((articlesCategoriesAccumulator, articleCategoriesItem) => {
   const articlesCategoriesItemWithSameId = articlesCategoriesAccumulator.find(({articleId}) => articleId === articleCategoriesItem.article_id);
   const categoriesIds = articlesCategoriesItemWithSameId ? articlesCategoriesItemWithSameId.categoriesIds : [];
 

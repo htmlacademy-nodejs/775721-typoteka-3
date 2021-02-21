@@ -120,4 +120,4 @@ class UserService {
   }
 }
 
-exports.UserService = UserService;
+module.exports.UserService = UserService;
