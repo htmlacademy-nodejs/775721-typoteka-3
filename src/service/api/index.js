@@ -7,7 +7,6 @@ const {createCategoryRouter} = require(`./category`);
 const {createSearchRouter} = require(`./search`);
 const {createUserRouter} = require(`./user`);
 const {createCommentRouter} = require(`./comment`);
-const {Route} = require(`./constants`);
 
 
 const createRouter = ({articleService, commentService, categoryService, userService, refreshTokenService, logger}) => {
@@ -19,11 +18,11 @@ const createRouter = ({articleService, commentService, categoryService, userServ
   const userRouter = createUserRouter({userService, refreshTokenService, logger});
   const commentRouter = createCommentRouter({commentService, articleService, userService, logger});
 
-  router.use(Route.ARTICLES, articleRouter);
-  router.use(Route.CATEGORIES, categoryRouter);
-  router.use(Route.SEARCH, searchRouter);
-  router.use(Route.USER, userRouter);
-  router.use(Route.COMMENTS, commentRouter);
+  router.use(`/articles`, articleRouter);
+  router.use(`/categories`, categoryRouter);
+  router.use(`/search`, searchRouter);
+  router.use(`/user`, userRouter);
+  router.use(`/comments`, commentRouter);
 
   return router;
 };

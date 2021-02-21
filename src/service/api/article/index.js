@@ -2,7 +2,6 @@
 
 const {Router} = require(`express`);
 
-const {Route} = require(`./constants`);
 const {isArticleExists} = require(`../../middlewares/is-article-exists`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
@@ -23,7 +22,7 @@ const createArticleRouter = ({articleService, userService, logger}) => {
   const isUserAuthorizedMiddleware = isUserAuthorized({logger});
   const isAdminMiddleware = isAdmin({userService, logger});
 
-  router.get(Route.INDEX, async (req, res, next) => {
+  router.get(`/`, async (req, res, next) => {
     try {
       const {offset, limit, categoryId} = req.query;
 
@@ -35,7 +34,7 @@ const createArticleRouter = ({articleService, userService, logger}) => {
     }
   });
 
-  router.post(Route.INDEX, [isUserAuthorizedMiddleware, isAdminMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
+  router.post(`/`, [isUserAuthorizedMiddleware, isAdminMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
     const {userId} = res.locals;
 
     try {
@@ -47,7 +46,7 @@ const createArticleRouter = ({articleService, userService, logger}) => {
     }
   });
 
-  router.get(Route.MOST_COMMENTED, [isMostCommentedArticlesParamsValidMiddleware], async (req, res, next) => {
+  router.get(`/most_commented`, [isMostCommentedArticlesParamsValidMiddleware], async (req, res, next) => {
     try {
       const {limit} = req.query;
       const result = await articleService.findAllMostCommentedArticles({limit});
@@ -58,7 +57,7 @@ const createArticleRouter = ({articleService, userService, logger}) => {
     }
   });
 
-  router.get(Route.ARTICLE, [isRequestParamsValidMiddleware, isArticleExistsMiddleware], async (req, res, next) => {
+  router.get(`/:articleId`, [isRequestParamsValidMiddleware, isArticleExistsMiddleware], async (req, res, next) => {
     const {articleId} = req.params;
 
     try {
@@ -70,7 +69,7 @@ const createArticleRouter = ({articleService, userService, logger}) => {
     }
   });
 
-  router.put(Route.ARTICLE, [
+  router.put(`/:articleId`, [
     isUserAuthorizedMiddleware,
     isAdminMiddleware,
     isRequestParamsValidMiddleware,
@@ -97,7 +96,7 @@ const createArticleRouter = ({articleService, userService, logger}) => {
     }
   });
 
-  router.delete(Route.ARTICLE, [
+  router.delete(`/:articleId`, [
     isUserAuthorizedMiddleware,
     isAdminMiddleware,
     isRequestParamsValidMiddleware,

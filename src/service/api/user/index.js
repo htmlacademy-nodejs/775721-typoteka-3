@@ -3,7 +3,6 @@
 const {Router} = require(`express`);
 const jwt = require(`jsonwebtoken`);
 
-const {Route} = require(`./constants`);
 const {makeTokens} = require(`../../jwt`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isUserEmailUnique} = require(`../../middlewares/is-user-email-unique`);
@@ -21,7 +20,7 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
   const isTokenDataValidMiddleware = isRequestDataValid({schema: tokenDataSchema, logger});
   const isUserAuthorizedMiddleware = isUserAuthorized({logger});
 
-  router.post(Route.INDEX, [isRegisterRequestDataValidMiddleware, isUserEmailUniqueMiddleware], async (req, res, next) => {
+  router.post(`/`, [isRegisterRequestDataValidMiddleware, isUserEmailUniqueMiddleware], async (req, res, next) => {
     const {firstName, lastName, email, password, passwordRepeat, avatar} = req.body;
 
     try {
@@ -33,7 +32,7 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
     }
   });
 
-  router.post(Route.LOGIN, [isLoginRequestDataValidMiddleware], async (req, res, next) => {
+  router.post(`/login`, [isLoginRequestDataValidMiddleware], async (req, res, next) => {
     const {email, password} = req.body;
 
     try {
@@ -89,7 +88,7 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
     }
   });
 
-  router.post(Route.REFRESH, [isTokenDataValidMiddleware], async (req, res, next) => {
+  router.post(`/refresh`, [isTokenDataValidMiddleware], async (req, res, next) => {
     const {token} = req.body;
 
     try {
@@ -124,7 +123,7 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
     return null;
   });
 
-  router.delete(Route.LOGOUT, [isUserAuthorizedMiddleware, isTokenDataValidMiddleware], async (req, res, next) => {
+  router.delete(`/logout`, [isUserAuthorizedMiddleware, isTokenDataValidMiddleware], async (req, res, next) => {
     const {token} = req.body;
 
     try {

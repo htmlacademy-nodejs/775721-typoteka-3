@@ -2,7 +2,6 @@
 
 const {Router} = require(`express`);
 
-const {Route} = require(`./constants`);
 const {isQueryRequestParamsValid} = require(`../../middlewares/is-query-params-valid`);
 const {isArticleExists} = require(`../../middlewares/is-article-exists`);
 const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
@@ -28,7 +27,7 @@ const createCommentRouter = ({commentService, articleService, userService, logge
   const isUserExistsMiddleware = isUserExists({logger, service: userService});
   const isAdminMiddleware = isAdmin({userService, logger});
 
-  router.get(Route.INDEX, [
+  router.get(`/`, [
     isGetRequestQueryParamsValidMiddleware,
     isArticleExistsMiddleware,
     isUserExistsMiddleware
@@ -42,7 +41,7 @@ const createCommentRouter = ({commentService, articleService, userService, logge
     }
   });
 
-  router.post(Route.INDEX, [
+  router.post(`/`, [
     isUserAuthorizedMiddleware,
     isRequestDataValidMiddleware,
     isArticleExistsMiddleware
@@ -59,7 +58,7 @@ const createCommentRouter = ({commentService, articleService, userService, logge
     }
   });
 
-  router.delete(Route.COMMENT, [
+  router.delete(`/:commentId`, [
     isUserAuthorizedMiddleware,
     isAdminMiddleware,
     isRequestParamsValidMiddleware,

@@ -2,7 +2,6 @@
 
 const {Router} = require(`express`);
 
-const {Route} = require(`./constants`);
 const {categoryParamsSchema} = require(`../../schema/category-params`);
 const {categoryDataSchema} = require(`../../schema/category-data`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
@@ -23,7 +22,7 @@ const createCategoryRouter = ({categoryService, userService, logger}) => {
   const isAdminMiddleware = isAdmin({userService, logger});
   const isCategoryCanBeDeletedMiddleware = isCategoryCanBeDeleted({categoryService, logger});
 
-  router.get(Route.INDEX, async (req, res, next) => {
+  router.get(`/`, async (req, res, next) => {
     try {
       const categories = await categoryService.findAll();
 
@@ -33,7 +32,7 @@ const createCategoryRouter = ({categoryService, userService, logger}) => {
     }
   });
 
-  router.post(Route.INDEX, [isUserAuthorizedMiddleware, isAdminMiddleware, isCategoryDataValidMiddleware], async (req, res, next) => {
+  router.post(`/`, [isUserAuthorizedMiddleware, isAdminMiddleware, isCategoryDataValidMiddleware], async (req, res, next) => {
     try {
       const newCategory = await categoryService.create(req.body);
 
@@ -43,7 +42,7 @@ const createCategoryRouter = ({categoryService, userService, logger}) => {
     }
   });
 
-  router.get(Route.CATEGORY, [isRequestParamsValidMiddleware], async (req, res, next) => {
+  router.get(`/:categoryId`, [isRequestParamsValidMiddleware], async (req, res, next) => {
     const {categoryId} = req.params;
 
     try {
@@ -59,7 +58,7 @@ const createCategoryRouter = ({categoryService, userService, logger}) => {
     }
   });
 
-  router.put(Route.CATEGORY, [isUserAuthorizedMiddleware, isAdminMiddleware, isRequestParamsValidMiddleware, isCategoryExistsMiddleware, isCategoryDataValidMiddleware], async (req, res, next) => {
+  router.put(`/:categoryId`, [isUserAuthorizedMiddleware, isAdminMiddleware, isRequestParamsValidMiddleware, isCategoryExistsMiddleware, isCategoryDataValidMiddleware], async (req, res, next) => {
     const {categoryId} = req.params;
     const id = Number.parseInt(categoryId, 10);
 
@@ -79,7 +78,7 @@ const createCategoryRouter = ({categoryService, userService, logger}) => {
     }
   });
 
-  router.delete(Route.CATEGORY, [
+  router.delete(`/:categoryId`, [
     isUserAuthorizedMiddleware,
     isAdminMiddleware,
     isRequestParamsValidMiddleware,

@@ -2,13 +2,12 @@
 
 const {Router} = require(`express`);
 
-const {Route} = require(`./constants`);
 const {HttpStatusCode} = require(`../../../constants`);
 
 const createSearchRouter = (articlesService) => {
   const router = new Router();
 
-  router.get(Route.INDEX, async (req, res, next) => {
+  router.get(`/`, async (req, res, next) => {
     const decodedQuery = decodeURI(req.query.query);
 
     if (!decodedQuery) {
