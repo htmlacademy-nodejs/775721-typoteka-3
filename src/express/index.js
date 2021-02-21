@@ -14,10 +14,10 @@ const userRouter = require(`./routes/user`);
 const articlesRouter = require(`./routes/articles`);
 const categoriesRouter = require(`./routes/categories`);
 const {DirName, AUTHORIZATION_KEY} = require(`./constants`);
-const {HttpStatusCode} = require(`../constants`);
+const {HttpStatusCode, UserRole} = require(`../constants`);
 const {FRONT_SERVER_DEFAULT_PORT, UPLOAD_DIR, API_SERVER_URL} = require(`../config`);
 const {request} = require(`./request`);
-const {isUserHasAccess} = require(`./middlewares/is-user-has-access`);
+const {isAdmin} = require(`./middlewares/is-admin`);
 
 const app = express();
 const csrfProtection = csrf({cookie: true});
@@ -54,13 +54,20 @@ app.use(async (req, res, next) => {
     const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/user/refresh`, json: true, body: {token: refreshToken}});
 
     if (statusCode === HttpStatusCode.OK) {
-      const authorizationValue = `Bearer ${body.accessToken} ${body.refreshToken}`;
+      const {accessToken, refreshToken: newRefreshToken, user} = body;
+      const authorizationValue = `Bearer ${accessToken} ${newRefreshToken}`;
+      const isRoleAdmin = user.role === UserRole.ADMIN;
 
       res.cookie(AUTHORIZATION_KEY, authorizationValue, {httpOnly: true, sameSite: `strict`});
       res.locals = {
         ...res.locals,
         isAuthorized: true,
-        tokens: body,
+        isAdmin: isRoleAdmin,
+        user,
+        tokens: {
+          accessToken,
+          refreshToken: newRefreshToken,
+        },
         headers: {
           [AUTHORIZATION_KEY]: authorizationValue,
         },
@@ -71,16 +78,21 @@ app.use(async (req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  res.locals.currentPath = req.originalUrl;
+
+  next();
+});
+
 app.use(mainRouter);
 app.use(authenticationRouter);
-app.use(`/my`, [isUserHasAccess], userRouter);
+app.use(`/my`, [isAdmin], userRouter);
 app.use(`/articles`, articlesRouter);
-app.use(`/categories`, categoriesRouter);
+app.use(`/categories`, [isAdmin], categoriesRouter);
 
 app.use((req, res) => res.status(HttpStatusCode.NOT_FOUND).render(`errors/404`));
 
-// eslint-disable-next-line
-app.use((error, req, res, next) => {
+app.use((error, req, res, _next) => {
   console.error(chalk.red(`Произошла ошибка на сервере: ${ error }`));
 
   res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).render(`errors/500`);

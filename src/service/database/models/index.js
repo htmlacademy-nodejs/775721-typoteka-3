@@ -6,7 +6,7 @@ const {createCategoryModel, createCategoryAssociations} = require(`./category`);
 const {createCommentModel, createCommentAssociations} = require(`./comment`);
 const {createRefreshTokenModel} = require(`./refresh-token`);
 
-exports.createModels = (sequelize) => {
+module.exports.createModels = (sequelize) => {
   const DataTypes = sequelize.Sequelize.DataTypes;
 
   const User = createUserModel(sequelize, DataTypes);

@@ -4,7 +4,7 @@ const Joi = require(`joi`);
 
 const {ArticleTitleRequirements, ArticleAnnounceRequirements, ArticleTextRequirements} = require(`../database/models/article/constants`);
 
-exports.articleDataSchema = Joi.object({
+module.exports.articleDataSchema = Joi.object({
   title: Joi.string()
   .min(ArticleTitleRequirements.length.MIN)
   .max(ArticleTitleRequirements.length.MAX)

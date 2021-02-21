@@ -1,40 +1,32 @@
 'use strict';
 
+const {TOP_COMMENTED_LIMIT} = require(`./constants`);
 const {request} = require(`../request`);
 const {API_SERVER_URL} = require(`../../config`);
-const {createPaginationPages} = require(`./utils/create-pagination-pages`);
 const {HttpStatusCode} = require(`../../constants`);
-const {ARTICLES_LIMIT_QUANTITY_ON_PAGE, DEFAULT_PAGE} = require(`./constants`);
 
-exports.getMain = async (req, res, next) => {
-  const {page} = req.query;
-  const currentPage = page ? Number.parseInt(page, 10) : DEFAULT_PAGE;
-  const offset = (currentPage - 1) * ARTICLES_LIMIT_QUANTITY_ON_PAGE;
-
-  let articles = [];
-  let articlesQuantity = 0;
-
+module.exports.getMain = async (req, res, next) => {
   try {
-    const {statusCode, body} = await request.get({
-      url: `${ API_SERVER_URL }/articles?offset=${ offset }&limit=${ ARTICLES_LIMIT_QUANTITY_ON_PAGE }`,
+    const mostCommentedArticlesResponse = await request.get({
+      url: `${ API_SERVER_URL }/articles/most_commented?limit=${TOP_COMMENTED_LIMIT}`,
+      json: true,
+    });
+    const hotArticles = mostCommentedArticlesResponse.statusCode === HttpStatusCode.OK ? mostCommentedArticlesResponse.body : [];
+
+    const commentsResponse = await request.get({
+      url: `${ API_SERVER_URL }/comments?limit=3`,
       json: true,
     });
 
-    if (statusCode === HttpStatusCode.OK) {
-      articles = body.articles;
-      articlesQuantity = body.quantity;
-    }
+    const comments = commentsResponse.statusCode === HttpStatusCode.OK ? commentsResponse.body : [];
+
+    res.render(`main/main`, {hotArticles, comments});
   } catch (error) {
-    return next(error);
+    next(error);
   }
-
-  const pagesQuantity = Math.ceil(articlesQuantity / ARTICLES_LIMIT_QUANTITY_ON_PAGE);
-  const pages = createPaginationPages({quantity: pagesQuantity, currentPage});
-
-  return res.render(`main/main`, {articles, pages});
 };
 
-exports.getSearch = async (req, res, next) => {
+module.exports.getSearch = async (req, res, next) => {
   try {
     const searchQuery = req.query.search;
     const encodedQuery = encodeURI(searchQuery);
@@ -49,4 +41,8 @@ exports.getSearch = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+module.exports.getHttpCodes = (req, res) => {
+  res.render(`main/http-codes`);
 };

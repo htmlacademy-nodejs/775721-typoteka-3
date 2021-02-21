@@ -5,27 +5,28 @@ const {Router} = require(`express`);
 const {isArticleExists} = require(`../../middlewares/is-article-exists`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
-const {isArticleBelongsToUser} = require(`../../middlewares/is-article-belongs-to-user`);
 const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
+const {isAdmin} = require(`../../middlewares/is-admin`);
+const {mostCommentedArticlesParams} = require(`../../schema/most-commented-articles-params`);
 const {articleDataSchema} = require(`../../schema/article-data`);
 const {articleParamsSchema} = require(`../../schema/article-params`);
-const {Route} = require(`./constants`);
 const {HttpStatusCode} = require(`../../../constants`);
 
-const createArticleRouter = ({articleService, commentRouter, logger}) => {
+const createArticleRouter = ({articleService, userService, logger}) => {
   const router = new Router();
 
   const isRequestDataValidMiddleware = isRequestDataValid({schema: articleDataSchema, logger});
   const isArticleExistsMiddleware = isArticleExists({service: articleService, logger});
   const isRequestParamsValidMiddleware = isRequestParamsValid({schema: articleParamsSchema, logger});
+  const isMostCommentedArticlesParamsValidMiddleware = isRequestParamsValid({schema: mostCommentedArticlesParams, logger});
   const isUserAuthorizedMiddleware = isUserAuthorized({logger});
-  const isArticleBelongsToUserMiddleware = isArticleBelongsToUser({logger, service: articleService});
+  const isAdminMiddleware = isAdmin({userService, logger});
 
-  router.get(Route.INDEX, async (req, res, next) => {
+  router.get(`/`, async (req, res, next) => {
     try {
-      const {offset, limit} = req.query;
+      const {offset, limit, categoryId} = req.query;
 
-      const result = await articleService.findAll(offset, limit);
+      const result = await articleService.findAll({offset, limit, categoryId});
 
       res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
@@ -33,12 +34,11 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
     }
   });
 
-  router.post(Route.INDEX, [isUserAuthorizedMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
-    const {image, title, announce, fullText, categories} = req.body;
+  router.post(`/`, [isUserAuthorizedMiddleware, isAdminMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
     const {userId} = res.locals;
 
     try {
-      const newArticle = await articleService.create({image, title, announce, fullText, categories, userId});
+      const newArticle = await articleService.create({userId, ...req.body});
 
       res.status(HttpStatusCode.CREATED).json(newArticle);
     } catch (error) {
@@ -46,7 +46,18 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
     }
   });
 
-  router.get(Route.ARTICLE, [isRequestParamsValidMiddleware, isArticleExistsMiddleware], async (req, res, next) => {
+  router.get(`/most_commented`, [isMostCommentedArticlesParamsValidMiddleware], async (req, res, next) => {
+    try {
+      const {limit} = req.query;
+      const result = await articleService.findAllMostCommentedArticles({limit});
+
+      res.status(HttpStatusCode.OK).json(result);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get(`/:articleId`, [isRequestParamsValidMiddleware, isArticleExistsMiddleware], async (req, res, next) => {
     const {articleId} = req.params;
 
     try {
@@ -58,15 +69,15 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
     }
   });
 
-  router.put(Route.ARTICLE, [
+  router.put(`/:articleId`, [
     isUserAuthorizedMiddleware,
+    isAdminMiddleware,
     isRequestParamsValidMiddleware,
     isArticleExistsMiddleware,
-    isArticleBelongsToUserMiddleware,
     isRequestDataValidMiddleware,
   ], async (req, res, next) => {
     const {articleId} = req.params;
-    const {image, title, announce, fullText, categories} = req.body;
+    const {image, title, announce, fullText, categories, createdDate} = req.body;
 
     try {
       const updatedArticle = await articleService.update({
@@ -76,6 +87,7 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
         announce,
         fullText,
         categories,
+        createdDate,
       });
 
       res.status(HttpStatusCode.OK).json(updatedArticle);
@@ -84,11 +96,11 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
     }
   });
 
-  router.delete(Route.ARTICLE, [
+  router.delete(`/:articleId`, [
     isUserAuthorizedMiddleware,
+    isAdminMiddleware,
     isRequestParamsValidMiddleware,
     isArticleExistsMiddleware,
-    isArticleBelongsToUserMiddleware,
   ], async (req, res, next) => {
     const {articleId} = req.params;
 
@@ -101,9 +113,7 @@ const createArticleRouter = ({articleService, commentRouter, logger}) => {
     }
   });
 
-  router.use(Route.COMMENTS, [isRequestParamsValidMiddleware, isArticleExistsMiddleware], commentRouter);
-
   return router;
 };
 
-exports.createArticleRouter = createArticleRouter;
+module.exports.createArticleRouter = createArticleRouter;

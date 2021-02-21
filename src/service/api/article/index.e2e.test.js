@@ -190,6 +190,87 @@ describe(`Article API end-points`, () => {
 
       expect(article).toMatchObject(expectedArticle);
     });
+
+    it(`with categoryId = 1 should return articles from category "Программирование"`, async () => {
+      const categoryId = 1;
+      const expectedArticle = {
+        id: 1,
+        image: `item01.jpg`,
+        title: `Как начать программировать за 21 день.`,
+        announce: `Процессор заслуживает особого внимания. Он обязательно понравится геймерам со стажем. Достичь успеха помогут ежедневные повторения.`,
+        fullText: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+        categories: [
+          {
+            id: 1,
+            title: `Программирование`,
+          },
+          {
+            id: 2,
+            title: `Кино и сериалы`,
+          }
+        ],
+        comments: [],
+      };
+
+      const res = await request(server).get(`/api/articles?categoryId=${categoryId}`);
+      const [article] = res.body.articles;
+
+      expect(article).toMatchObject(expectedArticle);
+    });
+  });
+
+  describe(`GET ape/articles/most_commented`, () => {
+    beforeEach(async () => {
+      const {body} = await request(server).get(`/api/articles`);
+
+      const articles = body.articles;
+      const firstCommentData = {
+        articleId: articles[0].id,
+        text: `Это где ж такие красоты? Совсем немного... Давно не пользуюсь стационарными компьютерами.`,
+      };
+      const secondCommentData = {
+        articleId: articles[1].id,
+        text: `Хочу такую же футболку :-) Давно не пользуюсь стационарными компьютерами. Ноутбуки победили.`,
+      };
+      const thirdCommentData = {
+        articleId: articles[1].id,
+        text: `Это один из лучших рок-музыкантов. Ёлки — это не просто красивое дерево. Это прочная древесина.`,
+      };
+
+      await request(server).post(`/api/comments`).send(firstCommentData).set(headers);
+      await request(server).post(`/api/comments`).send(secondCommentData).set(headers);
+      await request(server).post(`/api/comments`).send(thirdCommentData).set(headers);
+    });
+
+    it(`should return status 200 if request was successful`, async () => {
+      const res = await request(server).get(`/api/articles/most_commented`);
+
+      expect(res.statusCode).toBe(200);
+    });
+
+    it(`should return array with 2 articles`, async () => {
+      const {body} = await request(server).get(`/api/articles/most_commented`);
+
+      expect(body.length).toBe(2);
+    });
+
+    it(`should return array where first article with 2 comments`, async () => {
+      const {body} = await request(server).get(`/api/articles/most_commented`);
+
+      expect(body[0].commentsQuantity).toBe(`2`);
+    });
+
+    it(`should return status 500 if sent invalid params`, async () => {
+      const {statusCode} = await request(server).get(`/api/articles/most_commented?limit=abc`);
+
+      expect(statusCode).toBe(500);
+    });
+
+    it(`should return array with one article if sent limit = 1`, async () => {
+      const {body} = await request(server).get(`/api/articles/most_commented?limit=1`);
+
+      expect(body.length).toBe(1);
+    });
   });
 
   describe(`POST api/articles`, () => {
@@ -356,6 +437,33 @@ describe(`Article API end-points`, () => {
       const res = await request(server).post(`/api/articles`).send(data);
 
       expect(res.statusCode).toBe(401);
+    });
+
+    it(`should return status 403 if user without admin role tried to create article`, async () => {
+      const secondUserData = {
+        firstName: `Ivan`,
+        lastName: `Ivanov`,
+        email: `ivanIvamon@mail.com`,
+        password: `123456`,
+        passwordRepeat: `123456`,
+        avatar: `avatar.png`,
+      };
+      await request(server).post(`/api/user`).send(secondUserData);
+
+      const {body: loginBody} = await request(server).post(`/api/user/login`).send({email: secondUserData.email, password: secondUserData.password});
+      const authorizationHeader = `Bearer ${loginBody.accessToken} ${loginBody.refreshToken}`;
+
+      const data = {
+        image: `item01.jpg`,
+        title: `Обзор новейшего смартфона BFG-3000`,
+        announce: `Он обязательно понравится геймерам со стажем.`,
+        fullText: `Бороться с прокрастинацией несложно. Просто действуйте. Маленькими шагами.`,
+        categories: [1],
+      };
+
+      const res = await request(server).post(`/api/articles`).send(data).set({authorization: authorizationHeader});
+
+      expect(res.statusCode).toBe(403);
     });
 
     it(`should return status 201 if sent valid data`, async () => {
@@ -655,7 +763,7 @@ describe(`Article API end-points`, () => {
       expect(res.statusCode).toBe(401);
     });
 
-    it(`should return status 403 if tried to update someone else's article`, async () => {
+    it(`should return status 403 if user without admin role tried to update article`, async () => {
       const secondUserData = {
         firstName: `Ivan`,
         lastName: `Ivanov`,
@@ -740,7 +848,7 @@ describe(`Article API end-points`, () => {
       expect(res.statusCode).toBe(401);
     });
 
-    it(`should return status 403 if tried to delete someone else's article`, async () => {
+    it(`should return status 403 if user without admin role tried to delete article`, async () => {
       const secondUserData = {
         firstName: `Ivan`,
         lastName: `Ivanov`,

@@ -3,13 +3,12 @@
 const {Router} = require(`express`);
 const jwt = require(`jsonwebtoken`);
 
+const {makeTokens} = require(`../../jwt`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isUserEmailUnique} = require(`../../middlewares/is-user-email-unique`);
 const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
 const {userRegisterDataSchema, userLoginDataSchema, tokenDataSchema} = require(`../../schema/user-data`);
 const {HttpStatusCode} = require(`../../../constants`);
-const {Route} = require(`./constants`);
-const {makeTokens} = require(`../../jwt`);
 const {JWT_REFRESH_SECRET} = require(`../../../config`);
 
 const createUserRouter = ({userService, refreshTokenService, logger}) => {
@@ -21,7 +20,7 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
   const isTokenDataValidMiddleware = isRequestDataValid({schema: tokenDataSchema, logger});
   const isUserAuthorizedMiddleware = isUserAuthorized({logger});
 
-  router.post(Route.INDEX, [isRegisterRequestDataValidMiddleware, isUserEmailUniqueMiddleware], async (req, res, next) => {
+  router.post(`/`, [isRegisterRequestDataValidMiddleware, isUserEmailUniqueMiddleware], async (req, res, next) => {
     const {firstName, lastName, email, password, passwordRepeat, avatar} = req.body;
 
     try {
@@ -33,7 +32,7 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
     }
   });
 
-  router.post(Route.LOGIN, [isLoginRequestDataValidMiddleware], async (req, res, next) => {
+  router.post(`/login`, [isLoginRequestDataValidMiddleware], async (req, res, next) => {
     const {email, password} = req.body;
 
     try {
@@ -54,7 +53,8 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
         });
       }
 
-      const isPasswordIncorrect = !await userService.isUserPasswordCorrect(password, user.password);
+      const {password: userPassword, id, ...otherUserInformation} = user;
+      const isPasswordIncorrect = !await userService.isUserPasswordCorrect(password, userPassword);
 
       if (isPasswordIncorrect) {
         const message = `Неверный пароль`;
@@ -71,20 +71,24 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
         });
       }
 
-      const {accessToken, refreshToken} = makeTokens({id: user.id});
+      const {accessToken, refreshToken} = makeTokens({id});
 
       refreshTokenService.add(refreshToken);
 
       return res.json({
         accessToken,
         refreshToken,
+        user: {
+          id,
+          ...otherUserInformation,
+        },
       });
     } catch (error) {
       return next(error);
     }
   });
 
-  router.post(Route.REFRESH, [isTokenDataValidMiddleware], async (req, res, next) => {
+  router.post(`/refresh`, [isTokenDataValidMiddleware], async (req, res, next) => {
     const {token} = req.body;
 
     try {
@@ -100,11 +104,17 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
         }
 
         const newTokens = makeTokens({id});
+        const user = await userService.findById(id);
+
+        delete user.password;
 
         await refreshTokenService.delete(token);
         await refreshTokenService.add(newTokens.refreshToken);
 
-        return res.json(newTokens);
+        return res.json({
+          ...newTokens,
+          user,
+        });
       });
     } catch (error) {
       return next(error);
@@ -113,7 +123,7 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
     return null;
   });
 
-  router.delete(Route.LOGOUT, [isUserAuthorizedMiddleware, isTokenDataValidMiddleware], async (req, res, next) => {
+  router.delete(`/logout`, [isUserAuthorizedMiddleware, isTokenDataValidMiddleware], async (req, res, next) => {
     const {token} = req.body;
 
     try {
@@ -128,4 +138,4 @@ const createUserRouter = ({userService, refreshTokenService, logger}) => {
   return router;
 };
 
-exports.createUserRouter = createUserRouter;
+module.exports.createUserRouter = createUserRouter;

@@ -1,0 +1,46 @@
+doctype html
+html(lang='ru')
+  include ../partials/head
+
+  body
+    .wrapper-color
+      header.header.header--error
+        a.header__logo.header__logo--500.logo(href='/')
+          img(src='/img/icons/logo.svg', alt='логотип Типотеки')
+        a.header__registration(href='/register') Регистрация
+        a.header__enter(href='/login') Вход с паролем
+        a.header__search.button.button--search(href='/search', aria-label='поиск по сайту')
+      main.main-page
+        h1 Расшифровка кодов состояния HTTP
+
+        dl
+          dt 200
+          dd OK - успешный запрос. Если клиентом были запрошены какие-либо данные, то они находятся в заголовке и/или теле сообщения.
+
+          dt 201
+          dd CREATED - в результате успешного выполнения запроса был создан новый ресурс.
+
+          dt 204
+          dd NO CONTENT - сервер успешно обработал запрос, но в ответе были переданы только заголовки без тела сообщения.
+
+          dt 303
+          dd SEE OTHER - документ по запрошенному URI нужно запросить по адресу в поле Location заголовка с использованием метода GET несмотря даже на то, что первый запрашивался иным методом
+
+          dt 400
+          dd BAD REQUEST - сервер обнаружил в запросе клиента синтаксическую ошибку.
+
+          dt 401
+          dd UNAUTHORIZED - для доступа к запрашиваемому ресурсу требуется аутентификация.
+
+          dt 403
+          dd FORBIDDEN - сервер понял запрос, но он отказывается его выполнять из-за ограничений в доступе для клиента к указанному ресурсу
+
+          dt 404
+          dd NOT_FOUND - Сервер понял запрос, но не нашёл соответствующего ресурса по указанному URL
+
+          dt 500
+          dd INTERNAL SERVER ERROR - внутренняя ошибка сервера
+
+        a.error__link.text.text--big(href='/') Вернуться на главную
+
+      include ../partials/footer

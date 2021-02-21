@@ -1,8 +1,8 @@
 'use strict';
 
-exports.DirName = {
+module.exports.DirName = {
   PUBLIC: `public`,
   TEMPLATES: `templates`,
 };
 
-exports.AUTHORIZATION_KEY = `authorization`;
+module.exports.AUTHORIZATION_KEY = `authorization`;

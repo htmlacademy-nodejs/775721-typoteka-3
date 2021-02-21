@@ -1,6 +1,6 @@
 'use strict';
 
-exports.isUserHasAccess = (req, res, next) => {
+const isAuthorizedUser = (req, res, next) => {
   const hasNotAccess = !res.locals.isAuthorized;
 
   if (hasNotAccess) {
@@ -9,3 +9,5 @@ exports.isUserHasAccess = (req, res, next) => {
 
   return next();
 };
+
+module.exports.isAuthorizedUser = isAuthorizedUser;

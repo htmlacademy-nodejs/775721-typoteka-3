@@ -2,50 +2,66 @@ extends ../layout
 
 block content
   main
-    section.modal.modal--flex
-      .popup.popup--new-publication.popup--flex
+    section
+      .popup.popup--new-publication.popup--anti
         .new-publication
-          form(action=(`/articles/add?_csrf=${csrfToken}`), method='POST', enctype='multipart/form-data')
+          form(action=action, method='POST', enctype='multipart/form-data')
             .new-publication__header
-              h1 Новая публикация
+              h1 #{title}
               .new-publication__date-form
                 h3 Дата публикации
                 .new-publication__date-form-division
                   .new-publication__date-block
                     label(for='new-publication-date', aria-label='Календарь')
-                    input#new-publication-date(type='text', name='createdDate', value=(article ? article.createdDate : '') placeholder='21.03.2019')
+                    input#new-publication-date(
+                      type='date',
+                      name='createdDate',
+                      value=(article ? `${new Date(article.createdDate).toLocaleDateString('en-CA')}` : '')
+                      placeholder='21.03.2019'
+                    )
                   p.form__error-message #{errors ? errors['createdDate'] : ''}
               button.new-publication__button.button.button--colored(type='submit') Опубликовать
-            button.popup__button.button.button--popup-close(type='button', aria-label='Закрыть окно')
-              | Закрыть
-              | окно
+            a.popup__button.button.button--popup-close(href='/') Закрыть окно
             .new-publication__form.form
               .form__wrapper.form__wrapper--intro
                 .form__field
                   label
                     input(type='text', name='title' placeholder='Заголовок', value=(article ? article.title : ''), required)
-                p.form__error-message #{errors ? errors['title'] : ''}
-                .new-publication__checkbox.new-publication__checkbox--auto
+                if(errors && errors['title'])
+                  p.form__error-message #{errors['title']}
+                .form__field.form__field--post-image
+                  label
+                    input#image-name-field(type='text' placeholder='Фотография' readonly value=(article ? article.image : ''))
+                  .form__image-loader.form__image-loader--publication
+                    label
+                      input.visually-hidden(type='file' name='photo')
+                      | Обзор
+                  button.button.button--transparent(type='button') Удалить
+                .new-publication__category-wrapper
                   each category in categories
-                    input(
-                      id='category-checkbox-' + category.id type='checkbox',
-                      name='category',
-                      value=category.id,
-                      checked=(article && article.categories ? article.categories.some(({title}) => title === category.title) : false)
-                    )
-                    label(for='category-checkbox-' + category.id) #{category.title}
-                p.form__error-message #{errors ? errors['categories'] : ''}
-                a.new-publication__form-link.button.button--transparent(href='#') Добавить категорию
+                    .new-publication__checkbox.new-publication__checkbox--auto
+                      input(
+                        id='category-checkbox-' + category.id
+                        type='checkbox',
+                        name=`category-${category.id}`,
+                        value=category.id,
+                        checked=(article && article.categories ? article.categories.some((id) => id === category.id.toString()) : false)
+                      )
+                      label(for='category-checkbox-' + category.id) #{category.title}
+                  a.new-publication__form-link.button.button--transparent(href='/categories') Добавить категорию
+                if(errors && errors['categories'])
+                  p.form__error-message #{errors['categories']}
               .form__wrapper.form__wrapper--text
                 .form__field.form__field--publication-text
                   label
-                    textarea(rows='2', name='announce' placeholder='Анонс публикации')
+                    textarea(rows='5', name='announce' placeholder='Анонс публикации')
                       | #{article ? article.announce : ''}
-                p.form__error-message #{errors ? errors['announce'] : ''}
+                if(errors && errors['announce'])
+                  p.form__error-message #{errors['announce']}
                 .form__field.form__field--publication-text
                   label
-                    textarea(rows='5', name='fullText' placeholder='Полный текст публикации')
+                    textarea(rows='10', name='fullText' placeholder='Полный текст публикации')
                       | #{article ? article.fullText : ''}
-                p.form__error-message #{errors ? errors['fullText'] : ''}
-      .modal__overlay
+                if(errors && errors['fullText'])
+                  p.form__error-message #{errors['fullText']}
 

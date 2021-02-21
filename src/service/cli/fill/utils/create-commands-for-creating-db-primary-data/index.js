@@ -2,7 +2,7 @@
 
 const {createInsertCommand} = require(`../create-insert-command`);
 
-exports.createCommandsForCreatingDBPrimaryData = (entities, entityKeyToEntityPropertiesOrder) => {
+module.exports.createCommandsForCreatingDBPrimaryData = (entities, entityKeyToEntityPropertiesOrder) => {
   const createEntitiesCommands = Object.keys(entities).map((entityKey) => {
     const entity = entities[entityKey];
     const propertiesOrder = entityKeyToEntityPropertiesOrder[entityKey];

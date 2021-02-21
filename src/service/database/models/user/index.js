@@ -2,7 +2,7 @@
 
 const {UserFirstNameRequirements, UserLastNameRequirements, UserEmailRequirements, UserPasswordRequirements} = require(`./constants`);
 
-exports.createUserModel = (sequelize, DataTypes) => {
+module.exports.createUserModel = (sequelize, DataTypes) => {
   class User extends sequelize.Sequelize.Model {
   }
 
@@ -35,6 +35,11 @@ exports.createUserModel = (sequelize, DataTypes) => {
         len: [UserPasswordRequirements.length.MIN, UserPasswordRequirements.length.MAX],
       },
     },
+    role: {
+      type: sequelize.Sequelize.ENUM,
+      values: [`admin`, `reader`],
+      allowNull: false,
+    },
     avatar: {
       type: DataTypes.TEXT,
     },
@@ -48,7 +53,7 @@ exports.createUserModel = (sequelize, DataTypes) => {
   return User;
 };
 
-exports.createUserAssociations = ({User, Article, Comment}) => {
+module.exports.createUserAssociations = ({User, Article, Comment}) => {
   User.hasMany(Article, {
     as: `articles`,
     foreignKey: `user_id`,

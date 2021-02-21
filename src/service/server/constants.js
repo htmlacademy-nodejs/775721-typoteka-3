@@ -1,10 +1,10 @@
 'use strict';
 
-exports.Route = {
+module.exports.Route = {
   API: `/api`,
 };
 
-exports.Message = {
+module.exports.Message = {
   NOT_FOUND: `Данные не найдены`,
   INTERNAL_SERVER_ERROR: `Произошла непредвиденная ошибка на сервере`,
 };

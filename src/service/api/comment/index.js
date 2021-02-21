@@ -2,30 +2,38 @@
 
 const {Router} = require(`express`);
 
-const {HttpStatusCode} = require(`../../../constants`);
+const {isQueryRequestParamsValid} = require(`../../middlewares/is-query-params-valid`);
+const {isArticleExists} = require(`../../middlewares/is-article-exists`);
+const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
 const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
-const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
-const {isCommentBelongsToUser} = require(`../../middlewares/is-comment-belongs-to-user`);
+const {isAdmin} = require(`../../middlewares/is-admin`);
 const {isCommentExists} = require(`../../middlewares/is-comment-exist`);
+const {isUserExists} = require(`../../middlewares/is-user-exists`);
+const {getResponseCommentQueryParamsSchema} = require(`../../schema/get-response-comment-query-params-schema`);
 const {commentSchema} = require(`../../schema/comment-data`);
 const {commentParamsSchema} = require(`../../schema/comment-params`);
-const {Route} = require(`./constants`);
+const {HttpStatusCode} = require(`../../../constants`);
 
-const createCommentRouter = ({commentService, logger}) => {
+const createCommentRouter = ({commentService, articleService, userService, logger}) => {
   const router = new Router({mergeParams: true});
 
-  const isRequestParamsValidMiddleware = isRequestParamsValid({schema: commentParamsSchema, logger});
-  const isRequestDataValidMiddleware = isRequestDataValid({schema: commentSchema, logger});
+  const isGetRequestQueryParamsValidMiddleware = isQueryRequestParamsValid({schema: getResponseCommentQueryParamsSchema, logger});
+  const isArticleExistsMiddleware = isArticleExists({service: articleService, logger});
   const isUserAuthorizedMiddleware = isUserAuthorized({logger});
+  const isRequestDataValidMiddleware = isRequestDataValid({schema: commentSchema, logger});
+  const isRequestParamsValidMiddleware = isRequestParamsValid({schema: commentParamsSchema, logger});
   const isCommentExistsMiddleware = isCommentExists({logger, service: commentService});
-  const isCommentBelongsToUserMiddleware = isCommentBelongsToUser({logger, service: commentService});
+  const isUserExistsMiddleware = isUserExists({logger, service: userService});
+  const isAdminMiddleware = isAdmin({userService, logger});
 
-  router.get(Route.INDEX, async (req, res, next) => {
-    const {articleId} = req.params;
-
+  router.get(`/`, [
+    isGetRequestQueryParamsValidMiddleware,
+    isArticleExistsMiddleware,
+    isUserExistsMiddleware
+  ], async (req, res, next) => {
     try {
-      const comments = await commentService.findAll(articleId);
+      const comments = await commentService.findAll(req.query);
 
       res.status(HttpStatusCode.OK).json(comments);
     } catch (error) {
@@ -33,10 +41,13 @@ const createCommentRouter = ({commentService, logger}) => {
     }
   });
 
-  router.post(Route.INDEX, [isUserAuthorizedMiddleware, isRequestDataValidMiddleware], async (req, res, next) => {
-    const {articleId} = req.params;
+  router.post(`/`, [
+    isUserAuthorizedMiddleware,
+    isRequestDataValidMiddleware,
+    isArticleExistsMiddleware
+  ], async (req, res, next) => {
     const {userId} = res.locals;
-    const {text} = req.body;
+    const {text, articleId} = req.body;
 
     try {
       const newComment = await commentService.create({articleId, userId, text});
@@ -47,11 +58,11 @@ const createCommentRouter = ({commentService, logger}) => {
     }
   });
 
-  router.delete(Route.COMMENT, [
+  router.delete(`/:commentId`, [
     isUserAuthorizedMiddleware,
+    isAdminMiddleware,
     isRequestParamsValidMiddleware,
     isCommentExistsMiddleware,
-    isCommentBelongsToUserMiddleware,
   ], async (req, res, next) => {
     const {commentId} = req.params;
 

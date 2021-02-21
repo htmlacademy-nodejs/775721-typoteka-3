@@ -37,4 +37,4 @@ const isUserAuthorized = ({logger}) => async (req, res, next) => {
   return null;
 };
 
-exports.isUserAuthorized = isUserAuthorized;
+module.exports.isUserAuthorized = isUserAuthorized;

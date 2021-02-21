@@ -2,7 +2,6 @@
 
 const Joi = require(`joi`);
 
-exports.commentParamsSchema = Joi.object({
-  articleId: Joi.number(),
-  commentId: Joi.number(),
+module.exports.commentParamsSchema = Joi.object({
+  commentId: Joi.number().required(),
 });

@@ -22,4 +22,4 @@ const getMockData = async () => {
   return data;
 };
 
-exports.getMockData = getMockData;
+module.exports.getMockData = getMockData;

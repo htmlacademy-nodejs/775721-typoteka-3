@@ -3,7 +3,7 @@
 class ArticleService {
   constructor(dataBase, logger) {
     const {models} = dataBase;
-    const {Category, Comment} = models;
+    const {Category, Comment, User} = models;
 
     this._dataBase = dataBase;
     this._models = models;
@@ -28,6 +28,17 @@ class ArticleService {
             `message`,
             [`created_date`, `createdDate`],
           ],
+          include: [
+            {
+              model: User,
+              attributes: [
+                `id`,
+                `firstName`,
+                `lastName`,
+                `avatar`,
+              ],
+            },
+          ],
         },
       ],
       attributes: [
@@ -40,14 +51,46 @@ class ArticleService {
       ],
       order: [
         [`created_date`, `DESC`],
+        [{model: Comment, as: `comments`}, `created_date`, `ASC`]
       ],
     };
   }
 
-  async findAll(offset, limit) {
-    const {Article} = this._models;
+  async findAll({offset, limit, categoryId}) {
+    const {Article, Category} = this._models;
 
     try {
+      if (categoryId) {
+        const articlesWithCategoryId = await Article.findAll({
+          include: [
+            {
+              model: Category,
+              where: {
+                id: categoryId
+              },
+            },
+          ],
+          attributes: [`id`],
+          raw: true,
+        });
+
+        const articleIdsWithCategoryId = articlesWithCategoryId.map(({id}) => id);
+
+        const articles = await Article.findAll({
+          ...this._selectOptions,
+          offset,
+          limit,
+          where: {
+            id: articleIdsWithCategoryId,
+          }
+        });
+
+        return {
+          quantity: articleIdsWithCategoryId.length,
+          articles,
+        };
+      }
+
       const [quantity, articles] = await Promise.all([
         Article.count(),
         Article.findAll({
@@ -68,12 +111,44 @@ class ArticleService {
     }
   }
 
+  async findAllMostCommentedArticles({limit}) {
+    const {sequelize} = this._dataBase;
+    const {Article, Comment} = this._models;
+
+    try {
+      return Article.findAll({
+        include: [
+          {
+            model: Comment,
+            as: `comments`,
+            attributes: [],
+          },
+        ],
+        attributes: [
+          `id`,
+          `title`,
+          [sequelize.fn(`COUNT`, sequelize.col(`comments.id`)), `commentsQuantity`],
+        ],
+        group: [`article.id`, `article.title`],
+        order: [
+          [sequelize.col(`commentsQuantity`), `DESC`],
+        ],
+        subQuery: false,
+        limit,
+      });
+    } catch (error) {
+      this._logger.error(`Не могу найти самые популярные публикации. Ошибка: ${ error }`);
+
+      return null;
+    }
+  }
+
   async findAllByTitle(title) {
     const {sequelize} = this._dataBase;
     const {Article} = this._models;
 
     try {
-      return await Article.findAll({
+      return Article.findAll({
         ...this._selectOptions,
         where: {
           title: {
@@ -94,7 +169,7 @@ class ArticleService {
     const articleId = Number.parseInt(id, 10);
 
     try {
-      return await Article.findByPk(articleId, this._selectOptions);
+      return Article.findByPk(articleId, this._selectOptions);
     } catch (error) {
       this._logger.error(`Не могу найти публикацию с id: ${ articleId }. Ошибка: ${ error }`);
 
@@ -117,7 +192,7 @@ class ArticleService {
     }
   }
 
-  async create({image, title, announce, fullText, categories: categoriesIds, userId}) {
+  async create({image, title, announce, fullText, categories: categoriesIds, userId, createdDate}) {
     const {sequelize} = this._dataBase;
     const {Article, Category, User} = this._models;
 
@@ -131,6 +206,10 @@ class ArticleService {
         text: fullText,
       });
 
+      if (createdDate) {
+        await this.update({id: newArticle.id, createdDate});
+      }
+
       const categories = await Category.findAll({
         where: {
           id: {
@@ -141,7 +220,7 @@ class ArticleService {
 
       await newArticle.addCategories(categories);
 
-      return await Article.findByPk(newArticle.id, this._selectOptions);
+      return Article.findByPk(newArticle.id, this._selectOptions);
     } catch (error) {
       this._logger.error(`Не могу создать публикацию. Ошибка: ${ error }`);
 
@@ -149,7 +228,7 @@ class ArticleService {
     }
   }
 
-  async update({id, image, title, announce, fullText, categories: categoriesIds}) {
+  async update({id, image, title, announce, fullText, createdDate, categories: categoriesIds}) {
     const {sequelize} = this._dataBase;
     const {Article, Category} = this._models;
 
@@ -158,6 +237,7 @@ class ArticleService {
         image,
         title,
         announce,
+        createdDate,
         text: fullText,
       }, {
         where: {
@@ -181,7 +261,7 @@ class ArticleService {
 
       await updatedArticle.setCategories(categories);
 
-      return await Article.findByPk(updatedArticle.id, this._selectOptions);
+      return Article.findByPk(updatedArticle.id, this._selectOptions);
     } catch (error) {
       this._logger.error(`Не могу обновить публикацию. Ошибка: ${ error }`);
 
@@ -212,26 +292,6 @@ class ArticleService {
       return null;
     }
   }
-
-  async isArticleBelongsToUser(offerId, userId) {
-    const {Article} = this._models;
-
-    try {
-      const article = await Article.findByPk(offerId, {
-        raw: true,
-        attributes: [
-          `id`,
-          [`user_id`, `userId`],
-        ],
-      });
-
-      return article.userId === userId;
-    } catch (error) {
-      this._logger.error(`Не могу проверить кому принадлежит публикация. Ошибка: ${ error }`);
-
-      return false;
-    }
-  }
 }
 
-exports.ArticleService = ArticleService;
+module.exports.ArticleService = ArticleService;

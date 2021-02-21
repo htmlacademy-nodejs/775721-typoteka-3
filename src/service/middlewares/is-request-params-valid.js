@@ -16,4 +16,4 @@ const isRequestParamsValid = ({schema, logger}) => async (req, res, next) => {
   return next();
 };
 
-exports.isRequestParamsValid = isRequestParamsValid;
+module.exports.isRequestParamsValid = isRequestParamsValid;

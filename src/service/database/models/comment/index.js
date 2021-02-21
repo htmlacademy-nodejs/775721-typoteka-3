@@ -2,7 +2,7 @@
 
 const {CommentMessageRequirements} = require(`./constants`);
 
-exports.createCommentModel = (sequelize, DataTypes) => {
+module.exports.createCommentModel = (sequelize, DataTypes) => {
   class Comment extends sequelize.Sequelize.Model {
   }
 
@@ -31,7 +31,7 @@ exports.createCommentModel = (sequelize, DataTypes) => {
   return Comment;
 };
 
-exports.createCommentAssociations = ({Comment, Article, User}) => {
+module.exports.createCommentAssociations = ({Comment, Article, User}) => {
   Comment.belongsTo(User, {
     foreignKey: `user_id`,
   });

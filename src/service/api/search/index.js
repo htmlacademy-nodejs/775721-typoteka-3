@@ -3,12 +3,11 @@
 const {Router} = require(`express`);
 
 const {HttpStatusCode} = require(`../../../constants`);
-const {Route} = require(`./constants`);
 
 const createSearchRouter = (articlesService) => {
   const router = new Router();
 
-  router.get(Route.INDEX, async (req, res, next) => {
+  router.get(`/`, async (req, res, next) => {
     const decodedQuery = decodeURI(req.query.query);
 
     if (!decodedQuery) {
@@ -31,4 +30,4 @@ const createSearchRouter = (articlesService) => {
   return router;
 };
 
-exports.createSearchRouter = createSearchRouter;
+module.exports.createSearchRouter = createSearchRouter;

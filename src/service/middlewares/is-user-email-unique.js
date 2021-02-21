@@ -29,4 +29,4 @@ const isUserEmailUnique = ({service, logger}) => async (req, res, next) => {
   return next();
 };
 
-exports.isUserEmailUnique = isUserEmailUnique;
+module.exports.isUserEmailUnique = isUserEmailUnique;

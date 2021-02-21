@@ -47,7 +47,7 @@ module.exports = {
     }
 
     try {
-      const users = createUsers(USERS_COUNT);
+      const users = await createUsers(USERS_COUNT);
       const categories = await createCategories();
       const articles = await createArticles({quantity, users});
       const comments = await createComments({users, articles});

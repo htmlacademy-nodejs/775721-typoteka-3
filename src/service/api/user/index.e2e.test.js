@@ -5,6 +5,7 @@ const request = require(`supertest`);
 
 const {createServer} = require(`../../server`);
 const testDataBase = require(`../../database/test-data-base`);
+const {UserRole} = require(`../../../constants`);
 
 describe(`User API end-points`, () => {
   const server = createServer({dataBase: testDataBase});
@@ -22,6 +23,7 @@ describe(`User API end-points`, () => {
         email: `ivan@mail.com`,
         password: `123456`,
         avatar: `avatar01.jpg`,
+        role: UserRole.READER,
       },
     ];
 
@@ -301,6 +303,64 @@ describe(`User API end-points`, () => {
 
       expect(body.password).not.toEqual(data.password);
     });
+
+    it(`should return user with admin role if no admins`, async () => {
+      const data = {
+        firstName: `James`,
+        lastName: `Bond`,
+        email: `jamesBond@mail.com`,
+        password: `123456`,
+        passwordRepeat: `123456`,
+        avatar: `avatar.png`,
+      };
+      const expectedUserData = {
+        firstName: `James`,
+        lastName: `Bond`,
+        email: `jamesBond@mail.com`,
+        avatar: `avatar.png`,
+        role: UserRole.ADMIN,
+      };
+
+      const {body} = await request(server).post(`/api/user`).send(data);
+
+      expect(body).toMatchObject(expectedUserData);
+    });
+
+    it(`should return user with reader role if there is admin`, async () => {
+      const usersWithAdmin = [
+        {
+          firstName: `Admin`,
+          lastName: `Admin`,
+          email: `admin@mail.com`,
+          password: `123456`,
+          passwordRepeat: `123456`,
+          avatar: `admin-avatar.png`,
+          role: UserRole.ADMIN,
+        },
+      ];
+
+      await testDataBase.resetDataBase({users: usersWithAdmin});
+
+      const data = {
+        firstName: `James`,
+        lastName: `Bond`,
+        email: `jamesBond@mail.com`,
+        password: `123456`,
+        passwordRepeat: `123456`,
+        avatar: `avatar.png`,
+      };
+      const expectedUserData = {
+        firstName: `James`,
+        lastName: `Bond`,
+        email: `jamesBond@mail.com`,
+        avatar: `avatar.png`,
+        role: UserRole.READER,
+      };
+
+      const {body} = await request(server).post(`/api/user`).send(data);
+
+      expect(body).toMatchObject(expectedUserData);
+    });
   });
 
   describe(`POST api/user/login`, () => {
@@ -398,6 +458,22 @@ describe(`User API end-points`, () => {
       expect(body).toHaveProperty(`accessToken`);
       expect(body).toHaveProperty(`refreshToken`);
     });
+
+    it(`should return user information if sent correct data`, async () => {
+      const data = {
+        email: `jamesBond@mail.com`,
+        password: `123456`,
+      };
+      const expectedUserData = {
+        firstName: `James`,
+        lastName: `Bond`,
+        email: `jamesBond@mail.com`,
+      };
+
+      const {body: {user}} = await request(server).post(PATH).send(data);
+
+      expect(user).toMatchObject(expectedUserData);
+    });
   });
 
   describe(`POST api/user/refresh`, () => {
@@ -410,8 +486,19 @@ describe(`User API end-points`, () => {
           value: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjA1NzEzMTc2fQ.hzY0AvYGpeBagHnrECWH46apmpK9p8xJ8cUhFCI3z3Y`,
         }
       ];
+      const users = [
+        {
+          id: 1,
+          firstName: `James`,
+          lastName: `Bond`,
+          email: `jamesBond@mail.com`,
+          password: `123456`,
+          avatar: `avatar.png`,
+          role: UserRole.READER,
+        },
+      ];
 
-      await testDataBase.resetDataBase({tokens});
+      await testDataBase.resetDataBase({tokens, users});
     });
 
     it(`should return status 400 if sent invalid token`, async () => {
@@ -449,6 +536,18 @@ describe(`User API end-points`, () => {
       expect(body).toHaveProperty(`refreshToken`);
     });
 
+    it(`should return user information if token was refreshed`, async () => {
+      const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjA1NzEzMTc2fQ.hzY0AvYGpeBagHnrECWH46apmpK9p8xJ8cUhFCI3z3Y`;
+      const expectedUserData = {
+        firstName: `James`,
+        lastName: `Bond`,
+        email: `jamesBond@mail.com`,
+      };
+      const {body: {user}} = await request(server).post(PATH).send({token});
+
+      expect(user).toMatchObject(expectedUserData);
+    });
+
     it(`should return another refresh token if token was refreshed`, async () => {
       const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjA1NzEzMTc2fQ.hzY0AvYGpeBagHnrECWH46apmpK9p8xJ8cUhFCI3z3Y`;
       const res = await request(server).post(PATH).send({token});
@@ -477,6 +576,7 @@ describe(`User API end-points`, () => {
         email: `ivan@mail.com`,
         password: `123456`,
         avatar: `avatar01.jpg`,
+        role: UserRole.READER,
       },
     ];
 

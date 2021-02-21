@@ -2,7 +2,7 @@
 
 const {ArticleTitleRequirements, ArticleAnnounceRequirements, ArticleTextRequirements} = require(`./constants`);
 
-exports.createArticleModel = (sequelize, DataTypes) => {
+module.exports.createArticleModel = (sequelize, DataTypes) => {
   class Article extends sequelize.Sequelize.Model {
   }
 
@@ -34,6 +34,10 @@ exports.createArticleModel = (sequelize, DataTypes) => {
       type: DataTypes.STRING(ArticleTextRequirements.length.MAX), /* eslint-disable-line */
       allowNull: false,
     },
+    createdDate: {
+      field: `created_date`,
+      type: DataTypes.DATE,
+    },
   }, {
     sequelize,
     createdAt: `created_date`,
@@ -45,7 +49,7 @@ exports.createArticleModel = (sequelize, DataTypes) => {
   return Article;
 };
 
-exports.createArticleAssociations = ({Article, User, Category, Comment}) => {
+module.exports.createArticleAssociations = ({Article, User, Category, Comment}) => {
   Article.belongsTo(User, {
     foreignKey: `user_id`,
   });
@@ -60,5 +64,6 @@ exports.createArticleAssociations = ({Article, User, Category, Comment}) => {
   Article.hasMany(Comment, {
     as: `comments`,
     foreignKey: `article_id`,
+    onDelete: `CASCADE`,
   });
 };

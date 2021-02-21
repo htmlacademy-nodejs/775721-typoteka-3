@@ -1,24 +1,24 @@
 'use strict';
 
+const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-to-error-messages`);
+const {AUTHORIZATION_KEY} = require(`../constants`);
 const {request} = require(`../request`);
 const {HttpStatusCode} = require(`../../constants`);
 const {API_SERVER_URL} = require(`../../config`);
-const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-to-error-messages`);
-const {AUTHORIZATION_KEY} = require(`../constants`);
 
-exports.getRegister = async (req, res, next) => {
-  try {
-    res.render(`authentication/register`);
-  } catch (error) {
-    next(error);
-  }
+exports.getRegister = async (req, res) => {
+  res.render(`authentication/register`);
 };
 
 
 exports.postRegister = async (req, res, next) => {
-  try {
-    const userData = req.fields;
+  const avatar = res.locals.imageName;
+  const userData = {
+    ...req.fields,
+    avatar,
+  };
 
+  try {
     const {statusCode, body} = await request.post({url: `${ API_SERVER_URL }/user`, json: true, body: userData});
 
     if (statusCode === HttpStatusCode.CREATED) {
@@ -26,8 +26,9 @@ exports.postRegister = async (req, res, next) => {
     }
 
     const errorMessages = parseErrorDetailsToErrorMessages(body.details);
+    const errors = Object.values(errorMessages);
 
-    return res.render(`authentication/register`, {user: userData, errors: errorMessages});
+    return res.render(`authentication/register`, {user: userData, errors});
   } catch (error) {
     return next(error);
   }
@@ -47,12 +48,6 @@ exports.postLogin = async (req, res, next) => {
   try {
     const {statusCode, body} = await request.post({url: `${API_SERVER_URL}/user/login`, json: true, body: loginData});
 
-    if (statusCode === HttpStatusCode.FORBIDDEN) {
-      const errorMessages = parseErrorDetailsToErrorMessages(body.details);
-
-      return res.render(`authentication/login`, {errors: errorMessages});
-    }
-
     if (statusCode === HttpStatusCode.OK) {
       const {accessToken, refreshToken} = body;
 
@@ -61,7 +56,9 @@ exports.postLogin = async (req, res, next) => {
       return res.redirect(`/`);
     }
 
-    return res.render(`authentication/login`);
+    const errorMessages = parseErrorDetailsToErrorMessages(body.details);
+
+    return res.render(`authentication/login`, {errors: errorMessages});
   } catch (error) {
     return next(error);
   }

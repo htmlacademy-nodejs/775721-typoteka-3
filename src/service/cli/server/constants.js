@@ -1,5 +1,5 @@
 'use strict';
 
-exports.MODULE_NAME = `--server`;
+module.exports.MODULE_NAME = `--server`;
 
-exports.DEFAULT_PORT = 3000;
+module.exports.DEFAULT_PORT = 3000;

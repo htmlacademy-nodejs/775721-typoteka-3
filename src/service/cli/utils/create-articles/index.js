@@ -10,7 +10,7 @@ const {FilePath} = require(`../../../../constants`);
 const {AnnounceSizeLimit} = require(`../../constants`);
 const {TextSizeLimit} = require(`./constants`);
 
-exports.createArticles = async ({quantity, users}) => {
+module.exports.createArticles = async ({quantity, users}) => {
   let articles = [];
 
   try {

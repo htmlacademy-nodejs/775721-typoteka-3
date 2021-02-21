@@ -20,3 +20,6 @@ build/
 
 #Логи
 src/service/logs
+
+# Папки с изображениями
+src/express/public/img

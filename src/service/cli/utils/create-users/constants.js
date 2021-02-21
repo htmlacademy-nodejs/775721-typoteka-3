@@ -37,8 +37,5 @@ module.exports = {
       eng: `Vasiliev`,
     },
   ],
-  PasswordRestrict: {
-    MIN: 100000,
-    MAX: 999999,
-  },
+  DEFAULT_PASSWORD: `123456`,
 };

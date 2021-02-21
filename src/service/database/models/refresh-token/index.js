@@ -1,6 +1,6 @@
 'use strict';
 
-exports.createRefreshTokenModel = (sequelize, DataTypes) => {
+module.exports.createRefreshTokenModel = (sequelize, DataTypes) => {
   class RefreshToken extends sequelize.Sequelize.Model {
   }
 

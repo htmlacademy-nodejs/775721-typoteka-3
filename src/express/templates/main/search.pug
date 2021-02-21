@@ -11,7 +11,7 @@ block content
               input(type='text', name='search' value=(query || '') placeholder='Что ищем?')
             button.search__button.button.button--transparent(type='submit') Найти
 
-          each result in results
+          each resultItem in results
             .search__result
-              time.search__date(datetime=result.createdDate) #{result.createdDate}
-              a.search__link(href='/articles/'+result.id) #{result.title}
+              time.search__date(datetime=resultItem.createdDate) #{new Date(resultItem.createdDate).toLocaleString()}
+              a.search__link(href='/articles/'+resultItem.id) #{resultItem.title}

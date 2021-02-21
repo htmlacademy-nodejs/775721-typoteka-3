@@ -4,9 +4,7 @@ const {request} = require(`../request`);
 const {HttpStatusCode} = require(`../../constants`);
 const {API_SERVER_URL} = require(`../../config`);
 
-const REQUIRED_NUMBER_OF_COMMENTS = 3;
-
-exports.getUserMain = async (req, res, next) => {
+module.exports.getUserMain = async (req, res, next) => {
   try {
     const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/articles`, json: true});
     const articles = statusCode === HttpStatusCode.OK ? body.articles : [];
@@ -17,22 +15,25 @@ exports.getUserMain = async (req, res, next) => {
   }
 };
 
-exports.getUserComments = async (req, res, next) => {
+module.exports.getUserComments = async (req, res, next) => {
   try {
-    const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/articles`, json: true});
-    const articles = statusCode === HttpStatusCode.OK ? body.articles : [];
-    const requiredArticles = articles.slice(0, REQUIRED_NUMBER_OF_COMMENTS);
-    const requiredArticlesIds = requiredArticles.map(({id}) => id);
+    const {statusCode, body} = await request.get({url: `${ API_SERVER_URL }/comments`, json: true});
+    const comments = statusCode === HttpStatusCode.OK ? body : [];
 
-    const commentsRequests = requiredArticlesIds.map((id) => request.get({
-      url: `${ API_SERVER_URL }/articles/${ id }/comments`,
-      json: true,
-    }));
-    const commentsResponses = await Promise.all(commentsRequests);
-    const comments = commentsResponses.map(({statusCode: commentsStatusCode, body: commentsBody}) => commentsStatusCode === HttpStatusCode.OK ? commentsBody : []);
-    const userComments = comments.flat();
+    res.render(`user/comments`, {comments});
+  } catch (error) {
+    next(error);
+  }
+};
 
-    res.render(`user/comments`, {comments: userComments});
+module.exports.getDeleteComment = async (req, res, next) => {
+  const {id} = req.params;
+  const {headers} = res.locals;
+
+  try {
+    await request.delete({url: `${ API_SERVER_URL }/comments/${id}`, headers, json: true});
+
+    res.redirect(`/my/comments`);
   } catch (error) {
     next(error);
   }

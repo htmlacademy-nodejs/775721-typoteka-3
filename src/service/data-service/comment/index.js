@@ -2,28 +2,75 @@
 
 class CommentService {
   constructor(dataBase, logger) {
+    const {models} = dataBase;
+    const {User, Article} = models;
+
     this._dataBase = dataBase;
-    this._models = dataBase.models;
+    this._models = models;
     this._logger = logger;
     this._selectOptions = {
-      raw: true,
+      include: [
+        {
+          model: User,
+          attributes: [
+            `id`,
+            `firstName`,
+            `lastName`,
+            `avatar`,
+          ],
+        },
+        {
+          model: Article,
+          attributes: [
+            `id`,
+            `title`,
+          ],
+        },
+      ],
       attributes: [
         `id`,
         `message`,
-        `created_date`,
+        [`created_date`, `createdDate`],
+        [`article_id`, `articleId`],
+      ],
+      order: [
+        [`created_date`, `DESC`],
       ],
     };
   }
 
-  async findAll(articleId) {
-    const {Article} = this._models;
+  async findAll(options) {
+    const {limit, articleId, userId} = options;
+    const {Comment} = this._models;
+    let selectOptions = {};
+
+    if (userId) {
+      if (!selectOptions.where) {
+        selectOptions.where = {};
+      }
+
+      selectOptions.where[`user_id`] = userId;
+    }
+
+    if (articleId) {
+      if (!selectOptions.where) {
+        selectOptions.where = {};
+      }
+
+      selectOptions.where[`article_id`] = articleId;
+    }
+
+    if (limit) {
+      selectOptions.limit = limit;
+    }
 
     try {
-      const article = await Article.findByPk(articleId);
-
-      return await article.getComments(this._selectOptions);
+      return Comment.findAll({
+        ...this._selectOptions,
+        ...selectOptions,
+      });
     } catch (error) {
-      this._logger.error(`Не могу найти комментарии для публикации с id ${ articleId }. Ошибка: ${ error }`);
+      this._logger.error(`Не могу найти комментарии. Параметры: ${JSON.stringify(options)}. Ошибка: ${ error }`);
 
       return null;
     }
@@ -40,7 +87,7 @@ class CommentService {
         [`user_id`]: userId,
       });
 
-      return await Comment.findByPk(newComment.id, this._selectOptions);
+      return Comment.findByPk(newComment.id, this._selectOptions);
     } catch (error) {
       this._logger.error(`Не могу создать комментарий для публикации с id ${ articleId }. Ошибка: ${ error }`);
 
@@ -86,26 +133,6 @@ class CommentService {
       return false;
     }
   }
-
-  async isCommentBelongToUser(commentId, userId) {
-    const {Comment} = this._models;
-
-    try {
-      const comment = await Comment.findByPk(commentId, {
-        raw: true,
-        attributes: [
-          `id`,
-          [`user_id`, `userId`],
-        ],
-      });
-
-      return comment.userId === userId;
-    } catch (error) {
-      this._logger.error(`Не могу проверить кому принадлежит комментарий. Ошибка: ${ error }`);
-
-      return false;
-    }
-  }
 }
 
-exports.CommentService = CommentService;
+module.exports.CommentService = CommentService;

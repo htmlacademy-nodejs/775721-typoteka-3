@@ -16,4 +16,4 @@ const isRequestDataValid = ({schema, logger}) => async (req, res, next) => {
   return next();
 };
 
-exports.isRequestDataValid = isRequestDataValid;
+module.exports.isRequestDataValid = isRequestDataValid;

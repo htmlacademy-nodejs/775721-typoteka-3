@@ -2,6 +2,6 @@
 
 const Joi = require(`joi`);
 
-exports.articleParamsSchema = Joi.object({
+module.exports.articleParamsSchema = Joi.object({
   articleId: Joi.number(),
 });

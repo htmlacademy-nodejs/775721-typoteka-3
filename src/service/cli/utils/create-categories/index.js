@@ -5,7 +5,7 @@ const chalk = require(`chalk`);
 const {getMockContent} = require(`../get-mock-content`);
 const {FilePath} = require(`../../../../constants`);
 
-exports.createCategories = async () => {
+module.exports.createCategories = async () => {
   let categories = [];
 
   try {
