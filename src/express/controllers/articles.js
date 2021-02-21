@@ -1,8 +1,7 @@
 'use strict';
 
 const path = require(`path`);
-const fs = require(`fs`);
-const fsPromises = require(`fs`).promises;
+const fs = require(`fs`).promises;
 
 const {parseErrorDetailsToErrorMessages} = require(`./utils/parse-error-details-to-error-messages`);
 const {request} = require(`../request`);
@@ -100,7 +99,11 @@ module.exports.postEditArticle = async (req, res, next) => {
       if (previousImageName) {
         const imagePath = path.resolve(__dirname, `../${DirName.PUBLIC}/img/${previousImageName}`);
 
-        fs.unlink(imagePath);
+        try {
+          await fs.unlink(imagePath);
+        } catch (error) {
+          console.error(`Изображение ${imagePath} недоступно.`);
+        }
       }
 
       return res.redirect(`/my`);
@@ -129,8 +132,7 @@ module.exports.getDeleteArticle = async (req, res, next) => {
       const imagePath = path.resolve(__dirname, `../${DirName.PUBLIC}/img/${imageName}`);
 
       try {
-        await fsPromises.access(imagePath, fs.constants.F_OK);
-        await fsPromises.unlink(imagePath);
+        await fs.unlink(imagePath);
       } catch (error) {
         console.error(`Изображение ${imagePath} недоступно.`);
       }
