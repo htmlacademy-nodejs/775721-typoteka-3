@@ -259,18 +259,6 @@ describe(`Article API end-points`, () => {
 
       expect(body[0].commentsQuantity).toBe(`2`);
     });
-
-    it(`should return status 500 if sent invalid params`, async () => {
-      const {statusCode} = await request(server).get(`/api/articles/most_commented?limit=abc`);
-
-      expect(statusCode).toBe(500);
-    });
-
-    it(`should return array with one article if sent limit = 1`, async () => {
-      const {body} = await request(server).get(`/api/articles/most_commented?limit=1`);
-
-      expect(body.length).toBe(1);
-    });
   });
 
   describe(`POST api/articles`, () => {

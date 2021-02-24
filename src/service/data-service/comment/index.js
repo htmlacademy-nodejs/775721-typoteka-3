@@ -39,7 +39,7 @@ class CommentService {
     };
   }
 
-  async findAll(options) {
+  async findAll(options = {}) {
     const {limit, articleId, userId} = options;
     const {Comment} = this._models;
     let selectOptions = {};

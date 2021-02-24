@@ -1,6 +1,5 @@
 'use strict';
 
-const {TOP_COMMENTED_LIMIT} = require(`./constants`);
 const {request} = require(`../request`);
 const {API_SERVER_URL} = require(`../../config`);
 const {HttpStatusCode} = require(`../../constants`);
@@ -8,7 +7,7 @@ const {HttpStatusCode} = require(`../../constants`);
 module.exports.getMain = async (req, res, next) => {
   try {
     const mostCommentedArticlesResponse = await request.get({
-      url: `${ API_SERVER_URL }/articles/most_commented?limit=${TOP_COMMENTED_LIMIT}`,
+      url: `${ API_SERVER_URL }/articles/most_commented`,
       json: true,
     });
     const hotArticles = mostCommentedArticlesResponse.statusCode === HttpStatusCode.OK ? mostCommentedArticlesResponse.body : [];

@@ -7,18 +7,17 @@ const {isRequestDataValid} = require(`../../middlewares/is-request-data-valid`);
 const {isRequestParamsValid} = require(`../../middlewares/is-request-params-valid`);
 const {isUserAuthorized} = require(`../../middlewares/is-user-authorized`);
 const {isAdmin} = require(`../../middlewares/is-admin`);
-const {mostCommentedArticlesParams} = require(`../../schema/most-commented-articles-params`);
 const {articleDataSchema} = require(`../../schema/article-data`);
 const {articleParamsSchema} = require(`../../schema/article-params`);
 const {HttpStatusCode} = require(`../../../constants`);
+const {HOT_ARTICLES_LIMIT, LAST_COMMENTS_LIMIT} = require(`../constants`);
 
-const createArticleRouter = ({articleService, userService, logger}) => {
+const createArticleRouter = ({articleService, userService, commentService, logger, socket}) => {
   const router = new Router();
 
   const isRequestDataValidMiddleware = isRequestDataValid({schema: articleDataSchema, logger});
   const isArticleExistsMiddleware = isArticleExists({service: articleService, logger});
   const isRequestParamsValidMiddleware = isRequestParamsValid({schema: articleParamsSchema, logger});
-  const isMostCommentedArticlesParamsValidMiddleware = isRequestParamsValid({schema: mostCommentedArticlesParams, logger});
   const isUserAuthorizedMiddleware = isUserAuthorized({logger});
   const isAdminMiddleware = isAdmin({userService, logger});
 
@@ -39,6 +38,9 @@ const createArticleRouter = ({articleService, userService, logger}) => {
 
     try {
       const newArticle = await articleService.create({userId, ...req.body});
+      const hotArticles = await articleService.findAllMostCommentedArticles({limit: HOT_ARTICLES_LIMIT});
+
+      socket.emit(`hotArticlesUpdated`, hotArticles);
 
       res.status(HttpStatusCode.CREATED).json(newArticle);
     } catch (error) {
@@ -46,10 +48,9 @@ const createArticleRouter = ({articleService, userService, logger}) => {
     }
   });
 
-  router.get(`/most_commented`, [isMostCommentedArticlesParamsValidMiddleware], async (req, res, next) => {
+  router.get(`/most_commented`, async (req, res, next) => {
     try {
-      const {limit} = req.query;
-      const result = await articleService.findAllMostCommentedArticles({limit});
+      const result = await articleService.findAllMostCommentedArticles({limit: HOT_ARTICLES_LIMIT});
 
       res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
@@ -89,6 +90,9 @@ const createArticleRouter = ({articleService, userService, logger}) => {
         categories,
         createdDate,
       });
+      const hotArticles = await articleService.findAllMostCommentedArticles({limit: HOT_ARTICLES_LIMIT});
+
+      socket.emit(`hotArticlesUpdated`, hotArticles);
 
       res.status(HttpStatusCode.OK).json(updatedArticle);
     } catch (error) {
@@ -106,6 +110,11 @@ const createArticleRouter = ({articleService, userService, logger}) => {
 
     try {
       const deletedArticle = await articleService.delete(articleId);
+      const comments = await commentService.findAll({limit: LAST_COMMENTS_LIMIT});
+      const hotArticles = await articleService.findAllMostCommentedArticles({limit: HOT_ARTICLES_LIMIT});
+
+      socket.emit(`lastCommentsUpdated`, comments);
+      socket.emit(`hotArticlesUpdated`, hotArticles);
 
       res.status(HttpStatusCode.OK).json(deletedArticle);
     } catch (error) {
