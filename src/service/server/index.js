@@ -1,6 +1,9 @@
 'use strict';
 
+const http = require(`http`);
+
 const express = require(`express`);
+const createSocket = require(`socket.io`);
 
 const {pinoLogger} = require(`../logger`);
 const {ArticleService} = require(`../data-service/article`);
@@ -13,7 +16,23 @@ const {HttpStatusCode} = require(`../../constants`);
 const {Route, Message} = require(`./constants`);
 
 const createServer = ({dataBase, logger = pinoLogger} = {}) => {
-  const server = express();
+  const app = express();
+  const server = http.createServer(app);
+  const socket = createSocket(server, {
+    cors: {
+      origin: `http://localhost:8080`,
+    },
+  });
+
+  socket.on(`connection`, (client) => {
+    const {address: ip} = client.handshake;
+
+    logger.info(`Новое подключение к WebSocket: ${ip}`);
+
+    client.on(`disconnect`, () => {
+      logger.info(`Клиент отключён: ${ip}`);
+    });
+  });
 
   const articleService = new ArticleService(dataBase, logger);
   const commentService = new CommentService(dataBase, logger);
@@ -28,11 +47,12 @@ const createServer = ({dataBase, logger = pinoLogger} = {}) => {
     userService,
     refreshTokenService,
     logger,
+    socket,
   });
 
-  server.use(express.json());
+  app.use(express.json());
 
-  server.use((req, res, next) => {
+  app.use((req, res, next) => {
     const decodedUrl = decodeURI(req.url);
 
     logger.debug(`Старт ${ req.method } запроса к url: ${ decodedUrl }`);
@@ -40,7 +60,7 @@ const createServer = ({dataBase, logger = pinoLogger} = {}) => {
     return next();
   });
 
-  server.use((req, res, next) => {
+  app.use((req, res, next) => {
     next();
 
     if (res.headersSent) {
@@ -50,15 +70,15 @@ const createServer = ({dataBase, logger = pinoLogger} = {}) => {
     return undefined;
   });
 
-  server.use(Route.API, apiRouter);
+  app.use(Route.API, apiRouter);
 
-  server.use((req, res) => {
+  app.use((req, res) => {
     res.status(HttpStatusCode.NOT_FOUND).send(Message.NOT_FOUND);
 
     return logger.error(`Не могу найти маршрут к url: ${ req.url }.`);
   });
 
-  server.use((error, req, res, _next) => {
+  app.use((error, req, res, _next) => {
     res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send(Message.INTERNAL_SERVER_ERROR);
 
     return logger.error(`Ошибка сервера: ${ error }.`);

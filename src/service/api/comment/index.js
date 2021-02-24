@@ -14,8 +14,9 @@ const {getResponseCommentQueryParamsSchema} = require(`../../schema/get-response
 const {commentSchema} = require(`../../schema/comment-data`);
 const {commentParamsSchema} = require(`../../schema/comment-params`);
 const {HttpStatusCode} = require(`../../../constants`);
+const {LAST_COMMENTS_LIMIT, HOT_ARTICLES_LIMIT} = require(`../constants`);
 
-const createCommentRouter = ({commentService, articleService, userService, logger}) => {
+const createCommentRouter = ({commentService, articleService, userService, logger, socket}) => {
   const router = new Router({mergeParams: true});
 
   const isGetRequestQueryParamsValidMiddleware = isQueryRequestParamsValid({schema: getResponseCommentQueryParamsSchema, logger});
@@ -51,6 +52,11 @@ const createCommentRouter = ({commentService, articleService, userService, logge
 
     try {
       const newComment = await commentService.create({articleId, userId, text});
+      const comments = await commentService.findAll({limit: LAST_COMMENTS_LIMIT});
+      const hotArticles = await articleService.findAllMostCommentedArticles({limit: HOT_ARTICLES_LIMIT});
+
+      socket.emit(`lastCommentsUpdated`, comments);
+      socket.emit(`hotArticlesUpdated`, hotArticles);
 
       res.status(HttpStatusCode.CREATED).json(newComment);
     } catch (error) {
@@ -68,6 +74,11 @@ const createCommentRouter = ({commentService, articleService, userService, logge
 
     try {
       const deletedComment = await commentService.delete(commentId);
+      const comments = await commentService.findAll({limit: LAST_COMMENTS_LIMIT});
+      const hotArticles = await articleService.findAllMostCommentedArticles({limit: HOT_ARTICLES_LIMIT});
+
+      socket.emit(`lastCommentsUpdated`, comments);
+      socket.emit(`hotArticlesUpdated`, hotArticles);
 
       return res.status(HttpStatusCode.OK).json(deletedComment);
     } catch (error) {
