@@ -1,6 +1,8 @@
 'use strict';
 
 const path = require(`path`);
+const fs = require(`fs`).promises;
+const fsConstants = require(`fs`).constants;
 
 const express = require(`express`);
 const chalk = require(`chalk`);
@@ -24,6 +26,16 @@ const csrfProtection = csrf({cookie: true});
 
 app.set(`view engine`, `pug`);
 app.set(`views`, path.resolve(__dirname, DirName.TEMPLATES));
+
+app.use(async (req, res, next) => {
+  try {
+    await fs.access(UPLOAD_DIR, fsConstants.F_OK);
+  } catch (error) {
+    await fs.mkdir(UPLOAD_DIR);
+  }
+
+  next();
+});
 
 app.use(formidableMiddleware({
   encoding: `utf-8`,
